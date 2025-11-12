@@ -1,6 +1,6 @@
-# Custom Resume Website
+# Custom Resume
 
-A modern, responsive resume website built with React and Vite.
+A modern, responsive resume website built with React and Vite. Easily customizable to target specific job descriptions and showcase your professional experience.
 
 ## Features
 
@@ -9,6 +9,7 @@ A modern, responsive resume website built with React and Vite.
 - Easy to customize with your own information
 - Component-based structure for easy maintenance
 - Print-friendly styles
+- Tailorable content to match different job descriptions
 
 ## Getting Started
 
