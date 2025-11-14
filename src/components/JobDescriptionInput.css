@@ -26,6 +26,11 @@
   margin: 0;
 }
 
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .job-description-textarea {
   width: 100%;
   padding: 1.2rem;
@@ -49,6 +54,39 @@
 .job-description-textarea::placeholder {
   color: #b0b0b0;
   line-height: 1.8;
+}
+
+.clear-textarea-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f44336;
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+  z-index: 10;
+  line-height: 1;
+  padding: 0;
+}
+
+.clear-textarea-btn:hover {
+  background: #d32f2f;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.5);
+}
+
+.clear-textarea-btn:active {
+  transform: scale(0.95);
 }
 
 .job-description-actions {

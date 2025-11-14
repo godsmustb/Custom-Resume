@@ -544,13 +544,24 @@ ${newScore.matchScore >= 98 ? '🎉 98% TARGET REACHED!' : `${(98 - newScore.mat
           </div>
         )}
 
-        <textarea
-          className="job-description-textarea"
-          placeholder="Paste the job description here...&#10;&#10;The AI will analyze:&#10;• Required skills and qualifications&#10;• Key responsibilities&#10;• Important keywords&#10;• Company culture indicators&#10;&#10;Then automatically customize your resume to match!"
-          value={resumeData.jobDescription}
-          onChange={(e) => updateJobDescription(e.target.value)}
-          rows={12}
-        />
+        <div className="textarea-wrapper">
+          <textarea
+            className="job-description-textarea"
+            placeholder="Paste the job description here...&#10;&#10;The AI will analyze:&#10;• Required skills and qualifications&#10;• Key responsibilities&#10;• Important keywords&#10;• Company culture indicators&#10;&#10;Then automatically customize your resume to match!"
+            value={resumeData.jobDescription}
+            onChange={(e) => updateJobDescription(e.target.value)}
+            rows={12}
+          />
+          {resumeData.jobDescription.trim() && (
+            <button
+              className="clear-textarea-btn"
+              onClick={() => updateJobDescription('')}
+              title="Clear job description"
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
         <div className="job-description-actions">
           <button
