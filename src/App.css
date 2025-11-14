@@ -123,3 +123,198 @@
     flex-direction: column;
   }
 }
+
+/* App wrapper */
+.app-wrapper {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+/* Section header with add button */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Editable form styles */
+.editable-input,
+.editable-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.editable-input:focus,
+.editable-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.editable-textarea {
+  resize: vertical;
+  line-height: 1.6;
+  min-height: 80px;
+}
+
+/* Buttons */
+.add-btn,
+.remove-btn,
+.add-bullet-btn,
+.remove-bullet-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-btn {
+  background: #667eea;
+  color: white;
+  padding: 0.6rem 1.2rem;
+}
+
+.add-btn:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.remove-btn {
+  background: #ff5c5c;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.remove-btn:hover {
+  background: #ff3838;
+}
+
+.add-bullet-btn {
+  background: #e0e0e0;
+  color: #2c3e50;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.add-bullet-btn:hover {
+  background: #d0d0d0;
+}
+
+.remove-bullet-btn {
+  background: #ffcccc;
+  color: #cc0000;
+  padding: 0.3rem 0.6rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.remove-bullet-btn:hover {
+  background: #ff9999;
+}
+
+/* Editable experience/education containers */
+.editable-experience,
+.editable-education,
+.editable-skills {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 2px dashed #667eea;
+  margin-bottom: 1rem;
+}
+
+.experience-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.description-edit {
+  margin-top: 1rem;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.bullet-edit {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.bullet-textarea {
+  margin-bottom: 0;
+}
+
+/* Print styles */
+@media print {
+  .app-wrapper {
+    background: white;
+  }
+
+  .control-panel,
+  .job-description-panel,
+  .add-btn,
+  .remove-btn,
+  .add-bullet-btn,
+  .remove-bullet-btn,
+  .experience-controls {
+    display: none !important;
+  }
+
+  .resume-container {
+    box-shadow: none;
+    max-width: 100%;
+  }
+
+  .editable-experience,
+  .editable-education,
+  .editable-skills {
+    background: white;
+    border: none;
+    padding: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .add-btn {
+    width: 100%;
+  }
+
+  .bullet-edit {
+    flex-direction: column;
+  }
+
+  .remove-bullet-btn {
+    align-self: flex-end;
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+}

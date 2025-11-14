@@ -1,22 +1,69 @@
+import { useResume } from '../context/ResumeContext'
+
 function Education() {
-  const education = [
-    {
-      degree: 'Bachelor of Science in Computer Science',
-      school: 'University Name',
-      date: '2015 - 2019',
-      details: 'GPA: 3.8/4.0, Dean\'s List, Relevant coursework: Data Structures, Algorithms, Web Development'
-    }
-  ]
+  const { resumeData, isEditing, updateEducation, addEducation, removeEducation } = useResume()
 
   return (
     <section className="section">
-      <h2 className="section-title">Education</h2>
-      {education.map((edu, index) => (
-        <div key={index} className="education-item">
-          <h3 className="degree">{edu.degree}</h3>
-          <p className="school">{edu.school}</p>
-          <p className="date">{edu.date}</p>
-          <p className="description">{edu.details}</p>
+      <div className="section-header">
+        <h2 className="section-title">Education</h2>
+        {isEditing && (
+          <button className="add-btn" onClick={addEducation}>
+            + Add Education
+          </button>
+        )}
+      </div>
+
+      {resumeData.education.map((edu, index) => (
+        <div key={edu.id} className="education-item">
+          {isEditing ? (
+            <div className="editable-education">
+              <div className="experience-controls">
+                <button
+                  className="remove-btn"
+                  onClick={() => removeEducation(index)}
+                  title="Remove this education"
+                >
+                  × Remove
+                </button>
+              </div>
+              <input
+                type="text"
+                className="editable-input"
+                value={edu.degree}
+                onChange={(e) => updateEducation(index, 'degree', e.target.value)}
+                placeholder="Degree Name"
+              />
+              <input
+                type="text"
+                className="editable-input"
+                value={edu.school}
+                onChange={(e) => updateEducation(index, 'school', e.target.value)}
+                placeholder="School/University Name"
+              />
+              <input
+                type="text"
+                className="editable-input"
+                value={edu.date}
+                onChange={(e) => updateEducation(index, 'date', e.target.value)}
+                placeholder="Date Range (e.g., 2015 - 2019)"
+              />
+              <textarea
+                className="editable-textarea"
+                value={edu.details}
+                onChange={(e) => updateEducation(index, 'details', e.target.value)}
+                placeholder="Details (GPA, honors, relevant coursework, etc.)"
+                rows={2}
+              />
+            </div>
+          ) : (
+            <>
+              <h3 className="degree">{edu.degree}</h3>
+              <p className="school">{edu.school}</p>
+              <p className="date">{edu.date}</p>
+              <p className="description">{edu.details}</p>
+            </>
+          )}
         </div>
       ))}
     </section>

@@ -1,21 +1,92 @@
+import { useResume } from '../context/ResumeContext'
 import './Header.css'
 
 function Header() {
+  const { resumeData, isEditing, updatePersonal } = useResume()
+  const { personal } = resumeData
+
+  if (isEditing) {
+    return (
+      <header className="header editing">
+        <input
+          type="text"
+          className="editable-input name-input"
+          value={personal.name}
+          onChange={(e) => updatePersonal('name', e.target.value)}
+          placeholder="Your Full Name"
+        />
+        <input
+          type="text"
+          className="editable-input title-input"
+          value={personal.title}
+          onChange={(e) => updatePersonal('title', e.target.value)}
+          placeholder="Professional Title / Role"
+        />
+        <div className="contact-info-edit">
+          <input
+            type="email"
+            className="editable-input small-input"
+            value={personal.email}
+            onChange={(e) => updatePersonal('email', e.target.value)}
+            placeholder="email@example.com"
+          />
+          <input
+            type="tel"
+            className="editable-input small-input"
+            value={personal.phone}
+            onChange={(e) => updatePersonal('phone', e.target.value)}
+            placeholder="(123) 456-7890"
+          />
+          <input
+            type="text"
+            className="editable-input small-input"
+            value={personal.location}
+            onChange={(e) => updatePersonal('location', e.target.value)}
+            placeholder="City, State"
+          />
+        </div>
+        <div className="social-links-edit">
+          <input
+            type="url"
+            className="editable-input small-input"
+            value={personal.linkedin}
+            onChange={(e) => updatePersonal('linkedin', e.target.value)}
+            placeholder="LinkedIn URL"
+          />
+          <input
+            type="url"
+            className="editable-input small-input"
+            value={personal.github}
+            onChange={(e) => updatePersonal('github', e.target.value)}
+            placeholder="GitHub URL"
+          />
+          <input
+            type="url"
+            className="editable-input small-input"
+            value={personal.portfolio}
+            onChange={(e) => updatePersonal('portfolio', e.target.value)}
+            placeholder="Portfolio URL"
+          />
+        </div>
+      </header>
+    )
+  }
+
   return (
     <header className="header">
-      <h1 className="name">Your Name</h1>
-      <p className="title">Professional Title / Role</p>
+      <h1 className="name">{personal.name}</h1>
+      <p className="title">{personal.title}</p>
       <div className="contact-info">
-        <span>email@example.com</span>
+        <span>{personal.email}</span>
         <span>•</span>
-        <span>(123) 456-7890</span>
+        <span>{personal.phone}</span>
         <span>•</span>
-        <span>City, State</span>
+        <span>{personal.location}</span>
       </div>
       <div className="social-links">
-        <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://yourportfolio.com" target="_blank" rel="noopener noreferrer">Portfolio</a>
+        <a href={personal.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href={personal.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href={personal.portfolio} target="_blank" rel="noopener noreferrer">Portfolio</a>
       </div>
     </header>
   )

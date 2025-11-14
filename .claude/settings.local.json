@@ -6,7 +6,17 @@
       "Bash(npm --version:*)",
       "Bash(npm create:*)",
       "Bash(npm install:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(gh:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:www.resume-now.com)",
+      "WebSearch",
+      "Bash(copy \"node_modules\\pdfjs-dist\\build\\pdf.worker.min.mjs\" \"public\\pdf.worker.min.mjs\")"
     ],
     "deny": [],
     "ask": []
