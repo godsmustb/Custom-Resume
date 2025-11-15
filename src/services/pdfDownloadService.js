@@ -198,6 +198,69 @@ export function downloadResumePDF(resumeData) {
     })
   }
 
+  // Certifications Section
+  if (resumeData.certifications && resumeData.certifications.length > 0) {
+    checkNewPage(20)
+
+    pdf.setFillColor(102, 126, 234)
+    pdf.rect(margin, yPosition, contentWidth, 1, 'F')
+    yPosition += 5
+
+    pdf.setTextColor(44, 62, 80)
+    pdf.setFontSize(16)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('CERTIFICATIONS', margin, yPosition)
+    yPosition += 8
+
+    resumeData.certifications.forEach((cert, index) => {
+      checkNewPage(15)
+
+      // Certification Name
+      pdf.setFontSize(12)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(44, 62, 80)
+      pdf.text(cert.name, margin, yPosition)
+      yPosition += 6
+
+      // Issuer and Date
+      pdf.setFontSize(10)
+      pdf.setFont('helvetica', 'italic')
+      pdf.setTextColor(52, 152, 219)
+      pdf.text(cert.issuer, margin, yPosition)
+
+      pdf.setFont('helvetica', 'normal')
+      pdf.setTextColor(127, 140, 141)
+      pdf.text(cert.date, pageWidth - margin - pdf.getTextWidth(cert.date), yPosition)
+      yPosition += 6
+
+      // Credential ID
+      if (cert.credentialId) {
+        pdf.setFontSize(9)
+        pdf.setFont('helvetica', 'normal')
+        pdf.setTextColor(85, 85, 85)
+        const credText = `Credential ID: ${cert.credentialId}`
+        pdf.text(credText, margin, yPosition)
+        yPosition += 4.5
+      }
+
+      // Credential URL (if exists)
+      if (cert.credentialUrl) {
+        pdf.setFontSize(9)
+        pdf.setFont('helvetica', 'normal')
+        pdf.setTextColor(52, 152, 219)
+        const urlText = `Verification: ${cert.credentialUrl}`
+        const urlLines = pdf.splitTextToSize(urlText, contentWidth)
+        urlLines.forEach(line => {
+          checkNewPage()
+          pdf.text(line, margin, yPosition)
+          yPosition += 4.5
+        })
+      }
+
+      yPosition += 4
+    })
+  }
+
   // Skills Section
   if (resumeData.skills && resumeData.skills.length > 0) {
     checkNewPage(20)
