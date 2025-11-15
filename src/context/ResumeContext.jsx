@@ -69,6 +69,16 @@ const initialResumeData = {
       skills: ['Git', 'Docker', 'AWS', 'MongoDB', 'PostgreSQL', 'Agile']
     }
   ],
+  certifications: [
+    {
+      id: '1',
+      name: 'AWS Certified Solutions Architect',
+      issuer: 'Amazon Web Services',
+      date: '2023',
+      credentialId: 'ABC123456',
+      credentialUrl: 'https://aws.amazon.com/verification'
+    }
+  ],
   jobDescription: ''
 }
 
@@ -223,6 +233,36 @@ export const ResumeProvider = ({ children }) => {
     }))
   }
 
+  const updateCertification = (index, field, value) => {
+    setResumeData(prev => {
+      const newCertifications = [...prev.certifications]
+      newCertifications[index] = { ...newCertifications[index], [field]: value }
+      return { ...prev, certifications: newCertifications }
+    })
+  }
+
+  const addCertification = () => {
+    const newCert = {
+      id: Date.now().toString(),
+      name: '',
+      issuer: '',
+      date: '',
+      credentialId: '',
+      credentialUrl: ''
+    }
+    setResumeData(prev => ({
+      ...prev,
+      certifications: [...prev.certifications, newCert]
+    }))
+  }
+
+  const removeCertification = (index) => {
+    setResumeData(prev => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index)
+    }))
+  }
+
   const updateJobDescription = (value) => {
     setResumeData(prev => ({ ...prev, jobDescription: value }))
   }
@@ -260,6 +300,9 @@ export const ResumeProvider = ({ children }) => {
     updateSkills,
     addSkillCategory,
     removeSkillCategory,
+    updateCertification,
+    addCertification,
+    removeCertification,
     updateJobDescription,
     resetResume,
     loadResumeFromPDF

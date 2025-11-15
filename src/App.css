@@ -406,6 +406,124 @@
   transform: translateX(3px);
 }
 
+/* Certifications Section */
+.certification-item {
+  margin-bottom: 2rem;
+}
+
+.certification-item:last-child {
+  margin-bottom: 0;
+}
+
+.editable-certification {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  position: relative;
+}
+
+.cert-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cert-row:last-child {
+  margin-bottom: 0;
+}
+
+.cert-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-field-full {
+  flex: 1;
+}
+
+.cert-field-half {
+  flex: 1;
+}
+
+.cert-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.4rem;
+}
+
+.optional-label {
+  font-weight: 400;
+  color: #7f8c8d;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.certification-display {
+  padding: 0.5rem 0;
+}
+
+.cert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cert-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.cert-date {
+  color: #7f8c8d;
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+.cert-issuer {
+  font-size: 1rem;
+  color: #3498db;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.cert-credential {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0.3rem 0;
+}
+
+.cert-credential-label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.cert-url {
+  margin: 0.5rem 0 0 0;
+}
+
+.cert-link {
+  color: #3498db;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cert-link:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
 /* Print styles */
 @media print {
   .app-wrapper {
@@ -431,10 +549,15 @@
 
   .editable-experience,
   .editable-education,
-  .editable-skills {
+  .editable-skills,
+  .editable-certification {
     background: white;
     border: none;
     padding: 0;
+  }
+
+  .cert-link {
+    display: none;
   }
 }
 
@@ -477,5 +600,15 @@
 
   .suggestion-text {
     font-size: 0.9rem;
+  }
+
+  .cert-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .cert-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
