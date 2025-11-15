@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
+import { getBulletSuggestions } from '../services/bulletPointSuggestions'
 
 function Experience() {
   const {
@@ -11,6 +13,26 @@ function Experience() {
     addExperienceDescription,
     removeExperienceDescription
   } = useResume()
+
+  // Track which bullet point is showing suggestions
+  const [showSuggestions, setShowSuggestions] = useState({})
+
+  const toggleSuggestions = (expIndex, descIndex) => {
+    const key = `${expIndex}-${descIndex}`
+    setShowSuggestions(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }))
+  }
+
+  const useSuggestion = (expIndex, descIndex, suggestion) => {
+    updateExperienceDescription(expIndex, descIndex, suggestion)
+    const key = `${expIndex}-${descIndex}`
+    setShowSuggestions(prev => ({
+      ...prev,
+      [key]: false
+    }))
+  }
 
   return (
     <section className="section">
@@ -59,24 +81,66 @@ function Experience() {
               />
               <div className="description-edit">
                 <label className="field-label">Responsibilities & Achievements:</label>
-                {exp.description.map((desc, descIndex) => (
-                  <div key={descIndex} className="bullet-edit">
-                    <textarea
-                      className="editable-textarea bullet-textarea"
-                      value={desc}
-                      onChange={(e) => updateExperienceDescription(expIndex, descIndex, e.target.value)}
-                      placeholder="Describe your achievement or responsibility..."
-                      rows={2}
-                    />
-                    <button
-                      className="remove-bullet-btn"
-                      onClick={() => removeExperienceDescription(expIndex, descIndex)}
-                      title="Remove bullet point"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
+                {exp.description.map((desc, descIndex) => {
+                  const suggestionKey = `${expIndex}-${descIndex}`
+                  const showingSuggestions = showSuggestions[suggestionKey]
+                  const suggestions = getBulletSuggestions(exp.title)
+
+                  return (
+                    <div key={descIndex} className="bullet-edit-wrapper">
+                      <div className="bullet-edit">
+                        <textarea
+                          className="editable-textarea bullet-textarea"
+                          value={desc}
+                          onChange={(e) => updateExperienceDescription(expIndex, descIndex, e.target.value)}
+                          placeholder="Describe your achievement or responsibility..."
+                          rows={2}
+                        />
+                        <div className="bullet-actions">
+                          <button
+                            className="suggestion-btn"
+                            onClick={() => toggleSuggestions(expIndex, descIndex)}
+                            title="Get professional bullet point suggestions"
+                          >
+                            💡 {showingSuggestions ? 'Hide' : 'Suggestions'}
+                          </button>
+                          <button
+                            className="remove-bullet-btn"
+                            onClick={() => removeExperienceDescription(expIndex, descIndex)}
+                            title="Remove bullet point"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+
+                      {showingSuggestions && (
+                        <div className="suggestions-panel">
+                          <div className="suggestions-header">
+                            <span className="suggestions-title">
+                              💡 Professional Examples for "{exp.title || 'this role'}"
+                            </span>
+                            <span className="suggestions-hint">
+                              Click any suggestion to use it
+                            </span>
+                          </div>
+                          <div className="suggestions-list">
+                            {suggestions.map((suggestion, idx) => (
+                              <div
+                                key={idx}
+                                className="suggestion-item"
+                                onClick={() => useSuggestion(expIndex, descIndex, suggestion)}
+                              >
+                                <span className="suggestion-icon">▸</span>
+                                <span className="suggestion-text">{suggestion}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
                 <button
                   className="add-bullet-btn"
                   onClick={() => addExperienceDescription(expIndex)}
