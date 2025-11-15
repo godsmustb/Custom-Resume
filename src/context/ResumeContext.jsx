@@ -86,7 +86,15 @@ export const ResumeProvider = ({ children }) => {
   const [resumeData, setResumeData] = useState(() => {
     // Load from localStorage if available
     const saved = localStorage.getItem('resumeData')
-    return saved ? JSON.parse(saved) : initialResumeData
+    if (saved) {
+      const parsedData = JSON.parse(saved)
+      // Ensure certifications array exists (for backwards compatibility)
+      if (!parsedData.certifications) {
+        parsedData.certifications = []
+      }
+      return parsedData
+    }
+    return initialResumeData
   })
 
   const [isEditing, setIsEditing] = useState(false)
@@ -235,7 +243,7 @@ export const ResumeProvider = ({ children }) => {
 
   const updateCertification = (index, field, value) => {
     setResumeData(prev => {
-      const newCertifications = [...prev.certifications]
+      const newCertifications = [...(prev.certifications || [])]
       newCertifications[index] = { ...newCertifications[index], [field]: value }
       return { ...prev, certifications: newCertifications }
     })
@@ -252,14 +260,14 @@ export const ResumeProvider = ({ children }) => {
     }
     setResumeData(prev => ({
       ...prev,
-      certifications: [...prev.certifications, newCert]
+      certifications: [...(prev.certifications || []), newCert]
     }))
   }
 
   const removeCertification = (index) => {
     setResumeData(prev => ({
       ...prev,
-      certifications: prev.certifications.filter((_, i) => i !== index)
+      certifications: (prev.certifications || []).filter((_, i) => i !== index)
     }))
   }
 

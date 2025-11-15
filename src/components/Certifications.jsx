@@ -9,9 +9,12 @@ function Certifications() {
     removeCertification
   } = useResume()
 
-  // Only show section if there are certifications
-  if (!resumeData.certifications || resumeData.certifications.length === 0) {
-    if (!isEditing) return null
+  // Get certifications array, defaulting to empty array if undefined
+  const certifications = resumeData.certifications || []
+
+  // Only show section if there are certifications or in edit mode
+  if (certifications.length === 0 && !isEditing) {
+    return null
   }
 
   return (
@@ -25,7 +28,7 @@ function Certifications() {
         )}
       </div>
 
-      {resumeData.certifications && resumeData.certifications.map((cert, index) => (
+      {certifications.map((cert, index) => (
         <div key={cert.id} className="certification-item">
           {isEditing ? (
             <div className="editable-certification">
