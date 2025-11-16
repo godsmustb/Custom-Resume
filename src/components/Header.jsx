@@ -77,21 +77,21 @@ function Header() {
       <h1 className="name">{personal.name}</h1>
       <p className="title">{personal.title}</p>
       <div className="contact-info">
-        {personal.email && <span>{personal.email}</span>}
-        {personal.email && personal.phone && <span>•</span>}
-        {personal.phone && <span>{personal.phone}</span>}
-        {(personal.email || personal.phone) && personal.location && <span>•</span>}
-        {personal.location && <span>{personal.location}</span>}
+        {personal.email?.trim() && <span>{personal.email}</span>}
+        {personal.email?.trim() && personal.phone?.trim() && <span>•</span>}
+        {personal.phone?.trim() && <span>{personal.phone}</span>}
+        {(personal.email?.trim() || personal.phone?.trim()) && personal.location?.trim() && <span>•</span>}
+        {personal.location?.trim() && <span>{personal.location}</span>}
       </div>
-      {(personal.linkedin || personal.github || personal.portfolio) && (
+      {(personal.linkedin?.trim() || personal.github?.trim() || personal.portfolio?.trim()) && (
         <div className="social-links">
-          {personal.linkedin && (
+          {personal.linkedin?.trim() && (
             <a href={personal.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
           )}
-          {personal.github && (
+          {personal.github?.trim() && (
             <a href={personal.github} target="_blank" rel="noopener noreferrer">GitHub</a>
           )}
-          {personal.portfolio && (
+          {personal.portfolio?.trim() && (
             <a href={personal.portfolio} target="_blank" rel="noopener noreferrer">Portfolio</a>
           )}
         </div>
