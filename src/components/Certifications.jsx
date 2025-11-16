@@ -109,9 +109,9 @@ function Certifications() {
             <div className="certification-display">
               <div className="cert-header">
                 <h3 className="cert-name">{cert.name}</h3>
-                <span className="cert-date">{cert.date}</span>
+                {cert.date && <span className="cert-date">{cert.date}</span>}
               </div>
-              <p className="cert-issuer">{cert.issuer}</p>
+              {cert.issuer && <p className="cert-issuer">{cert.issuer}</p>}
               {cert.credentialId && (
                 <p className="cert-credential">
                   <span className="cert-credential-label">Credential ID:</span> {cert.credentialId}

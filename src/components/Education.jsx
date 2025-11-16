@@ -61,7 +61,7 @@ function Education() {
               <h3 className="degree">{edu.degree}</h3>
               <p className="school">{edu.school}</p>
               <p className="date">{edu.date}</p>
-              <p className="description">{edu.details}</p>
+              {edu.details && <p className="description">{edu.details}</p>}
             </>
           )}
         </div>
