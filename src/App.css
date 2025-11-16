@@ -612,3 +612,55 @@
     align-items: flex-start;
   }
 }
+
+/* Skill Chips */
+.skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.skill-chip {
+  background: white;
+  border: 2px solid #667eea;
+  color: #667eea;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+}
+
+.skill-chip:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.skill-chip:active {
+  transform: translateY(0);
+}
+
+/* Skill suggestions scrollbar */
+.suggestions-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.suggestions-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+
+.suggestions-panel::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.suggestions-panel::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}
