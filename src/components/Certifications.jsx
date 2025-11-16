@@ -108,16 +108,16 @@ function Certifications() {
           ) : (
             <div className="certification-display">
               <div className="cert-header">
-                <h3 className="cert-name">{cert.name}</h3>
-                {cert.date && <span className="cert-date">{cert.date}</span>}
+                {cert.name?.trim() && <h3 className="cert-name">{cert.name}</h3>}
+                {cert.date?.trim() && <span className="cert-date">{cert.date}</span>}
               </div>
-              {cert.issuer && <p className="cert-issuer">{cert.issuer}</p>}
-              {cert.credentialId && (
+              {cert.issuer?.trim() && <p className="cert-issuer">{cert.issuer}</p>}
+              {cert.credentialId?.trim() && (
                 <p className="cert-credential">
                   <span className="cert-credential-label">Credential ID:</span> {cert.credentialId}
                 </p>
               )}
-              {cert.credentialUrl && (
+              {cert.credentialUrl?.trim() && (
                 <p className="cert-url">
                   <a
                     href={cert.credentialUrl}

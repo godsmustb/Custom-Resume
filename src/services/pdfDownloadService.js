@@ -55,9 +55,9 @@ export function downloadResumePDF(resumeData) {
 
   pdf.setFontSize(9)
   const contactParts = [
-    resumeData.personal.email,
-    resumeData.personal.phone,
-    resumeData.personal.location
+    resumeData.personal.email?.trim(),
+    resumeData.personal.phone?.trim(),
+    resumeData.personal.location?.trim()
   ].filter(Boolean)
 
   if (contactParts.length > 0) {
@@ -66,9 +66,9 @@ export function downloadResumePDF(resumeData) {
   }
 
   const linksLine = [
-    resumeData.personal.linkedin && 'LinkedIn',
-    resumeData.personal.github && 'GitHub',
-    resumeData.personal.portfolio && 'Portfolio'
+    resumeData.personal.linkedin?.trim() && 'LinkedIn',
+    resumeData.personal.github?.trim() && 'GitHub',
+    resumeData.personal.portfolio?.trim() && 'Portfolio'
   ].filter(Boolean).join(' • ')
 
   if (linksLine) {
@@ -233,24 +233,24 @@ export function downloadResumePDF(resumeData) {
       // Issuer and Date
       pdf.setFontSize(10)
 
-      if (cert.issuer) {
+      if (cert.issuer?.trim()) {
         pdf.setFont('helvetica', 'italic')
         pdf.setTextColor(52, 152, 219)
         pdf.text(cert.issuer, margin, yPosition)
       }
 
-      if (cert.date) {
+      if (cert.date?.trim()) {
         pdf.setFont('helvetica', 'normal')
         pdf.setTextColor(127, 140, 141)
         pdf.text(cert.date, pageWidth - margin - pdf.getTextWidth(cert.date), yPosition)
       }
 
-      if (cert.issuer || cert.date) {
+      if (cert.issuer?.trim() || cert.date?.trim()) {
         yPosition += 6
       }
 
       // Credential ID
-      if (cert.credentialId) {
+      if (cert.credentialId?.trim()) {
         pdf.setFontSize(9)
         pdf.setFont('helvetica', 'normal')
         pdf.setTextColor(85, 85, 85)
@@ -260,7 +260,7 @@ export function downloadResumePDF(resumeData) {
       }
 
       // Credential URL (if exists)
-      if (cert.credentialUrl) {
+      if (cert.credentialUrl?.trim()) {
         pdf.setFontSize(9)
         pdf.setFont('helvetica', 'normal')
         pdf.setTextColor(52, 152, 219)
