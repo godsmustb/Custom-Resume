@@ -58,10 +58,10 @@ function Education() {
             </div>
           ) : (
             <>
-              <h3 className="degree">{edu.degree}</h3>
-              <p className="school">{edu.school}</p>
-              <p className="date">{edu.date}</p>
-              {edu.details && <p className="description">{edu.details}</p>}
+              {edu.degree?.trim() && <h3 className="degree">{edu.degree}</h3>}
+              {edu.school?.trim() && <p className="school">{edu.school}</p>}
+              {edu.date?.trim() && <p className="date">{edu.date}</p>}
+              {edu.details?.trim() && <p className="description">{edu.details}</p>}
             </>
           )}
         </div>
