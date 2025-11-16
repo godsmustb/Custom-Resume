@@ -77,17 +77,25 @@ function Header() {
       <h1 className="name">{personal.name}</h1>
       <p className="title">{personal.title}</p>
       <div className="contact-info">
-        <span>{personal.email}</span>
-        <span>•</span>
-        <span>{personal.phone}</span>
-        <span>•</span>
-        <span>{personal.location}</span>
+        {personal.email && <span>{personal.email}</span>}
+        {personal.email && personal.phone && <span>•</span>}
+        {personal.phone && <span>{personal.phone}</span>}
+        {(personal.email || personal.phone) && personal.location && <span>•</span>}
+        {personal.location && <span>{personal.location}</span>}
       </div>
-      <div className="social-links">
-        <a href={personal.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href={personal.github} target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href={personal.portfolio} target="_blank" rel="noopener noreferrer">Portfolio</a>
-      </div>
+      {(personal.linkedin || personal.github || personal.portfolio) && (
+        <div className="social-links">
+          {personal.linkedin && (
+            <a href={personal.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          )}
+          {personal.github && (
+            <a href={personal.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+          )}
+          {personal.portfolio && (
+            <a href={personal.portfolio} target="_blank" rel="noopener noreferrer">Portfolio</a>
+          )}
+        </div>
+      )}
     </header>
   )
 }
