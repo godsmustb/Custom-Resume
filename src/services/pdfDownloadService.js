@@ -54,8 +54,16 @@ export function downloadResumePDF(resumeData) {
   pdf.text(resumeData.personal.title, margin, 23)
 
   pdf.setFontSize(9)
-  const contactLine = `${resumeData.personal.email} • ${resumeData.personal.phone} • ${resumeData.personal.location}`
-  pdf.text(contactLine, margin, 30)
+  const contactParts = [
+    resumeData.personal.email,
+    resumeData.personal.phone,
+    resumeData.personal.location
+  ].filter(Boolean)
+
+  if (contactParts.length > 0) {
+    const contactLine = contactParts.join(' • ')
+    pdf.text(contactLine, margin, 30)
+  }
 
   const linksLine = [
     resumeData.personal.linkedin && 'LinkedIn',
@@ -224,14 +232,22 @@ export function downloadResumePDF(resumeData) {
 
       // Issuer and Date
       pdf.setFontSize(10)
-      pdf.setFont('helvetica', 'italic')
-      pdf.setTextColor(52, 152, 219)
-      pdf.text(cert.issuer, margin, yPosition)
 
-      pdf.setFont('helvetica', 'normal')
-      pdf.setTextColor(127, 140, 141)
-      pdf.text(cert.date, pageWidth - margin - pdf.getTextWidth(cert.date), yPosition)
-      yPosition += 6
+      if (cert.issuer) {
+        pdf.setFont('helvetica', 'italic')
+        pdf.setTextColor(52, 152, 219)
+        pdf.text(cert.issuer, margin, yPosition)
+      }
+
+      if (cert.date) {
+        pdf.setFont('helvetica', 'normal')
+        pdf.setTextColor(127, 140, 141)
+        pdf.text(cert.date, pageWidth - margin - pdf.getTextWidth(cert.date), yPosition)
+      }
+
+      if (cert.issuer || cert.date) {
+        yPosition += 6
+      }
 
       // Credential ID
       if (cert.credentialId) {
