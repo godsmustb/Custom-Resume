@@ -27,10 +27,10 @@ function App() {
       <div className="resume-container">
         <Header />
         <About />
+        <Skills />
         <Experience />
         <Education />
         <Certifications />
-        <Skills />
         <Contact />
       </div>
     </div>
