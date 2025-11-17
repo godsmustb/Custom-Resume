@@ -35,7 +35,7 @@
 }
 
 .template-preview-wrapper.full .template-preview-container {
-  transform: scale(0.85);
+  transform: scale(1.0);
   transform-origin: top center;
   width: 850px; /* Actual resume width */
   pointer-events: none;
