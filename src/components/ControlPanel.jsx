@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
 import { downloadResumePDF } from '../services/pdfDownloadService'
 import PDFUpload from './PDFUpload'
+import TemplateBrowser from './TemplateBrowser'
 import './ControlPanel.css'
 
 const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
   const { isEditing, setIsEditing, resetResume, resumeData, loadResumeFromPDF } = useResume()
   const [showUploadModal, setShowUploadModal] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
 
   const handleDownloadPDF = () => {
     try {
@@ -39,6 +41,14 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
               title="Upload existing PDF resume"
             >
               📤 Upload PDF
+            </button>
+
+            <button
+              className="control-btn templates-btn"
+              onClick={() => setShowTemplates(true)}
+              title="Browse and select resume templates"
+            >
+              🎨 Templates
             </button>
 
             <button
@@ -84,6 +94,12 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
         <PDFUpload
           onResumeLoaded={handleResumeLoaded}
           onClose={() => setShowUploadModal(false)}
+        />
+      )}
+
+      {showTemplates && (
+        <TemplateBrowser
+          onClose={() => setShowTemplates(false)}
         />
       )}
     </>
