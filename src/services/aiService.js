@@ -579,15 +579,16 @@ Target: 98%
 ⚠️ CRITICAL "AREAS TO IMPROVE" FROM MATCH ANALYSIS:
 ${gaps.map((gap, idx) => `${idx + 1}. ${gap}`).join('\n')}
 
-TASK: Generate 5 DIFFERENT OPTIONS of bullet points. Each option MUST directly address ALL the "Areas to Improve" listed above, but from different strategic angles.
+TASK: Generate 10-15 INDIVIDUAL bullet points. Each bullet point addresses ONE specific gap from the "Areas to Improve" list above.
 
-MANDATORY REQUIREMENTS FOR EACH OPTION:
-- MUST contain 3-5 bullet points
-- EVERY SINGLE bullet must address at least ONE specific gap from the "Areas to Improve" list
-- Each option takes a different strategic approach (leadership, technical, business, scale, innovation)
+MANDATORY REQUIREMENTS:
+- Generate 10-15 individual bullet points (NOT grouped)
+- Each bullet MUST directly address ONE specific gap from the "Areas to Improve" list
+- Use variety in strategic approaches: leadership, technical, business impact, scale, innovation
 - Include specific metrics (%, $, numbers, team size, users, time)
 - Use exact keywords and terminology from the gaps
 - Make bullets sound realistic based on the current resume context
+- Each bullet should stand alone as a complete achievement
 
 EXAMPLE OF HOW TO ADDRESS GAPS:
 If gap is "Lacks cloud deployment experience":
@@ -596,53 +597,31 @@ If gap is "Lacks cloud deployment experience":
 If gap is "Missing agile methodology experience":
 → "Spearheaded adoption of Scrum framework across 3 engineering teams, implementing sprint planning and daily standups, accelerating feature delivery by 40%"
 
-OPTION THEMES (each must address ALL gaps, just from different angles):
+STRATEGIC VARIETY (use different angles across your bullets):
+- Leadership: "Led team of X to implement [gap area], achieving [metric]"
+- Technical: "Architected and implemented [gap area] using [technologies], improving [metric]"
+- Business: "Drove [gap area] initiative, generating $X revenue / saving $X costs"
+- Scale: "Scaled [gap area] to support X users/requests, achieving [performance metric]"
+- Innovation: "Pioneered [gap area] strategy, modernizing [system] and positioning company for [outcome]"
 
-1. LEADERSHIP & TEAM IMPACT:
-   - Address gaps through team leadership, mentoring, cross-functional collaboration
-   - Example: "Led team of X to implement [gap area], achieving [metric]"
+CRITICAL: Make sure to address ALL gaps from the list. Some gaps can have multiple bullet options if there are fewer gaps than bullets.
 
-2. TECHNICAL EXCELLENCE:
-   - Address gaps through technical implementation, architecture, optimization
-   - Example: "Architected and implemented [gap area] using [technologies], improving [metric]"
-
-3. BUSINESS RESULTS:
-   - Address gaps through business impact, revenue, cost savings
-   - Example: "Drove [gap area] initiative, generating $X revenue / saving $X costs"
-
-4. SCALE & PERFORMANCE:
-   - Address gaps through scalability, performance, user growth
-   - Example: "Scaled [gap area] to support X users/requests, achieving [performance metric]"
-
-5. INNOVATION & MODERNIZATION:
-   - Address gaps through innovation, new initiatives, strategic improvements
-   - Example: "Pioneered [gap area] strategy, modernizing [system] and positioning company for [outcome]"
-
-CRITICAL: Each bullet within an option should address a DIFFERENT gap from the list. Make sure ALL gaps are covered across the bullets in each option.
-
-Return as JSON:
+Return as JSON (flat array of individual bullets):
 {
-  "options": [
+  "bullets": [
     {
-      "theme": "Leadership & Team Impact",
-      "bullets": ["bullet addressing gap 1", "bullet addressing gap 2", "bullet addressing gap 3"]
+      "text": "First individual bullet point addressing a specific gap",
+      "category": "Leadership & Team Impact"
     },
     {
-      "theme": "Technical Excellence",
-      "bullets": ["bullet addressing gap 1", "bullet addressing gap 2", "bullet addressing gap 3"]
+      "text": "Second individual bullet point addressing another gap",
+      "category": "Technical Excellence"
     },
     {
-      "theme": "Business Results",
-      "bullets": ["bullet addressing gap 1", "bullet addressing gap 2", "bullet addressing gap 3"]
-    },
-    {
-      "theme": "Scale & Performance",
-      "bullets": ["bullet addressing gap 1", "bullet addressing gap 2", "bullet addressing gap 3"]
-    },
-    {
-      "theme": "Innovation & Modernization",
-      "bullets": ["bullet addressing gap 1", "bullet addressing gap 2", "bullet addressing gap 3"]
+      "text": "Third individual bullet point",
+      "category": "Business Results"
     }
+    // ... 10-15 total individual bullets
   ]
 }`
 
@@ -651,7 +630,7 @@ Return as JSON:
       messages: [
         {
           role: 'system',
-          content: 'You are an elite resume strategist specializing in addressing ATS gaps. Your ONLY job is to generate bullet points that DIRECTLY fix the specific "Areas to Improve" gaps. Each bullet must explicitly address a gap from the list using exact keywords. Generate 5 different strategic approaches (Leadership, Technical, Business, Scale, Innovation) but ALL must address the same gaps. Be specific and use metrics. Make each option realistic and professional.'
+          content: 'You are an elite resume strategist specializing in addressing ATS gaps. Your ONLY job is to generate INDIVIDUAL bullet points that DIRECTLY fix the specific "Areas to Improve" gaps. Each bullet must explicitly address one gap from the list using exact keywords. Use variety in strategic approaches (Leadership, Technical, Business, Scale, Innovation). Be specific and use metrics. Make each bullet realistic and professional. Generate 10-15 individual bullets as a flat array, NOT grouped into options.'
         },
         {
           role: 'user',
@@ -659,12 +638,18 @@ Return as JSON:
         }
       ],
       temperature: 0.85,
-      max_tokens: 1800,
+      max_tokens: 2500,
       response_format: { type: 'json_object' }
     })
 
     const result = JSON.parse(response.choices[0].message.content)
-    return result.options || []
+    // Transform flat bullet array into individual options for compatibility
+    const bullets = result.bullets || []
+    return bullets.map((bullet, idx) => ({
+      theme: bullet.category || 'Professional Achievement',
+      bullets: [bullet.text],
+      isIndividual: true
+    }))
   } catch (error) {
     console.error('Error generating multiple bullet options:', error)
     throw new Error('Failed to generate bullet options. Please try again.')

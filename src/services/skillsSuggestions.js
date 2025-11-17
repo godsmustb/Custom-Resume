@@ -365,6 +365,237 @@ const jobTitleKeywords = {
   'security engineer': ['security', 'cybersecurity', 'infosec', 'penetration tester']
 }
 
+// Comprehensive job title database with variations
+export const jobTitleDatabase = [
+  // Product roles
+  'Product Owner',
+  'Agile Product Owner',
+  'Senior Product Owner',
+  'IT Product Owner',
+  'Digital Product Owner',
+  'Technical Product Owner',
+  'Product Manager',
+  'Senior Product Manager',
+  'Associate Product Manager',
+  'Product Marketing Manager',
+  'Technical Product Manager',
+  'Digital Product Manager',
+  'Principal Product Manager',
+
+  // Software Engineering
+  'Software Engineer',
+  'Senior Software Engineer',
+  'Junior Software Engineer',
+  'Lead Software Engineer',
+  'Principal Software Engineer',
+  'Software Developer',
+  'Full Stack Developer',
+  'Full Stack Engineer',
+  'Frontend Developer',
+  'Frontend Engineer',
+  'Senior Frontend Developer',
+  'Backend Developer',
+  'Backend Engineer',
+  'Senior Backend Developer',
+  'Web Developer',
+  'Mobile Developer',
+  'iOS Developer',
+  'Android Developer',
+  'React Developer',
+  'Node.js Developer',
+  'Python Developer',
+  'Java Developer',
+  '.NET Developer',
+
+  // Project Management
+  'Project Manager',
+  'Senior Project Manager',
+  'IT Project Manager',
+  'Technical Project Manager',
+  'Digital Project Manager',
+  'Agile Project Manager',
+  'Scrum Master',
+  'Certified Scrum Master',
+  'Agile Coach',
+  'Program Manager',
+  'Portfolio Manager',
+
+  // Data roles
+  'Data Analyst',
+  'Senior Data Analyst',
+  'Business Data Analyst',
+  'Financial Data Analyst',
+  'Marketing Data Analyst',
+  'Data Scientist',
+  'Senior Data Scientist',
+  'Machine Learning Engineer',
+  'ML Engineer',
+  'AI Engineer',
+  'Data Engineer',
+  'Big Data Engineer',
+  'Business Intelligence Analyst',
+  'BI Analyst',
+
+  // DevOps & Infrastructure
+  'DevOps Engineer',
+  'Senior DevOps Engineer',
+  'Site Reliability Engineer',
+  'SRE',
+  'Cloud Engineer',
+  'AWS Engineer',
+  'Azure Engineer',
+  'Infrastructure Engineer',
+  'Platform Engineer',
+  'Systems Engineer',
+  'Network Engineer',
+
+  // Design roles
+  'UI/UX Designer',
+  'UX Designer',
+  'UI Designer',
+  'Product Designer',
+  'Senior Product Designer',
+  'Graphic Designer',
+  'Visual Designer',
+  'Web Designer',
+  'Interaction Designer',
+  'User Researcher',
+  'UX Researcher',
+
+  // QA & Testing
+  'QA Engineer',
+  'Quality Assurance Engineer',
+  'QA Analyst',
+  'Test Engineer',
+  'Automation Engineer',
+  'SDET',
+  'Manual Tester',
+  'Performance Test Engineer',
+
+  // Marketing
+  'Marketing Manager',
+  'Digital Marketing Manager',
+  'Content Marketing Manager',
+  'Social Media Manager',
+  'SEO Specialist',
+  'PPC Specialist',
+  'Email Marketing Specialist',
+  'Growth Marketing Manager',
+  'Brand Manager',
+  'Marketing Coordinator',
+
+  // Sales
+  'Sales Representative',
+  'Account Executive',
+  'Senior Account Executive',
+  'Sales Manager',
+  'Business Development Manager',
+  'BDM',
+  'Sales Associate',
+  'Inside Sales Representative',
+  'Outside Sales Representative',
+  'Sales Consultant',
+
+  // Business Analysis
+  'Business Analyst',
+  'Senior Business Analyst',
+  'IT Business Analyst',
+  'Systems Analyst',
+  'Requirements Analyst',
+  'Process Analyst',
+  'Functional Analyst',
+
+  // HR & Recruiting
+  'HR Manager',
+  'Human Resources Manager',
+  'HR Generalist',
+  'HR Specialist',
+  'Recruiter',
+  'Technical Recruiter',
+  'IT Recruiter',
+  'Talent Acquisition Specialist',
+  'Talent Acquisition Manager',
+  'HR Coordinator',
+  'HR Business Partner',
+
+  // Customer Service
+  'Customer Service Representative',
+  'Customer Support Specialist',
+  'Customer Success Manager',
+  'Technical Support Specialist',
+  'Help Desk Technician',
+  'Support Engineer',
+  'Client Services Manager',
+
+  // Content & Writing
+  'Content Writer',
+  'Content Creator',
+  'Copywriter',
+  'Technical Writer',
+  'Content Strategist',
+  'Blog Writer',
+  'SEO Content Writer',
+
+  // Finance & Accounting
+  'Accountant',
+  'Senior Accountant',
+  'Staff Accountant',
+  'Financial Analyst',
+  'Senior Financial Analyst',
+  'Finance Manager',
+  'Controller',
+  'Tax Accountant',
+  'Bookkeeper',
+  'Payroll Specialist',
+
+  // Operations
+  'Operations Manager',
+  'Operations Coordinator',
+  'Supply Chain Manager',
+  'Logistics Manager',
+  'Warehouse Manager',
+  'Inventory Manager',
+  'Process Improvement Manager',
+
+  // Administrative
+  'Administrative Assistant',
+  'Executive Assistant',
+  'Office Manager',
+  'Office Administrator',
+  'Receptionist',
+  'Administrative Coordinator',
+
+  // Healthcare
+  'Registered Nurse',
+  'RN',
+  'Nurse Practitioner',
+  'Licensed Practical Nurse',
+  'Medical Assistant',
+  'Healthcare Administrator',
+  'Clinical Coordinator',
+
+  // Education
+  'Teacher',
+  'Elementary Teacher',
+  'High School Teacher',
+  'Special Education Teacher',
+  'ESL Teacher',
+  'Professor',
+  'Instructor',
+  'Training Specialist',
+  'Corporate Trainer',
+
+  // Security
+  'Security Engineer',
+  'Cybersecurity Analyst',
+  'Information Security Analyst',
+  'Security Analyst',
+  'Penetration Tester',
+  'Security Consultant',
+  'CISO',
+  'Security Architect'
+]
+
 // Search skills across all categories AND job titles
 export const searchSkills = (query) => {
   if (!query || query.trim().length < 2) {
@@ -424,4 +655,35 @@ export const getAllCategories = () => {
 // Get skills by category
 export const getSkillsByCategory = (category) => {
   return skillsLibrary[category] || []
+}
+
+// Autocomplete job titles based on search query
+export const autocompleteJobTitles = (query) => {
+  if (!query || query.trim().length < 1) {
+    return []
+  }
+
+  const searchTerm = query.toLowerCase()
+
+  // Filter job titles that contain the search term
+  const matches = jobTitleDatabase.filter(title =>
+    title.toLowerCase().includes(searchTerm)
+  )
+
+  // Sort results: exact matches first, then starts-with matches, then contains
+  return matches.sort((a, b) => {
+    const aLower = a.toLowerCase()
+    const bLower = b.toLowerCase()
+
+    // Exact match
+    if (aLower === searchTerm) return -1
+    if (bLower === searchTerm) return 1
+
+    // Starts with
+    if (aLower.startsWith(searchTerm) && !bLower.startsWith(searchTerm)) return -1
+    if (bLower.startsWith(searchTerm) && !aLower.startsWith(searchTerm)) return 1
+
+    // Alphabetical for same priority
+    return a.localeCompare(b)
+  }).slice(0, 10) // Limit to top 10 suggestions
 }

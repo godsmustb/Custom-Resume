@@ -527,16 +527,16 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
 
       const improvement = newScore.matchScore - matchScore.matchScore
 
-      alert(`✅ "${option.theme}" bullets added!
+      alert(`✅ Bullet point added!
 
-Added ${option.bullets.length} bullet points to your resume.
+Added "${option.bullets[0]}" to your resume.
 
 Score Update:
 Before: ${matchScore.matchScore}%
 After: ${newScore.matchScore}%
 Improvement: +${improvement.toFixed(1)}%
 
-${newScore.matchScore >= 98 ? '🎉 98% TARGET REACHED!' : `${(98 - newScore.matchScore).toFixed(1)}% away from 98% target.`}`)
+${newScore.matchScore >= 98 ? '🎉 98% TARGET REACHED!' : `${(98 - newScore.matchScore).toFixed(1)}% away from 98% target. Add more bullets to continue improving!`}`)
 
       // Close the options panel if target reached
       if (newScore.matchScore >= 98) {
@@ -780,16 +780,16 @@ ${newScore.matchScore >= 98 ? '🎉 98% TARGET REACHED!' : `${(98 - newScore.mat
 
                 {matchScore && matchScore.matchScore >= 90 && matchScore.matchScore < 98 && (
                   <div className="manual-options-prompt">
-                    <p>🎯 Want to fine-tune to 98%? Get 5 bullet point options addressing "Areas to Improve"!</p>
+                    <p>🎯 Want to fine-tune to 98%? Get individual bullet point options addressing "Areas to Improve"!</p>
                     <p style={{fontSize: '0.95rem', opacity: 0.9, marginTop: '0.5rem'}}>
-                      Each option directly fixes the gaps shown above using different strategic approaches
+                      Each bullet directly fixes a specific gap shown above - add them individually as needed
                     </p>
                     <button
                       className="generate-options-btn"
                       onClick={handleGenerateBulletOptions}
                       disabled={analyzing}
                     >
-                      {analyzing ? '🔄 Generating Gap-Targeted Options...' : '🎨 Generate 5 Options from "Areas to Improve"'}
+                      {analyzing ? '🔄 Generating Individual Bullet Options...' : '🎨 Generate Individual Bullet Options from "Areas to Improve"'}
                     </button>
                   </div>
                 )}
@@ -844,8 +844,8 @@ ${newScore.matchScore >= 98 ? '🎉 98% TARGET REACHED!' : `${(98 - newScore.mat
             {showBulletOptions && bulletOptions.length > 0 && (
               <div className="bullet-options-panel">
                 <div className="bullet-options-header">
-                  <h3>🎯 Choose Bullets to Fix "Areas to Improve"</h3>
-                  <p>Each option below directly addresses the gaps from your match analysis. Choose the strategic approach that best fits your experience.</p>
+                  <h3>🎯 Individual Bullet Points to Fix "Areas to Improve"</h3>
+                  <p>Each bullet below directly addresses a specific gap from your match analysis. Click + to add any bullet you like.</p>
                   {matchScore && matchScore.gaps && (
                     <div style={{
                       background: 'rgba(255,255,255,0.2)',
@@ -865,22 +865,20 @@ ${newScore.matchScore >= 98 ? '🎉 98% TARGET REACHED!' : `${(98 - newScore.mat
                 </div>
                 <div className="bullet-options-grid">
                   {bulletOptions.map((option, idx) => (
-                    <div key={idx} className="bullet-option-card">
+                    <div key={idx} className="bullet-option-card individual-bullet-card">
                       <div className="option-header">
-                        <span className="option-number">Option {idx + 1}</span>
+                        <span className="option-number">#{idx + 1}</span>
                         <span className="option-theme">{option.theme}</span>
                       </div>
-                      <ul className="option-bullets">
-                        {option.bullets.map((bullet, bidx) => (
-                          <li key={bidx}>{bullet}</li>
-                        ))}
-                      </ul>
+                      <div className="individual-bullet-text">
+                        {option.bullets[0]}
+                      </div>
                       <button
                         className="apply-option-btn"
                         onClick={() => applyBulletOption(option)}
                         disabled={analyzing}
                       >
-                        ✅ Add These Bullets ({option.bullets.length})
+                        + Add This Bullet
                       </button>
                     </div>
                   ))}
