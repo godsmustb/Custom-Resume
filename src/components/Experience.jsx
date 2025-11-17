@@ -84,7 +84,8 @@ function Experience() {
                 {exp.description.map((desc, descIndex) => {
                   const suggestionKey = `${expIndex}-${descIndex}`
                   const showingSuggestions = showSuggestions[suggestionKey]
-                  const suggestions = getBulletSuggestions(exp.title)
+                  // Only compute suggestions when panel is visible to improve performance
+                  const suggestions = showingSuggestions ? getBulletSuggestions(exp.title) : []
 
                   return (
                     <div key={descIndex} className="bullet-edit-wrapper">
