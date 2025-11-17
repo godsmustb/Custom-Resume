@@ -5,7 +5,8 @@ import {
   getSkillsByRole,
   searchSkills,
   getAllCategories,
-  getSkillsByCategory
+  getSkillsByCategory,
+  autocompleteJobTitles
 } from '../services/skillsSuggestions'
 
 function Skills() {
@@ -14,6 +15,8 @@ function Skills() {
   const [searchQuery, setSearchQuery] = useState('')
   const [jobTitleSearch, setJobTitleSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
+  const [showAutocomplete, setShowAutocomplete] = useState(false)
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([])
 
   const handleSkillsChange = (categoryIndex, value) => {
     // Convert comma-separated string to array
@@ -83,6 +86,7 @@ function Skills() {
     setJobTitleSearch(jobTitle)
     setSearchQuery('')
     setSelectedCategory('')
+    setShowAutocomplete(false)
   }
 
   const handleSearchJobTitle = () => {
@@ -90,7 +94,30 @@ function Skills() {
     if (jobTitleSearch.trim()) {
       setSearchQuery('')
       setSelectedCategory('')
+      setShowAutocomplete(false)
     }
+  }
+
+  const handleJobTitleInputChange = (e) => {
+    const value = e.target.value
+    setJobTitleSearch(value)
+
+    // Get autocomplete suggestions
+    if (value.trim().length >= 1) {
+      const suggestions = autocompleteJobTitles(value)
+      setAutocompleteSuggestions(suggestions)
+      setShowAutocomplete(suggestions.length > 0)
+    } else {
+      setAutocompleteSuggestions([])
+      setShowAutocomplete(false)
+    }
+  }
+
+  const handleAutocompleteClick = (suggestion) => {
+    setJobTitleSearch(suggestion)
+    setShowAutocomplete(false)
+    setSearchQuery('')
+    setSelectedCategory('')
   }
 
   return (
@@ -170,18 +197,34 @@ function Skills() {
                     {/* Job Title Search */}
                     <div className="job-title-search-section">
                       <h4 className="search-section-title">Search by job title for pre-written examples</h4>
-                      <div className="search-input-wrapper">
+                      <div className="search-input-wrapper" style={{ position: 'relative' }}>
                         <input
                           type="text"
                           className="job-title-search-input"
                           placeholder="Search by job title"
                           value={jobTitleSearch}
-                          onChange={(e) => setJobTitleSearch(e.target.value)}
+                          onChange={handleJobTitleInputChange}
                           onKeyPress={(e) => e.key === 'Enter' && handleSearchJobTitle()}
+                          onFocus={() => jobTitleSearch.trim() && setShowAutocomplete(autocompleteSuggestions.length > 0)}
                         />
                         <button className="search-icon-btn" onClick={handleSearchJobTitle}>
                           🔍
                         </button>
+
+                        {/* Autocomplete Dropdown */}
+                        {showAutocomplete && autocompleteSuggestions.length > 0 && (
+                          <div className="autocomplete-dropdown">
+                            {autocompleteSuggestions.map((suggestion, idx) => (
+                              <div
+                                key={idx}
+                                className="autocomplete-item"
+                                onClick={() => handleAutocompleteClick(suggestion)}
+                              >
+                                {suggestion}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {/* Popular Job Titles */}
