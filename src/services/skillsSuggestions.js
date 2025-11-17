@@ -336,7 +336,36 @@ export const getSkillsByRole = (jobTitle) => {
   ]
 }
 
-// Search skills across all categories
+// Job title keywords mapping
+const jobTitleKeywords = {
+  'frontend developer': ['frontend', 'front-end', 'react', 'vue', 'angular', 'ui developer'],
+  'backend developer': ['backend', 'back-end', 'api', 'server', 'node'],
+  'full stack developer': ['full stack', 'fullstack', 'full-stack'],
+  'software engineer': ['software engineer', 'developer', 'programmer', 'swe'],
+  'data scientist': ['data scientist', 'data science', 'machine learning', 'ml engineer'],
+  'data analyst': ['data analyst', 'business intelligence', 'analytics'],
+  'devops engineer': ['devops', 'sre', 'site reliability', 'infrastructure'],
+  'mobile developer': ['mobile', 'ios', 'android', 'react native', 'flutter'],
+  'ui/ux designer': ['designer', 'ui', 'ux', 'product designer', 'user experience'],
+  'project manager': ['project manager', 'pm', 'scrum master', 'agile coach'],
+  'product manager': ['product manager', 'product owner', 'po'],
+  'marketing manager': ['marketing', 'digital marketing', 'growth'],
+  'sales representative': ['sales', 'account executive', 'business development'],
+  'business analyst': ['business analyst', 'ba', 'requirements analyst'],
+  'qa engineer': ['qa', 'quality assurance', 'test', 'sdet', 'automation'],
+  'hr manager': ['hr', 'human resources', 'recruiter', 'talent acquisition'],
+  'customer support': ['customer support', 'customer service', 'help desk'],
+  'content writer': ['content writer', 'copywriter', 'technical writer'],
+  'graphic designer': ['graphic designer', 'visual designer', 'creative'],
+  'accountant': ['accountant', 'finance', 'bookkeeper', 'cpa'],
+  'nurse': ['nurse', 'rn', 'healthcare', 'medical'],
+  'teacher': ['teacher', 'educator', 'instructor', 'professor'],
+  'administrative assistant': ['admin', 'assistant', 'coordinator', 'secretary'],
+  'operations manager': ['operations', 'ops manager', 'logistics'],
+  'security engineer': ['security', 'cybersecurity', 'infosec', 'penetration tester']
+}
+
+// Search skills across all categories AND job titles
 export const searchSkills = (query) => {
   if (!query || query.trim().length < 2) {
     return []
@@ -344,16 +373,47 @@ export const searchSkills = (query) => {
 
   const searchTerm = query.toLowerCase()
   const results = []
+  const addedSkills = new Set() // Prevent duplicates
 
+  // First, check if search matches a job title
+  let jobTitleMatch = null
+  for (const [jobTitle, keywords] of Object.entries(jobTitleKeywords)) {
+    if (keywords.some(keyword => keyword.includes(searchTerm) || searchTerm.includes(keyword))) {
+      jobTitleMatch = jobTitle
+      break
+    }
+  }
+
+  // If job title matched, get skills for that role
+  if (jobTitleMatch) {
+    const roleSkills = getSkillsByRole(jobTitleMatch)
+    roleSkills.forEach(skill => {
+      if (!addedSkills.has(skill)) {
+        // Find which category this skill belongs to
+        let skillCategory = 'Recommended'
+        for (const [category, skills] of Object.entries(skillsLibrary)) {
+          if (skills.includes(skill)) {
+            skillCategory = category
+            break
+          }
+        }
+        results.push({ skill, category: skillCategory })
+        addedSkills.add(skill)
+      }
+    })
+  }
+
+  // Also search for skills by name
   Object.entries(skillsLibrary).forEach(([category, skills]) => {
     skills.forEach(skill => {
-      if (skill.toLowerCase().includes(searchTerm)) {
+      if (skill.toLowerCase().includes(searchTerm) && !addedSkills.has(skill)) {
         results.push({ skill, category })
+        addedSkills.add(skill)
       }
     })
   })
 
-  return results.slice(0, 20) // Limit to 20 results
+  return results.slice(0, 30) // Increased limit to 30 results
 }
 
 // Get all categories
