@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
 import { downloadResumePDF } from '../services/pdfDownloadService'
 import PDFUpload from './PDFUpload'
-import ResumeAnalyzer from './ResumeAnalyzer'
 import './ControlPanel.css'
 
 const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
@@ -41,8 +40,6 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
             >
               📤 Upload PDF
             </button>
-
-            <ResumeAnalyzer />
 
             <button
               className={`control-btn ${isEditing ? 'active' : ''}`}
