@@ -5,6 +5,7 @@
  */
 
 import { useResume } from '../../../context/ResumeContext'
+import { FONT_OPTIONS } from '../../../types/templateTypes'
 import About from '../../About'
 import Experience from '../../Experience'
 import Education from '../../Education'
@@ -13,12 +14,22 @@ import Skills from '../../Skills'
 import Contact from '../../Contact'
 import './ModernTwoColumn.css'
 
-const ModernTwoColumn = ({ template, data }) => {
+const ModernTwoColumn = ({ template, data, customization }) => {
   const { isEditing } = useResume()
-  const colorScheme = template?.colorSchemes?.[0] || 'corporate-blue'
+
+  // Use customization settings
+  const colorScheme = customization?.colorScheme || template?.colorSchemes?.[0] || 'corporate-blue'
+  const spacing = customization?.spacing || 'comfortable'
+
+  // Get font family from customization
+  const selectedFont = FONT_OPTIONS.find(f => f.id === (customization?.font || 'inter'))
+  const fontFamily = selectedFont?.family || "'Inter', sans-serif"
 
   return (
-    <div className={`template-modern-two-column ${colorScheme}`}>
+    <div
+      className={`template-modern-two-column ${colorScheme} spacing-${spacing}`}
+      style={{ fontFamily }}
+    >
       <div className="modern-two-column-container">
         {/* Header Section - Full Width */}
         <div className="modern-header-section">

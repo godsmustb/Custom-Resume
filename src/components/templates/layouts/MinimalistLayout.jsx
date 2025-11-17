@@ -5,6 +5,7 @@
  */
 
 import { useResume } from '../../../context/ResumeContext'
+import { FONT_OPTIONS } from '../../../types/templateTypes'
 import Header from '../../Header'
 import About from '../../About'
 import Experience from '../../Experience'
@@ -14,12 +15,22 @@ import Skills from '../../Skills'
 import Contact from '../../Contact'
 import './MinimalistLayout.css'
 
-const MinimalistLayout = ({ template, data }) => {
+const MinimalistLayout = ({ template, data, customization }) => {
   const { isEditing } = useResume()
-  const colorScheme = template?.colorSchemes?.[0] || 'modern-neutral'
+
+  // Use customization settings
+  const colorScheme = customization?.colorScheme || template?.colorSchemes?.[0] || 'modern-neutral'
+  const spacing = customization?.spacing || 'comfortable'
+
+  // Get font family from customization
+  const selectedFont = FONT_OPTIONS.find(f => f.id === (customization?.font || 'inter'))
+  const fontFamily = selectedFont?.family || "'Inter', sans-serif"
 
   return (
-    <div className={`template-minimalist ${colorScheme}`}>
+    <div
+      className={`template-minimalist ${colorScheme} spacing-${spacing}`}
+      style={{ fontFamily }}
+    >
       <div className="minimalist-container">
         {/* Minimalist Header */}
         <div className="minimalist-header">

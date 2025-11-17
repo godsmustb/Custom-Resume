@@ -83,21 +83,21 @@ const LAYOUT_MAP = {
  * Main Template Renderer Component
  */
 const TemplateRenderer = () => {
-  const { currentTemplate, resumeData } = useResume()
+  const { currentTemplate, resumeData, templateCustomization } = useResume()
 
   // Get the selected template configuration
   const template = getTemplateById(currentTemplate)
 
   if (!template) {
     // Fallback to default classic layout if template not found
-    return <ClassicSingleColumn template={template} data={resumeData} />
+    return <ClassicSingleColumn template={template} data={resumeData} customization={templateCustomization} />
   }
 
   // Get the layout component for this template
   const LayoutComponent = LAYOUT_MAP[template.component] || ClassicSingleColumn
 
-  // Render the selected layout with template configuration and resume data
-  return <LayoutComponent template={template} data={resumeData} />
+  // Render the selected layout with template configuration, resume data, and customization
+  return <LayoutComponent template={template} data={resumeData} customization={templateCustomization} />
 }
 
 export default TemplateRenderer

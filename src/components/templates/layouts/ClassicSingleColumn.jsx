@@ -5,6 +5,7 @@
  */
 
 import { useResume } from '../../../context/ResumeContext'
+import { FONT_OPTIONS } from '../../../types/templateTypes'
 import Header from '../../Header'
 import About from '../../About'
 import Experience from '../../Experience'
@@ -14,14 +15,22 @@ import Skills from '../../Skills'
 import Contact from '../../Contact'
 import './ClassicSingleColumn.css'
 
-const ClassicSingleColumn = ({ template, data }) => {
+const ClassicSingleColumn = ({ template, data, customization }) => {
   const { isEditing } = useResume()
 
-  // Determine color scheme from template
-  const colorScheme = template?.colorSchemes?.[0] || 'corporate-blue'
+  // Use customization settings
+  const colorScheme = customization?.colorScheme || template?.colorSchemes?.[0] || 'corporate-blue'
+  const spacing = customization?.spacing || 'comfortable'
+
+  // Get font family from customization
+  const selectedFont = FONT_OPTIONS.find(f => f.id === (customization?.font || 'inter'))
+  const fontFamily = selectedFont?.family || "'Inter', sans-serif"
 
   return (
-    <div className={`template-classic-single ${colorScheme}`}>
+    <div
+      className={`template-classic-single ${colorScheme} spacing-${spacing}`}
+      style={{ fontFamily }}
+    >
       <div className="classic-container">
         <Header />
         <About />

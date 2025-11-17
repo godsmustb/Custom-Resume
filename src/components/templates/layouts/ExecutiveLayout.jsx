@@ -5,6 +5,7 @@
  */
 
 import { useResume } from '../../../context/ResumeContext'
+import { FONT_OPTIONS } from '../../../types/templateTypes'
 import About from '../../About'
 import Experience from '../../Experience'
 import Education from '../../Education'
@@ -13,12 +14,22 @@ import Skills from '../../Skills'
 import Contact from '../../Contact'
 import './ExecutiveLayout.css'
 
-const ExecutiveLayout = ({ template, data }) => {
+const ExecutiveLayout = ({ template, data, customization }) => {
   const { isEditing } = useResume()
-  const colorScheme = template?.colorSchemes?.[0] || 'executive-navy'
+
+  // Use customization settings
+  const colorScheme = customization?.colorScheme || template?.colorSchemes?.[0] || 'executive-navy'
+  const spacing = customization?.spacing || 'comfortable'
+
+  // Get font family from customization
+  const selectedFont = FONT_OPTIONS.find(f => f.id === (customization?.font || 'inter'))
+  const fontFamily = selectedFont?.family || "'Inter', sans-serif"
 
   return (
-    <div className={`template-executive ${colorScheme}`}>
+    <div
+      className={`template-executive ${colorScheme} spacing-${spacing}`}
+      style={{ fontFamily }}
+    >
       <div className="executive-container">
         {/* Executive Header */}
         <div className="executive-header">

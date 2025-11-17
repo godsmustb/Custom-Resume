@@ -62,6 +62,42 @@
   letter-spacing: 0.5px;
 }
 
+/* Spacing variations */
+.template-classic-single.spacing-compact {
+  padding: 1.5rem;
+  line-height: 1.4;
+}
+
+.template-classic-single.spacing-compact .section {
+  margin-bottom: 1.5rem;
+}
+
+.template-classic-single.spacing-compact .section-title {
+  margin-bottom: 0.75rem;
+}
+
+.template-classic-single.spacing-comfortable {
+  padding: 2rem;
+  line-height: 1.6;
+}
+
+.template-classic-single.spacing-comfortable .section {
+  margin-bottom: 2rem;
+}
+
+.template-classic-single.spacing-spacious {
+  padding: 2.5rem;
+  line-height: 1.8;
+}
+
+.template-classic-single.spacing-spacious .section {
+  margin-bottom: 2.5rem;
+}
+
+.template-classic-single.spacing-spacious .section-title {
+  margin-bottom: 1.25rem;
+}
+
 /* Print optimization */
 @media print {
   .template-classic-single {

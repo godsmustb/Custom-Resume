@@ -105,6 +105,19 @@ export const ResumeProvider = ({ children }) => {
     return savedTemplate || 'ats-simple-minimal' // Default template
   })
 
+  const [templateCustomization, setTemplateCustomizationState] = useState(() => {
+    // Load customization from localStorage
+    const saved = localStorage.getItem('templateCustomization')
+    if (saved) {
+      return JSON.parse(saved)
+    }
+    return {
+      colorScheme: 'corporate-blue',
+      font: 'inter',
+      spacing: 'comfortable'
+    }
+  })
+
   // Save to localStorage whenever data changes
   useEffect(() => {
     localStorage.setItem('resumeData', JSON.stringify(resumeData))
@@ -115,8 +128,20 @@ export const ResumeProvider = ({ children }) => {
     localStorage.setItem('currentTemplate', currentTemplate)
   }, [currentTemplate])
 
+  // Save customization whenever it changes
+  useEffect(() => {
+    localStorage.setItem('templateCustomization', JSON.stringify(templateCustomization))
+  }, [templateCustomization])
+
   const setCurrentTemplate = (templateId) => {
     setCurrentTemplateState(templateId)
+  }
+
+  const setTemplateCustomization = (customization) => {
+    setTemplateCustomizationState(prev => ({
+      ...prev,
+      ...customization
+    }))
   }
 
   const updatePersonal = (field, value) => {
@@ -309,6 +334,8 @@ export const ResumeProvider = ({ children }) => {
     setLoading,
     currentTemplate,
     setCurrentTemplate,
+    templateCustomization,
+    setTemplateCustomization,
     updatePersonal,
     updateAbout,
     updateExperience,

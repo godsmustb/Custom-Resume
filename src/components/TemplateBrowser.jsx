@@ -9,6 +9,7 @@ import {
   searchTemplates
 } from '../data/templateCatalog'
 import { TEMPLATE_TIERS, TEMPLATE_CATEGORIES, COLOR_PALETTES } from '../types/templateTypes'
+import TemplateCustomization from './TemplateCustomization'
 import './TemplateBrowser.css'
 
 const TemplateBrowser = ({ onClose }) => {
@@ -124,6 +125,9 @@ const TemplateBrowser = ({ onClose }) => {
             </select>
           </div>
         </div>
+
+        {/* Template Customization Panel */}
+        <TemplateCustomization />
 
         {/* Featured Templates Section */}
         {!searchQuery && selectedCategory === 'all' && selectedTier === 'all' && (
