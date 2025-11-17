@@ -10,6 +10,8 @@ import {
 } from '../data/templateCatalog'
 import { TEMPLATE_TIERS, TEMPLATE_CATEGORIES, COLOR_PALETTES } from '../types/templateTypes'
 import TemplateCustomization from './TemplateCustomization'
+import TemplatePreview from './TemplatePreview'
+import TemplatePreviewModal from './TemplatePreviewModal'
 import './TemplateBrowser.css'
 
 const TemplateBrowser = ({ onClose }) => {
@@ -18,6 +20,7 @@ const TemplateBrowser = ({ onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedTier, setSelectedTier] = useState('all')
   const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [previewTemplate, setPreviewTemplate] = useState(null)
 
   // Filter templates
   const getFilteredTemplates = () => {
@@ -63,6 +66,30 @@ const TemplateBrowser = ({ onClose }) => {
 
     setCurrentTemplate(selectedTemplate.id)
     alert(`✅ Template "${selectedTemplate.name}" applied! Your resume data has been fitted to the new template.`)
+    onClose()
+  }
+
+  const handlePreviewTemplate = (template, e) => {
+    e.stopPropagation() // Prevent card selection
+    setPreviewTemplate(template)
+  }
+
+  const handleApplyFromPreview = () => {
+    if (!previewTemplate) return
+
+    // Check if premium/freemium and user has access
+    if (previewTemplate.tier === TEMPLATE_TIERS.PREMIUM) {
+      alert('🔒 This is a premium template. Upgrade to access premium templates!')
+      return
+    }
+
+    if (previewTemplate.tier === TEMPLATE_TIERS.FREEMIUM) {
+      alert('✨ Freemium template selected! You can edit for free, but need to upgrade to download PDF/Word.')
+    }
+
+    setCurrentTemplate(previewTemplate.id)
+    alert(`✅ Template "${previewTemplate.name}" applied! Your resume data has been fitted to the new template.`)
+    setPreviewTemplate(null)
     onClose()
   }
 
@@ -141,6 +168,7 @@ const TemplateBrowser = ({ onClose }) => {
                   isSelected={selectedTemplate?.id === template.id}
                   isCurrent={currentTemplate === template.id}
                   onSelect={() => handleTemplateSelect(template)}
+                  onPreview={(e) => handlePreviewTemplate(template, e)}
                   getTierBadge={getTierBadge}
                 />
               ))}
@@ -161,6 +189,7 @@ const TemplateBrowser = ({ onClose }) => {
                 isSelected={selectedTemplate?.id === template.id}
                 isCurrent={currentTemplate === template.id}
                 onSelect={() => handleTemplateSelect(template)}
+                onPreview={(e) => handlePreviewTemplate(template, e)}
                 getTierBadge={getTierBadge}
               />
             ))}
@@ -204,12 +233,21 @@ const TemplateBrowser = ({ onClose }) => {
           </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      {previewTemplate && (
+        <TemplatePreviewModal
+          template={previewTemplate}
+          onClose={() => setPreviewTemplate(null)}
+          onApply={handleApplyFromPreview}
+        />
+      )}
     </div>
   )
 }
 
 // Template Card Component
-const TemplateCard = ({ template, isSelected, isCurrent, onSelect, getTierBadge }) => {
+const TemplateCard = ({ template, isSelected, isCurrent, onSelect, onPreview, getTierBadge }) => {
   const tierBadge = getTierBadge(template.tier)
 
   return (
@@ -220,20 +258,12 @@ const TemplateCard = ({ template, isSelected, isCurrent, onSelect, getTierBadge 
       {isCurrent && <div className="current-badge">✓ Current</div>}
       <div className={`tier-badge ${tierBadge.class}`}>{tierBadge.text}</div>
 
-      {/* Template Preview Placeholder */}
+      {/* Live Template Preview */}
       <div className="template-preview">
-        <div className="template-preview-placeholder">
-          <div className="preview-header"></div>
-          <div className="preview-content">
-            <div className="preview-line"></div>
-            <div className="preview-line short"></div>
-            <div className="preview-line"></div>
-            <div className="preview-section">
-              <div className="preview-line"></div>
-              <div className="preview-line short"></div>
-            </div>
-          </div>
-        </div>
+        <TemplatePreview templateId={template.id} mini={true} />
+        <button className="preview-overlay-btn" onClick={onPreview}>
+          👁 Preview
+        </button>
       </div>
 
       <div className="template-info">
