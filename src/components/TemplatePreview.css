@@ -1,0 +1,79 @@
+/* Template Preview Styles */
+
+.template-preview-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #f5f5f5;
+  border-radius: 4px;
+  position: relative;
+}
+
+/* Mini preview mode - for template cards */
+.template-preview-wrapper.mini {
+  height: 280px;
+  border: 1px solid #e0e0e0;
+}
+
+.template-preview-wrapper.mini .template-preview-container {
+  transform: scale(0.18);
+  transform-origin: top left;
+  width: 555%; /* 100% / 0.18 to compensate for scale */
+  height: 555%;
+  pointer-events: none;
+}
+
+/* Full preview mode - for modal */
+.template-preview-wrapper.full {
+  height: 100%;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.template-preview-wrapper.full .template-preview-container {
+  transform: scale(0.5);
+  transform-origin: top center;
+  width: 200%; /* 100% / 0.5 */
+  height: 200%;
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+/* Error state */
+.template-preview-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+  color: #757575;
+  font-size: 0.9rem;
+}
+
+/* Hide interactive elements in preview mode */
+.template-preview-container button,
+.template-preview-container input,
+.template-preview-container textarea,
+.template-preview-container select {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Ensure preview content is readable */
+.template-preview-container {
+  background: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .template-preview-wrapper.mini {
+    height: 240px;
+  }
+
+  .template-preview-wrapper.mini .template-preview-container {
+    transform: scale(0.15);
+    width: 666%; /* 100% / 0.15 */
+    height: 666%;
+  }
+}

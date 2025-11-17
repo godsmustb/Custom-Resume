@@ -1,15 +1,9 @@
 import { useState } from 'react'
 import './App.css'
 import { useResume } from './context/ResumeContext'
-import Header from './components/Header'
-import About from './components/About'
-import Experience from './components/Experience'
-import Education from './components/Education'
-import Certifications from './components/Certifications'
-import Skills from './components/Skills'
-import Contact from './components/Contact'
 import ControlPanel from './components/ControlPanel'
 import JobDescriptionInput from './components/JobDescriptionInput'
+import TemplateRenderer from './components/templates/TemplateRenderer'
 
 function App() {
   const { isEditing } = useResume()
@@ -25,13 +19,7 @@ function App() {
       {showJobDescription && <JobDescriptionInput />}
 
       <div className="resume-container">
-        <Header />
-        <About />
-        <Skills />
-        <Experience />
-        <Education />
-        <Certifications />
-        <Contact />
+        <TemplateRenderer />
       </div>
     </div>
   )

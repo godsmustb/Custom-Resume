@@ -99,11 +99,50 @@ export const ResumeProvider = ({ children }) => {
 
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [currentTemplate, setCurrentTemplateState] = useState(() => {
+    // Load template preference from localStorage
+    const savedTemplate = localStorage.getItem('currentTemplate')
+    return savedTemplate || 'ats-simple-minimal' // Default template
+  })
+
+  const [templateCustomization, setTemplateCustomizationState] = useState(() => {
+    // Load customization from localStorage
+    const saved = localStorage.getItem('templateCustomization')
+    if (saved) {
+      return JSON.parse(saved)
+    }
+    return {
+      colorScheme: 'corporate-blue',
+      font: 'inter',
+      spacing: 'comfortable'
+    }
+  })
 
   // Save to localStorage whenever data changes
   useEffect(() => {
     localStorage.setItem('resumeData', JSON.stringify(resumeData))
   }, [resumeData])
+
+  // Save template preference whenever it changes
+  useEffect(() => {
+    localStorage.setItem('currentTemplate', currentTemplate)
+  }, [currentTemplate])
+
+  // Save customization whenever it changes
+  useEffect(() => {
+    localStorage.setItem('templateCustomization', JSON.stringify(templateCustomization))
+  }, [templateCustomization])
+
+  const setCurrentTemplate = (templateId) => {
+    setCurrentTemplateState(templateId)
+  }
+
+  const setTemplateCustomization = (customization) => {
+    setTemplateCustomizationState(prev => ({
+      ...prev,
+      ...customization
+    }))
+  }
 
   const updatePersonal = (field, value) => {
     setResumeData(prev => ({
@@ -293,6 +332,10 @@ export const ResumeProvider = ({ children }) => {
     setIsEditing,
     loading,
     setLoading,
+    currentTemplate,
+    setCurrentTemplate,
+    templateCustomization,
+    setTemplateCustomization,
     updatePersonal,
     updateAbout,
     updateExperience,

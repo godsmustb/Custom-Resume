@@ -98,6 +98,16 @@
   border-color: rgba(33, 150, 243, 0.5);
 }
 
+.templates-btn {
+  background: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.3);
+}
+
+.templates-btn:hover {
+  background: rgba(255, 193, 7, 0.3);
+  border-color: rgba(255, 193, 7, 0.5);
+}
+
 @media print {
   .control-panel {
     display: none;

@@ -1,0 +1,153 @@
+/* Modern Two Column Layout Styles */
+
+.template-modern-two-column {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: white;
+  padding: 2rem;
+}
+
+.modern-two-column-container {
+  width: 100%;
+}
+
+/* Header Section */
+.modern-header-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2.5rem 2rem;
+  margin: -2rem -2rem 2rem -2rem;
+  text-align: center;
+  color: white;
+}
+
+.modern-header-section.corporate-blue {
+  background: linear-gradient(135deg, #1A73E8 0%, #0D47A1 100%);
+}
+
+.modern-header-section.professional-green {
+  background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+}
+
+.modern-header-section.tech-cyan {
+  background: linear-gradient(135deg, #00ACC1 0%, #00838F 100%);
+}
+
+.modern-name {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 1px;
+}
+
+.modern-title {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin: 0 0 1rem 0;
+  opacity: 0.95;
+}
+
+.modern-contact-info {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+.modern-contact-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Two Column Grid */
+.modern-grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+.modern-main-content {
+  min-width: 0; /* Prevent grid blowout */
+}
+
+.modern-sidebar {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+/* Sidebar sections */
+.modern-sidebar .section {
+  margin-bottom: 2rem;
+}
+
+.modern-sidebar .section:last-child {
+  margin-bottom: 0;
+}
+
+.modern-sidebar .section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1A73E8;
+}
+
+/* Color scheme variations for sidebar */
+.template-modern-two-column.corporate-blue .modern-sidebar .section-title {
+  color: #1A73E8;
+}
+
+.template-modern-two-column.professional-green .modern-sidebar .section-title {
+  color: #2E7D32;
+}
+
+.template-modern-two-column.tech-cyan .modern-sidebar .section-title {
+  color: #00ACC1;
+}
+
+.template-modern-two-column.modern-neutral .modern-sidebar .section-title {
+  color: #424242;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .modern-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-sidebar {
+    position: static;
+  }
+}
+
+/* Print optimization */
+@media print {
+  .template-modern-two-column {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .modern-header-section {
+    margin: 0 0 1.5rem 0;
+    padding: 1.5rem 1rem;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .modern-grid {
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+  }
+
+  .modern-sidebar {
+    background: #f8f9fa;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
