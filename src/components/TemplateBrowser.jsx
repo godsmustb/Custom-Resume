@@ -81,7 +81,7 @@ const TemplateBrowser = ({ onClose }) => {
         <div className="template-browser-header">
           <div className="template-header-content">
             <h2>Choose Your Perfect Resume Template</h2>
-            <p>Select from 5 professionally designed templates (50 coming soon!)</p>
+            <p>Select from 20 professionally designed, ATS-optimized templates</p>
           </div>
           <button className="template-close-btn" onClick={onClose}>✕</button>
         </div>
