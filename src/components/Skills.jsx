@@ -12,6 +12,7 @@ function Skills() {
   const { resumeData, isEditing, updateSkills, addSkillCategory, removeSkillCategory } = useResume()
   const [showSuggestions, setShowSuggestions] = useState({})
   const [searchQuery, setSearchQuery] = useState('')
+  const [jobTitleSearch, setJobTitleSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
 
   const handleSkillsChange = (categoryIndex, value) => {
@@ -26,6 +27,7 @@ function Skills() {
       [categoryIndex]: !prev[categoryIndex]
     }))
     setSearchQuery('')
+    setJobTitleSearch('')
     setSelectedCategory('')
   }
 
@@ -37,12 +39,22 @@ function Skills() {
     }
   }
 
+  // Popular job titles for quick access
+  const popularJobTitles = [
+    'Project Manager', 'Product Manager', 'Software Engineer', 'Data Analyst',
+    'Marketing Manager', 'Sales Representative', 'Customer Service', 'Teacher'
+  ]
+
   // Get job-title-based suggestions
   const jobTitleSuggestions = useMemo(() => {
-    // Try to get job title from first experience or personal title
+    // If user searched for a job title, use that
+    if (jobTitleSearch.trim()) {
+      return getSkillsByRole(jobTitleSearch)
+    }
+    // Otherwise use their actual job title
     const jobTitle = resumeData.experience?.[0]?.title || resumeData.personal?.title || ''
     return getSkillsByRole(jobTitle)
-  }, [resumeData.experience, resumeData.personal])
+  }, [jobTitleSearch, resumeData.experience, resumeData.personal])
 
   // Get skills to display based on search or category selection
   const getDisplaySkills = () => {
@@ -53,11 +65,33 @@ function Skills() {
       const categorySkills = getSkillsByCategory(selectedCategory)
       return categorySkills.map(skill => ({ skill, category: selectedCategory }))
     }
+    if (jobTitleSearch.trim()) {
+      return jobTitleSuggestions.map(skill => ({ skill, category: 'Recommended' }))
+    }
     return []
   }
 
   const displaySkills = getDisplaySkills()
   const categories = getAllCategories()
+
+  // Check if a skill is "expert recommended" (from job title suggestions)
+  const isExpertRecommended = (skill) => {
+    return jobTitleSuggestions.includes(skill)
+  }
+
+  const handleJobTitleClick = (jobTitle) => {
+    setJobTitleSearch(jobTitle)
+    setSearchQuery('')
+    setSelectedCategory('')
+  }
+
+  const handleSearchJobTitle = () => {
+    // Trigger search when button is clicked
+    if (jobTitleSearch.trim()) {
+      setSearchQuery('')
+      setSelectedCategory('')
+    }
+  }
 
   return (
     <section className="section">
@@ -108,97 +142,114 @@ function Skills() {
                   💡 {showSuggestions[index] ? 'Hide Suggestions' : 'Browse Skills'}
                 </button>
 
-                {/* Suggestions Panel */}
+                {/* Suggestions Panel - Resume Now Style */}
                 {showSuggestions[index] && (
-                  <div className="suggestions-panel" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                    <div className="suggestions-header">
-                      <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>Browse Skills</h4>
+                  <div className="skills-suggestions-panel">
+                    {/* Job Title Search */}
+                    <div className="job-title-search-section">
+                      <h4 className="search-section-title">Search by job title for pre-written examples</h4>
+                      <div className="search-input-wrapper">
+                        <input
+                          type="text"
+                          className="job-title-search-input"
+                          placeholder="Search by job title"
+                          value={jobTitleSearch}
+                          onChange={(e) => setJobTitleSearch(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSearchJobTitle()}
+                        />
+                        <button className="search-icon-btn" onClick={handleSearchJobTitle}>
+                          🔍
+                        </button>
+                      </div>
 
-                      {/* Search Bar */}
-                      <input
-                        type="text"
-                        className="editable-input"
-                        placeholder="Search skills... (e.g., React, Python, Marketing)"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ marginBottom: '1rem' }}
-                      />
-
-                      {/* Category Selector */}
-                      <select
-                        className="editable-input"
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        style={{ marginBottom: '1rem' }}
-                      >
-                        <option value="">-- Select a Category --</option>
-                        {categories.map(cat => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                      </select>
+                      {/* Popular Job Titles */}
+                      <div className="popular-job-titles">
+                        <h5 className="popular-titles-label">Popular Job Titles</h5>
+                        <div className="job-title-links">
+                          {popularJobTitles.map((title, idx) => (
+                            <button
+                              key={idx}
+                              className="job-title-link"
+                              onClick={() => handleJobTitleClick(title)}
+                            >
+                              🔍 {title}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Job-based Recommendations */}
-                    {!searchQuery && !selectedCategory && (
-                      <div style={{ marginBottom: '1rem' }}>
-                        <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#667eea' }}>
-                          {jobTitleSuggestions.length > 0 ? 'Recommended for Your Role' : 'Popular Skills'}
-                        </h5>
-                        <div className="skill-chips">
-                          {jobTitleSuggestions.slice(0, 20).map((skill, idx) => (
-                            <button
-                              key={idx}
-                              className="skill-chip"
-                              onClick={() => addSkillToCategory(index, skill)}
-                              title="Click to add this skill"
-                            >
-                              + {skill}
-                            </button>
+                    {/* Skills List */}
+                    <div className="ready-to-use-section">
+                      <h5 className="ready-to-use-label">Ready to use examples</h5>
+
+                      {/* Display skills based on job title or search */}
+                      {(displaySkills.length > 0 || jobTitleSuggestions.length > 0) && (
+                        <div className="skills-list-vertical">
+                          {(displaySkills.length > 0 ? displaySkills : jobTitleSuggestions.map(s => ({ skill: s, category: 'Recommended' }))).slice(0, 30).map((item, idx) => (
+                            <div key={idx} className="skill-list-item">
+                              <button
+                                className="add-skill-btn-circle"
+                                onClick={() => addSkillToCategory(index, typeof item === 'string' ? item : item.skill)}
+                                title="Add this skill"
+                              >
+                                +
+                              </button>
+                              <div className="skill-item-content">
+                                {isExpertRecommended(typeof item === 'string' ? item : item.skill) && (
+                                  <div className="expert-badge">
+                                    ⭐ Expert Recommended
+                                  </div>
+                                )}
+                                <div className="skill-name">
+                                  {typeof item === 'string' ? item : item.skill}
+                                </div>
+                              </div>
+                            </div>
                           ))}
                         </div>
-                        <p style={{
-                          marginTop: '1rem',
-                          fontSize: '0.85rem',
-                          color: '#7f8c8d',
-                          fontStyle: 'italic'
-                        }}>
-                          💡 Tip: Use the search bar above or select a category to find more skills
+                      )}
+
+                      {/* Alternative search options */}
+                      {displaySkills.length === 0 && jobTitleSearch && (
+                        <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                          No skills found for "{jobTitleSearch}". Try a different job title.
                         </p>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Search/Category Results */}
-                    {displaySkills.length > 0 && (
-                      <div>
-                        <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#667eea' }}>
-                          {searchQuery ? `Search Results (${displaySkills.length})` : selectedCategory}
+                      {/* Category and skill name search */}
+                      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e0e0e0' }}>
+                        <h5 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: '#2c3e50' }}>
+                          Or browse by category / skill name
                         </h5>
-                        <div className="skill-chips">
-                          {displaySkills.map((item, idx) => (
-                            <button
-                              key={idx}
-                              className="skill-chip"
-                              onClick={() => addSkillToCategory(index, item.skill)}
-                              title={`Click to add ${item.skill} (${item.category})`}
-                            >
-                              + {item.skill}
-                              {searchQuery && (
-                                <span style={{ fontSize: '0.7rem', opacity: 0.7, marginLeft: '0.3rem' }}>
-                                  ({item.category})
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
-                    {/* No results message */}
-                    {(searchQuery.trim().length >= 2 || selectedCategory) && displaySkills.length === 0 && (
-                      <p style={{ textAlign: 'center', color: '#999', margin: '2rem 0' }}>
-                        No skills found. Try a different search term or category.
-                      </p>
-                    )}
+                        <select
+                          className="editable-input"
+                          value={selectedCategory}
+                          onChange={(e) => {
+                            setSelectedCategory(e.target.value)
+                            setJobTitleSearch('')
+                          }}
+                          style={{ marginBottom: '0.75rem' }}
+                        >
+                          <option value="">-- Select a Category --</option>
+                          {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+
+                        <input
+                          type="text"
+                          className="editable-input"
+                          placeholder="Search by skill name (e.g., React, Python)"
+                          value={searchQuery}
+                          onChange={(e) => {
+                            setSearchQuery(e.target.value)
+                            setJobTitleSearch('')
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
