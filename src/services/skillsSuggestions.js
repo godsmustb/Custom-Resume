@@ -129,8 +129,7 @@ export const getSkillsByRole = (jobTitle) => {
     return [
       ...skillsLibrary['Programming Languages'].slice(0, 3),
       ...skillsLibrary['Frontend Development'].slice(0, 10),
-      ...skillsLibrary['Tools & Software'],
-      'Git', 'REST APIs', 'Agile/Scrum'
+      'Git', 'REST APIs', 'Agile/Scrum', 'Responsive Design'
     ]
   }
 
@@ -220,15 +219,153 @@ export const getSkillsByRole = (jobTitle) => {
     return skillsLibrary['Customer Service']
   }
 
+  // Business Analyst roles
+  if (title.includes('business') && title.includes('analyst')) {
+    return [
+      ...skillsLibrary['Business Analysis'],
+      ...skillsLibrary['Communication'].slice(0, 5),
+      ...skillsLibrary['Problem Solving'].slice(0, 4)
+    ]
+  }
+
+  // Product roles
+  if (title.includes('product') && (title.includes('manager') || title.includes('owner'))) {
+    return [
+      ...skillsLibrary['Project Management'],
+      ...skillsLibrary['Leadership'].slice(0, 6),
+      ...skillsLibrary['Communication'].slice(0, 5),
+      'User Research', 'Data Analysis', 'SQL'
+    ]
+  }
+
+  // QA/Testing roles
+  if (title.includes('qa') || title.includes('test') || title.includes('quality')) {
+    return [
+      'Test Automation', 'Selenium', 'Jest', 'Cypress', 'Manual Testing',
+      'Bug Tracking', 'Jira', 'Test Planning', 'Agile/Scrum',
+      ...skillsLibrary['Programming Languages'].slice(0, 3)
+    ]
+  }
+
+  // HR roles
+  if (title.includes('hr') || title.includes('human resource') || title.includes('recruit')) {
+    return [
+      'Recruiting', 'Onboarding', 'HRIS', 'Employee Relations', 'Benefits Administration',
+      'Performance Management', 'Talent Acquisition', 'Interviewing', 'ATS',
+      ...skillsLibrary['Communication'],
+      'Conflict Resolution', 'Compliance'
+    ]
+  }
+
+  // Healthcare roles
+  if (title.includes('nurse') || title.includes('medical') || title.includes('healthcare')) {
+    return [
+      ...skillsLibrary['Healthcare'],
+      ...skillsLibrary['Communication'].slice(0, 4),
+      'Teamwork', 'Critical Thinking', 'Time Management'
+    ]
+  }
+
+  // Security roles
+  if (title.includes('security') || title.includes('cyber')) {
+    return [
+      ...skillsLibrary['Security'],
+      ...skillsLibrary['Cloud & DevOps'].slice(0, 8),
+      'Python', 'Linux', 'Networking'
+    ]
+  }
+
+  // Administrative roles
+  if (title.includes('admin') || title.includes('assistant') || title.includes('coordinator')) {
+    return [
+      ...skillsLibrary['Office & Productivity'],
+      ...skillsLibrary['Communication'].slice(0, 6),
+      'Organization', 'Scheduling', 'Data Entry', 'Customer Service'
+    ]
+  }
+
+  // Teacher/Education roles
+  if (title.includes('teacher') || title.includes('educator') || title.includes('instructor')) {
+    return [
+      'Curriculum Development', 'Lesson Planning', 'Classroom Management',
+      'Educational Technology', 'Student Assessment', 'Differentiated Instruction',
+      ...skillsLibrary['Communication'],
+      ...skillsLibrary['Leadership'].slice(0, 5),
+      'Microsoft Office', 'Google Classroom', 'Zoom'
+    ]
+  }
+
+  // Operations roles
+  if (title.includes('operations')) {
+    return [
+      'Process Improvement', 'Logistics', 'Supply Chain Management',
+      'Inventory Management', 'Vendor Management', 'Cost Reduction',
+      ...skillsLibrary['Project Management'].slice(0, 8),
+      ...skillsLibrary['Business Analysis'].slice(0, 6),
+      'Excel', 'Data Analysis'
+    ]
+  }
+
+  // Content/Writer roles
+  if (title.includes('content') || title.includes('writer') || title.includes('copywriter')) {
+    return [
+      'Content Writing', 'Copywriting', 'SEO Writing', 'Editing', 'Proofreading',
+      'Content Strategy', 'WordPress', 'CMS', 'SEO', 'Social Media',
+      ...skillsLibrary['Communication'].slice(0, 5),
+      'Research', 'Storytelling', 'AP Style'
+    ]
+  }
+
+  // Developer (general)
+  if (title.includes('developer') || title.includes('engineer') || title.includes('programmer')) {
+    return [
+      ...skillsLibrary['Programming Languages'].slice(0, 5),
+      ...skillsLibrary['Frontend Development'].slice(0, 5),
+      ...skillsLibrary['Backend Development'].slice(0, 5),
+      ...skillsLibrary['Database & Data'].slice(0, 4),
+      'Git', 'REST APIs', 'Agile/Scrum', 'Problem Solving'
+    ]
+  }
+
   // Default - return most common skills
   return [
     'Communication', 'Teamwork', 'Problem Solving', 'Time Management',
     'Microsoft Office', 'Excel', 'Project Management', 'Customer Service',
-    'Leadership', 'Analytical Skills', 'Attention to Detail', 'Adaptability'
+    'Leadership', 'Analytical Skills', 'Attention to Detail', 'Adaptability',
+    'Organization', 'Multitasking', 'Critical Thinking', 'Collaboration'
   ]
 }
 
-// Search skills across all categories
+// Job title keywords mapping
+const jobTitleKeywords = {
+  'frontend developer': ['frontend', 'front-end', 'react', 'vue', 'angular', 'ui developer'],
+  'backend developer': ['backend', 'back-end', 'api', 'server', 'node'],
+  'full stack developer': ['full stack', 'fullstack', 'full-stack'],
+  'software engineer': ['software engineer', 'developer', 'programmer', 'swe'],
+  'data scientist': ['data scientist', 'data science', 'machine learning', 'ml engineer'],
+  'data analyst': ['data analyst', 'business intelligence', 'analytics'],
+  'devops engineer': ['devops', 'sre', 'site reliability', 'infrastructure'],
+  'mobile developer': ['mobile', 'ios', 'android', 'react native', 'flutter'],
+  'ui/ux designer': ['designer', 'ui', 'ux', 'product designer', 'user experience'],
+  'project manager': ['project manager', 'pm', 'scrum master', 'agile coach'],
+  'product manager': ['product manager', 'product owner', 'po'],
+  'marketing manager': ['marketing', 'digital marketing', 'growth'],
+  'sales representative': ['sales', 'account executive', 'business development'],
+  'business analyst': ['business analyst', 'ba', 'requirements analyst'],
+  'qa engineer': ['qa', 'quality assurance', 'test', 'sdet', 'automation'],
+  'hr manager': ['hr', 'human resources', 'recruiter', 'talent acquisition'],
+  'customer support': ['customer support', 'customer service', 'help desk'],
+  'content writer': ['content writer', 'copywriter', 'technical writer'],
+  'graphic designer': ['graphic designer', 'visual designer', 'creative'],
+  'accountant': ['accountant', 'finance', 'bookkeeper', 'cpa'],
+  'nurse': ['nurse', 'rn', 'healthcare', 'medical'],
+  'teacher': ['teacher', 'educator', 'instructor', 'professor'],
+  'administrative assistant': ['admin', 'assistant', 'coordinator', 'secretary'],
+  'operations manager': ['operations', 'ops manager', 'logistics'],
+  'security engineer': ['security', 'cybersecurity', 'infosec', 'penetration tester']
+}
+
+// Search skills across all categories AND job titles
 export const searchSkills = (query) => {
   if (!query || query.trim().length < 2) {
     return []
@@ -236,16 +373,47 @@ export const searchSkills = (query) => {
 
   const searchTerm = query.toLowerCase()
   const results = []
+  const addedSkills = new Set() // Prevent duplicates
 
+  // First, check if search matches a job title
+  let jobTitleMatch = null
+  for (const [jobTitle, keywords] of Object.entries(jobTitleKeywords)) {
+    if (keywords.some(keyword => keyword.includes(searchTerm) || searchTerm.includes(keyword))) {
+      jobTitleMatch = jobTitle
+      break
+    }
+  }
+
+  // If job title matched, get skills for that role
+  if (jobTitleMatch) {
+    const roleSkills = getSkillsByRole(jobTitleMatch)
+    roleSkills.forEach(skill => {
+      if (!addedSkills.has(skill)) {
+        // Find which category this skill belongs to
+        let skillCategory = 'Recommended'
+        for (const [category, skills] of Object.entries(skillsLibrary)) {
+          if (skills.includes(skill)) {
+            skillCategory = category
+            break
+          }
+        }
+        results.push({ skill, category: skillCategory })
+        addedSkills.add(skill)
+      }
+    })
+  }
+
+  // Also search for skills by name
   Object.entries(skillsLibrary).forEach(([category, skills]) => {
     skills.forEach(skill => {
-      if (skill.toLowerCase().includes(searchTerm)) {
+      if (skill.toLowerCase().includes(searchTerm) && !addedSkills.has(skill)) {
         results.push({ skill, category })
+        addedSkills.add(skill)
       }
     })
   })
 
-  return results.slice(0, 20) // Limit to 20 results
+  return results.slice(0, 30) // Increased limit to 30 results
 }
 
 // Get all categories

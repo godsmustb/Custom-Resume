@@ -139,13 +139,13 @@ function Skills() {
                     </div>
 
                     {/* Job-based Recommendations */}
-                    {!searchQuery && !selectedCategory && jobTitleSuggestions.length > 0 && (
+                    {!searchQuery && !selectedCategory && (
                       <div style={{ marginBottom: '1rem' }}>
                         <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#667eea' }}>
-                          Recommended for Your Role
+                          {jobTitleSuggestions.length > 0 ? 'Recommended for Your Role' : 'Popular Skills'}
                         </h5>
                         <div className="skill-chips">
-                          {jobTitleSuggestions.slice(0, 15).map((skill, idx) => (
+                          {jobTitleSuggestions.slice(0, 20).map((skill, idx) => (
                             <button
                               key={idx}
                               className="skill-chip"
@@ -156,6 +156,14 @@ function Skills() {
                             </button>
                           ))}
                         </div>
+                        <p style={{
+                          marginTop: '1rem',
+                          fontSize: '0.85rem',
+                          color: '#7f8c8d',
+                          fontStyle: 'italic'
+                        }}>
+                          💡 Tip: Use the search bar above or select a category to find more skills
+                        </p>
                       </div>
                     )}
 
