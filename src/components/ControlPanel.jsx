@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
 import { downloadResumePDF } from '../services/pdfDownloadService'
-import PDFUpload from './PDFUpload'
+import ResumeUpload from './ResumeUpload'
 import TemplateBrowser from './TemplateBrowser'
 import './ControlPanel.css'
 
 const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
-  const { isEditing, setIsEditing, resetResume, resumeData, loadResumeFromPDF } = useResume()
+  const { isEditing, setIsEditing, resetResume, resumeData } = useResume()
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
 
@@ -17,12 +17,6 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
       console.error('Error downloading PDF:', error)
       alert('Failed to download PDF. Please try again.')
     }
-  }
-
-  const handleResumeLoaded = (parsedData) => {
-    loadResumeFromPDF(parsedData)
-    setShowUploadModal(false)
-    alert('✅ Resume loaded successfully! You can now edit and customize it.')
   }
 
   return (
@@ -38,9 +32,9 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
             <button
               className="control-btn upload-btn"
               onClick={() => setShowUploadModal(true)}
-              title="Upload existing PDF resume"
+              title="Upload existing resume (PDF or DOCX)"
             >
-              📤 Upload PDF
+              📤 Import Resume
             </button>
 
             <button
@@ -91,8 +85,7 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
       </div>
 
       {showUploadModal && (
-        <PDFUpload
-          onResumeLoaded={handleResumeLoaded}
+        <ResumeUpload
           onClose={() => setShowUploadModal(false)}
         />
       )}
