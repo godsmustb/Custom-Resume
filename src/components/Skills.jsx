@@ -139,12 +139,34 @@ function Skills() {
                   onClick={() => toggleSuggestions(index)}
                   style={{ marginTop: '0.5rem' }}
                 >
-                  💡 {showSuggestions[index] ? 'Hide Suggestions' : 'Browse Skills'}
+                  💡 Browse Skills
                 </button>
 
-                {/* Suggestions Panel - Resume Now Style */}
+                {/* Suggestions Modal - Resume Now Style Popup */}
                 {showSuggestions[index] && (
-                  <div className="skills-suggestions-panel">
+                  <>
+                    {/* Modal Backdrop */}
+                    <div
+                      className="modal-backdrop"
+                      onClick={() => toggleSuggestions(index)}
+                    />
+
+                    {/* Modal Container */}
+                    <div className="skills-modal">
+                      {/* Modal Header */}
+                      <div className="modal-header">
+                        <h3 className="modal-title">Browse Skills</h3>
+                        <button
+                          className="modal-close-btn"
+                          onClick={() => toggleSuggestions(index)}
+                          title="Close"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      {/* Modal Content */}
+                      <div className="skills-suggestions-panel">
                     {/* Job Title Search */}
                     <div className="job-title-search-section">
                       <h4 className="search-section-title">Search by job title for pre-written examples</h4>
@@ -250,7 +272,9 @@ function Skills() {
                         />
                       </div>
                     </div>
-                  </div>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             ) : (
