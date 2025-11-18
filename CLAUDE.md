@@ -29,9 +29,15 @@ npm run lint
 
 The application requires an OpenAI API key for AI features:
 
-1. Create a `.env` file in the root directory
-2. Add: `VITE_OPENAI_API_KEY=your_api_key_here`
-3. Note: The API key is used client-side (see security note in `src/services/aiService.js:5`)
+1. **Copy the template**: `cp .env.example .env`
+2. **Add your API key**: Edit `.env` and replace `your-openai-api-key-here` with your actual OpenAI API key
+   ```
+   VITE_OPENAI_API_KEY=sk-proj-your-actual-key-here
+   ```
+3. **Restart dev server**: Changes to `.env` only load on server startup
+4. **Security note**: The API key is used client-side (see `src/services/aiService.js:5` and `src/services/resumeParserService.js:14`). This is acceptable for local development but not recommended for production deployment.
+
+**Important**: All AI services now use `import.meta.env.VITE_OPENAI_API_KEY` from the `.env` file. The old `localStorage` approach has been deprecated.
 
 ## Architecture Overview
 
@@ -97,18 +103,46 @@ Template architecture:
 
 **Important**: All AI prompts use aggressive keyword matching to maximize ATS scores. Temperature varies by function (0.3-1.0) to balance creativity and precision.
 
-### PDF Services
+### Resume Upload Services
+
+**Two Upload Systems** (both use OpenAI for AI parsing):
+
+1. **ResumeUpload** (`src/components/ResumeUpload.jsx`) - **Primary System** ⭐
+   - Supports **both PDF and DOCX** file uploads
+   - Uses `resumeParserService.js` for file processing
+   - Drag-and-drop interface with progress indicators
+   - File validation: PDF/DOCX, max 10MB
+   - API key validation before processing
+   - **Currently used in ControlPanel**
+
+2. **PDFUpload** (`src/components/PDFUpload.jsx`) - **Legacy System**
+   - Supports **PDF only**
+   - Uses `pdfService.js` for file processing
+   - Simpler interface, PDF-specific
+   - File validation: PDF only, max 5MB
+   - API key validation before processing
+   - **Not currently used** (kept for compatibility)
+
+**Resume Parser Service** (`src/services/resumeParserService.js`):
+- Handles both PDF and DOCX file formats
+- PDF extraction: Uses pdfjs-dist library
+- DOCX extraction: Uses mammoth library
+- AI parsing: OpenAI GPT-4o-mini with structured JSON output
+- Retry logic: Automatically retries once on JSON parsing errors
+- Text truncation: Limits to 8000 chars to avoid token limits
+- Extracts: Personal info, experience, education, skills, certifications
+
+**PDF Services** (`src/services/pdfService.js`):
+- **PDF Parsing**: Uses pdfjs-dist to extract text from PDFs
+- **AI Parsing**: OpenAI GPT-4o-mini with enhanced error handling
+- Worker configuration: Uses local pdf.worker.min.mjs
+- Same retry logic and truncation as resumeParserService
 
 **PDF Generation** (`src/services/pdfDownloadService.js`):
 - Uses jsPDF to create professionally formatted PDFs
 - Supports multi-page resumes with automatic pagination
 - Styled sections with color-coded headers
 - Word wrapping and spacing optimization
-
-**PDF Parsing** (`src/services/pdfService.js`):
-- Uses pdfjs-dist to extract text from uploaded PDFs
-- Attempts to parse structured resume data (name, experience, education, skills)
-- Pattern-based extraction with fallback handling
 
 ### Component Structure
 
