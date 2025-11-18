@@ -162,8 +162,8 @@ const ResumeUpload = ({ onClose }) => {
               <li>Choose from 50 professional templates</li>
             </ol>
             <p className="upload-note">
-              <strong>Note:</strong> You need an OpenAI API key configured to use this feature.
-              The key is stored locally in your browser.
+              <strong>Note:</strong> This feature uses OpenAI's AI to automatically extract your resume data.
+              Processing typically takes 10-20 seconds.
             </p>
           </div>
         </div>
