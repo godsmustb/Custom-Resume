@@ -1,5 +1,8 @@
 name: Deploy to Hostinger
 
+# Automated deployment to Hostinger via FTP
+# Triggers on push to main or claude/* branches
+
 on:
   push:
     branches:
@@ -47,6 +50,7 @@ jobs:
           server: ${{ secrets.HOSTINGER_FTP_SERVER }}
           username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          port: 21  # Explicit FTP port
           local-dir: ./dist/
           server-dir: /public_html/
           dangerous-clean-slate: true  # Clean the directory first to remove old files
