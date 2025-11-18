@@ -493,14 +493,29 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
       const firstExp = resumeData.experience[0]
       const currentBullets = [...firstExp.description]
       const updatedBullets = [...currentBullets, ...option.bullets]
-      replaceExperienceDescription(0, updatedBullets)
 
-      // Wait for state to update
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Create DEEP COPY of resumeData with the NEW bullets included
+      const updatedResumeData = {
+        ...resumeData,
+        experience: resumeData.experience.map((exp, idx) =>
+          idx === 0
+            ? { ...exp, description: updatedBullets }  // First experience gets new bullets
+            : exp  // Other experiences unchanged
+        )
+      }
 
-      // Recalculate score to show improvement
-      const updatedResumeData = { ...resumeData }
+      console.log('📊 Recalculating score with new bullets...')
+      console.log('Previous bullet count:', currentBullets.length)
+      console.log('New bullet count:', updatedBullets.length)
+      console.log('Bullets added:', option.bullets.length)
+
+      // Calculate score with the UPDATED data (before state update)
       const newScore = await calculateMatchScore(updatedResumeData, resumeData.jobDescription)
+      console.log('Previous score:', matchScore.matchScore, '%')
+      console.log('New score:', newScore.matchScore, '%')
+
+      // NOW update the actual state
+      replaceExperienceDescription(0, updatedBullets)
 
       setMatchScore(newScore)
       setScoreHistory(prev => [...prev, {
