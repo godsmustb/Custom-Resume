@@ -1075,7 +1075,7 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 1000;
+  z-index: 1100; /* Higher than control-panel (1000) to appear on top */
 }
 
 .auth-sign-in-btn {
