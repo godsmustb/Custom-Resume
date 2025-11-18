@@ -39,6 +39,43 @@ The application requires an OpenAI API key for AI features:
 
 **Important**: All AI services now use `import.meta.env.VITE_OPENAI_API_KEY` from the `.env` file. The old `localStorage` approach has been deprecated.
 
+## Deployment
+
+### Automated FTP Deployment to Hostinger
+
+The project includes GitHub Actions workflow for automated deployment to Hostinger via FTP. This setup mirrors the deployment process used in the White Feather Finance project.
+
+**Workflow file**: `.github/workflows/deploy-hostinger.yml`
+
+**Deployment triggers**:
+- Automatic: Push to `main` branch
+- Automatic: Push to any `claude/*` branch (for testing)
+- Manual: Triggered via GitHub Actions UI
+
+**Required GitHub Secrets** (configure in repo Settings → Secrets and variables → Actions):
+- `HOSTINGER_FTP_SERVER`: FTP server hostname (e.g., `ftp.yourdomain.com`)
+- `HOSTINGER_FTP_USERNAME`: FTP username from Hostinger
+- `HOSTINGER_FTP_PASSWORD`: FTP password from Hostinger
+- `VITE_OPENAI_API_KEY`: OpenAI API key (baked into build)
+
+**Deployment steps**:
+1. Checkout repository code
+2. Setup Node.js 18 with npm caching
+3. Install dependencies (`npm ci`)
+4. Build application with `VITE_OPENAI_API_KEY` environment variable
+5. Verify build output in `dist/` folder
+6. Deploy to Hostinger FTP at `/public_html/` using clean-slate mode
+
+**Key configuration**:
+- Build output: `dist/` folder
+- Server directory: `/public_html/`
+- Clean slate: Yes (removes old files before deployment)
+- Verbose logging: Enabled for debugging
+
+**Testing deployments**: Use `claude/*` branches to test deployment without affecting main site.
+
+For detailed setup instructions, troubleshooting, and FTP configuration, see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
 ## Architecture Overview
 
 ### State Management
