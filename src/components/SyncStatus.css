@@ -1,0 +1,84 @@
+/* Sync Status */
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: all 0.3s;
+}
+
+.sync-status-icon {
+  font-size: 16px;
+  animation: none;
+}
+
+.sync-status-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sync-status-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.sync-status-title {
+  font-size: 11px;
+  color: #999;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status States */
+.sync-status-syncing {
+  background: #fff8e1;
+  border: 1px solid #ffc107;
+}
+
+.sync-status-syncing .sync-status-label {
+  color: #f57c00;
+}
+
+.sync-status-syncing .sync-status-icon {
+  animation: rotate 1s linear infinite;
+}
+
+.sync-status-success {
+  background: #e8f5e9;
+  border: 1px solid #4caf50;
+}
+
+.sync-status-success .sync-status-label {
+  color: #2e7d32;
+}
+
+.sync-status-error {
+  background: #ffebee;
+  border: 1px solid #f44336;
+}
+
+.sync-status-error .sync-status-label {
+  color: #c62828;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sync-status-title {
+    display: none;
+  }
+}

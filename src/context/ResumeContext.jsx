@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import { useAuth } from './AuthContext'
+import {
+  fetchUserResumes,
+  createResume,
+  updateResume,
+  deleteResume,
+  migrateLocalStorageToSupabase
+} from '../services/supabaseResumeService'
 
 const ResumeContext = createContext()
 
@@ -83,12 +91,13 @@ const initialResumeData = {
 }
 
 export const ResumeProvider = ({ children }) => {
+  const { user } = useAuth()
+
+  // Core resume state
   const [resumeData, setResumeData] = useState(() => {
-    // Load from localStorage if available
     const saved = localStorage.getItem('resumeData')
     if (saved) {
       const parsedData = JSON.parse(saved)
-      // Ensure certifications array exists (for backwards compatibility)
       if (!parsedData.certifications) {
         parsedData.certifications = []
       }
@@ -100,13 +109,11 @@ export const ResumeProvider = ({ children }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [currentTemplate, setCurrentTemplateState] = useState(() => {
-    // Load template preference from localStorage
     const savedTemplate = localStorage.getItem('currentTemplate')
-    return savedTemplate || 'ats-simple-minimal' // Default template
+    return savedTemplate || 'ats-simple-minimal'
   })
 
   const [templateCustomization, setTemplateCustomizationState] = useState(() => {
-    // Load customization from localStorage
     const saved = localStorage.getItem('templateCustomization')
     if (saved) {
       return JSON.parse(saved)
@@ -118,21 +125,270 @@ export const ResumeProvider = ({ children }) => {
     }
   })
 
-  // Save to localStorage whenever data changes
+  // Supabase-specific state
+  const [currentResumeId, setCurrentResumeId] = useState(null)
+  const [currentResumeTitle, setCurrentResumeTitle] = useState('My Resume')
+  const [userResumes, setUserResumes] = useState([])
+  const [syncStatus, setSyncStatus] = useState('idle') // idle, syncing, synced, error
+  const [hasMigrated, setHasMigrated] = useState(() => {
+    return localStorage.getItem('supabaseMigrated') === 'true'
+  })
+
+  // Debounce timer ref
+  const saveTimerRef = useRef(null)
+
+  // Save to localStorage (immediate, for offline support)
   useEffect(() => {
     localStorage.setItem('resumeData', JSON.stringify(resumeData))
   }, [resumeData])
 
-  // Save template preference whenever it changes
   useEffect(() => {
     localStorage.setItem('currentTemplate', currentTemplate)
   }, [currentTemplate])
 
-  // Save customization whenever it changes
   useEffect(() => {
     localStorage.setItem('templateCustomization', JSON.stringify(templateCustomization))
   }, [templateCustomization])
 
+  // Auto-save to Supabase (debounced)
+  const saveToSupabase = useCallback(async () => {
+    if (!user || !currentResumeId) return
+
+    setSyncStatus('syncing')
+    const { data, error } = await updateResume(
+      currentResumeId,
+      user.id,
+      resumeData,
+      currentTemplate,
+      templateCustomization,
+      currentResumeTitle
+    )
+
+    if (error) {
+      console.error('Error saving to Supabase:', error)
+      setSyncStatus('error')
+    } else {
+      setSyncStatus('synced')
+      console.log('✅ Saved to Supabase')
+    }
+  }, [user, currentResumeId, resumeData, currentTemplate, templateCustomization, currentResumeTitle])
+
+  // Debounced save effect
+  useEffect(() => {
+    if (!user || !currentResumeId) return
+
+    // Clear previous timer
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current)
+    }
+
+    // Set new timer (2 second debounce)
+    saveTimerRef.current = setTimeout(() => {
+      saveToSupabase()
+    }, 2000)
+
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current)
+      }
+    }
+  }, [resumeData, currentTemplate, templateCustomization, user, currentResumeId, saveToSupabase])
+
+  // Load resumes when user authenticates
+  useEffect(() => {
+    if (!user) {
+      // User logged out - clear Supabase state
+      setCurrentResumeId(null)
+      setUserResumes([])
+      setSyncStatus('idle')
+      return
+    }
+
+    // User logged in - load resumes from Supabase
+    const loadResumes = async () => {
+      setLoading(true)
+
+      // Migrate localStorage data if first login
+      if (!hasMigrated) {
+        const { data: migratedResume, error: migrateError, skipped } = await migrateLocalStorageToSupabase(
+          user.id,
+          resumeData,
+          currentTemplate,
+          templateCustomization
+        )
+
+        if (!migrateError && !skipped) {
+          console.log('✅ Migrated localStorage data to Supabase')
+          localStorage.setItem('supabaseMigrated', 'true')
+          setHasMigrated(true)
+
+          if (migratedResume) {
+            setCurrentResumeId(migratedResume.id)
+            setCurrentResumeTitle(migratedResume.title)
+          }
+        }
+      }
+
+      // Fetch all resumes
+      const { data: resumes, error } = await fetchUserResumes(user.id)
+
+      if (error) {
+        console.error('Error fetching resumes:', error)
+      } else if (resumes && resumes.length > 0) {
+        setUserResumes(resumes)
+
+        // If no current resume, load the most recent one
+        if (!currentResumeId) {
+          const latestResume = resumes[0] // Already sorted by updated_at desc
+          setCurrentResumeId(latestResume.id)
+          setCurrentResumeTitle(latestResume.title)
+          setResumeData(latestResume.resume_data)
+          setCurrentTemplateState(latestResume.current_template || 'ats-simple-minimal')
+          setTemplateCustomizationState(latestResume.template_customization || {
+            colorScheme: 'corporate-blue',
+            font: 'inter',
+            spacing: 'comfortable'
+          })
+        }
+      }
+
+      setLoading(false)
+    }
+
+    loadResumes()
+  }, [user, hasMigrated])
+
+  // Resume management functions
+  const createNewResume = async (title = 'New Resume') => {
+    if (!user) {
+      alert('Please sign in to create multiple resumes')
+      return
+    }
+
+    setLoading(true)
+    const { data, error } = await createResume(
+      user.id,
+      initialResumeData,
+      'ats-simple-minimal',
+      {
+        colorScheme: 'corporate-blue',
+        font: 'inter',
+        spacing: 'comfortable'
+      },
+      title
+    )
+
+    if (error) {
+      console.error('Error creating resume:', error)
+      alert('Failed to create new resume')
+    } else {
+      setUserResumes(prev => [data, ...prev])
+      setCurrentResumeId(data.id)
+      setCurrentResumeTitle(data.title)
+      setResumeData(initialResumeData)
+      setCurrentTemplateState('ats-simple-minimal')
+      setTemplateCustomizationState({
+        colorScheme: 'corporate-blue',
+        font: 'inter',
+        spacing: 'comfortable'
+      })
+    }
+
+    setLoading(false)
+  }
+
+  const switchResume = async (resumeId) => {
+    const resume = userResumes.find(r => r.id === resumeId)
+    if (!resume) return
+
+    setCurrentResumeId(resume.id)
+    setCurrentResumeTitle(resume.title)
+    setResumeData(resume.resume_data)
+    setCurrentTemplateState(resume.current_template || 'ats-simple-minimal')
+    setTemplateCustomizationState(resume.template_customization || {
+      colorScheme: 'corporate-blue',
+      font: 'inter',
+      spacing: 'comfortable'
+    })
+  }
+
+  const renameResume = async (resumeId, newTitle) => {
+    if (!user) return
+
+    const { data, error } = await updateResume(
+      resumeId,
+      user.id,
+      resumeData,
+      currentTemplate,
+      templateCustomization,
+      newTitle
+    )
+
+    if (error) {
+      console.error('Error renaming resume:', error)
+    } else {
+      setUserResumes(prev =>
+        prev.map(r => r.id === resumeId ? { ...r, title: newTitle } : r)
+      )
+      if (currentResumeId === resumeId) {
+        setCurrentResumeTitle(newTitle)
+      }
+    }
+  }
+
+  const deleteCurrentResume = async () => {
+    if (!user || !currentResumeId) return
+
+    if (userResumes.length === 1) {
+      alert('Cannot delete your only resume')
+      return
+    }
+
+    if (!confirm('Are you sure you want to delete this resume?')) {
+      return
+    }
+
+    const { error } = await deleteResume(currentResumeId, user.id)
+
+    if (error) {
+      console.error('Error deleting resume:', error)
+      alert('Failed to delete resume')
+    } else {
+      const remaining = userResumes.filter(r => r.id !== currentResumeId)
+      setUserResumes(remaining)
+
+      // Switch to the next resume
+      if (remaining.length > 0) {
+        await switchResume(remaining[0].id)
+      }
+    }
+  }
+
+  const duplicateResume = async () => {
+    if (!user) {
+      alert('Please sign in to duplicate resumes')
+      return
+    }
+
+    const { data, error } = await createResume(
+      user.id,
+      resumeData,
+      currentTemplate,
+      templateCustomization,
+      `${currentResumeTitle} (Copy)`
+    )
+
+    if (error) {
+      console.error('Error duplicating resume:', error)
+      alert('Failed to duplicate resume')
+    } else {
+      setUserResumes(prev => [data, ...prev])
+      // Optionally switch to the new copy
+      await switchResume(data.id)
+    }
+  }
+
+  // Original CRUD functions (unchanged)
   const setCurrentTemplate = (templateId) => {
     setCurrentTemplateState(templateId)
   }
@@ -322,11 +578,12 @@ export const ResumeProvider = ({ children }) => {
   const loadResumeFromPDF = (parsedData) => {
     setResumeData(prev => ({
       ...parsedData,
-      jobDescription: prev.jobDescription // Keep existing job description
+      jobDescription: prev.jobDescription
     }))
   }
 
   const value = {
+    // Original state
     resumeData,
     isEditing,
     setIsEditing,
@@ -336,6 +593,23 @@ export const ResumeProvider = ({ children }) => {
     setCurrentTemplate,
     templateCustomization,
     setTemplateCustomization,
+
+    // Supabase state
+    currentResumeId,
+    currentResumeTitle,
+    setCurrentResumeTitle,
+    userResumes,
+    syncStatus,
+
+    // Resume management
+    createNewResume,
+    switchResume,
+    renameResume,
+    deleteCurrentResume,
+    duplicateResume,
+    saveToSupabase,
+
+    // Original CRUD operations
     updatePersonal,
     updateAbout,
     updateExperience,

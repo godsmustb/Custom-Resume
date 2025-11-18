@@ -1,0 +1,378 @@
+/* Resume Manager Container */
+.resume-manager-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Resume Manager Modal */
+.resume-manager-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Close Button */
+.resume-manager-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.resume-manager-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Title & Subtitle */
+.resume-manager-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+}
+
+.resume-manager-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+.resume-manager-signin-msg {
+  font-size: 15px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.6;
+}
+
+/* Current Resume Section */
+.resume-manager-current {
+  background: #f8f9fa;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.resume-manager-current-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.resume-manager-current-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resume-manager-current-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.resume-manager-icon-btn {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.resume-manager-icon-btn:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+/* Rename Section */
+.resume-manager-rename {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resume-manager-rename-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Create Section */
+.resume-manager-create {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.resume-manager-create h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #333;
+}
+
+.resume-manager-create-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Input */
+.resume-manager-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.resume-manager-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Actions */
+.resume-manager-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.resume-manager-action-btn {
+  padding: 12px 16px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.resume-manager-action-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #ccc;
+  transform: translateY(-1px);
+}
+
+.resume-manager-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resume-manager-action-btn:disabled:hover {
+  transform: none;
+}
+
+.resume-manager-action-danger {
+  color: #dc3545;
+}
+
+.resume-manager-action-danger:hover:not(:disabled) {
+  background: #fff5f5;
+  border-color: #dc3545;
+}
+
+.resume-manager-action-icon {
+  font-size: 20px;
+}
+
+/* Resume List */
+.resume-manager-list {
+  margin-bottom: 20px;
+}
+
+.resume-manager-list-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resume-manager-item {
+  background: white;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resume-manager-item:hover {
+  background: #f8f9fa;
+  border-color: #667eea;
+  transform: translateX(4px);
+}
+
+.resume-manager-item-active {
+  background: #f0f4ff;
+  border-color: #667eea;
+  cursor: default;
+}
+
+.resume-manager-item-active:hover {
+  transform: none;
+}
+
+.resume-manager-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.resume-manager-item-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.resume-manager-item-date {
+  font-size: 13px;
+  color: #999;
+}
+
+.resume-manager-item-badge {
+  background: #667eea;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Buttons */
+.resume-manager-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #667eea;
+  color: white;
+}
+
+.resume-manager-button:hover {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+.resume-manager-button-small {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #667eea;
+  color: white;
+}
+
+.resume-manager-button-small:hover {
+  background: #5568d3;
+}
+
+.resume-manager-button-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.resume-manager-button-secondary:hover {
+  background: #d0d0d0;
+}
+
+.resume-manager-button-block {
+  width: 100%;
+}
+
+/* Footer */
+.resume-manager-footer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .resume-manager-modal {
+    padding: 24px;
+  }
+
+  .resume-manager-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-manager-action-btn {
+    flex-direction: row;
+    justify-content: center;
+  }
+}

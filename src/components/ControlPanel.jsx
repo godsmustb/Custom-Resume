@@ -1,14 +1,19 @@
 import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
+import { useAuth } from '../context/AuthContext'
 import { downloadResumePDF } from '../services/pdfDownloadService'
 import ResumeUpload from './ResumeUpload'
 import TemplateBrowser from './TemplateBrowser'
+import ResumeManager from './ResumeManager'
+import SyncStatus from './SyncStatus'
 import './ControlPanel.css'
 
 const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
+  const { user } = useAuth()
   const { isEditing, setIsEditing, resetResume, resumeData } = useResume()
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [showResumeManager, setShowResumeManager] = useState(false)
 
   const handleDownloadPDF = () => {
     try {
@@ -26,9 +31,20 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
           <div className="control-panel-left">
             <h1 className="control-panel-title">AI Resume Builder</h1>
             <p className="control-panel-subtitle">Build, customize, and optimize your resume with AI</p>
+            {user && <SyncStatus />}
           </div>
 
           <div className="control-panel-actions">
+            {user && (
+              <button
+                className="control-btn manager-btn"
+                onClick={() => setShowResumeManager(true)}
+                title="Manage your resumes in the cloud"
+              >
+                📁 My Resumes
+              </button>
+            )}
+
             <button
               className="control-btn upload-btn"
               onClick={() => setShowUploadModal(true)}
@@ -93,6 +109,12 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
       {showTemplates && (
         <TemplateBrowser
           onClose={() => setShowTemplates(false)}
+        />
+      )}
+
+      {showResumeManager && (
+        <ResumeManager
+          onClose={() => setShowResumeManager(false)}
         />
       )}
     </>
