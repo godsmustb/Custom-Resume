@@ -52,6 +52,7 @@ jobs:
           server: ${{ secrets.HOSTINGER_FTP_SERVER }}
           username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          protocol: ftps  # Use FTPS (FTP over SSL/TLS) - required by most Hostinger servers
           port: 21  # Explicit FTP port
           local-dir: ./dist/
           server-dir: /public_html/
