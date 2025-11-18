@@ -38,9 +38,15 @@ export async function extractTextFromPDF(file) {
 /**
  * Parse resume text using AI to extract structured data
  */
-export async function parseResumeWithAI(resumeText) {
+export async function parseResumeWithAI(resumeText, retryCount = 0) {
   try {
-    const prompt = `Parse this resume text and extract structured information. Return a JSON object with the following structure:
+    // Truncate resume text if too long to avoid token limits
+    const maxResumeLength = 8000
+    const truncatedText = resumeText.length > maxResumeLength
+      ? resumeText.substring(0, maxResumeLength) + '...'
+      : resumeText
+
+    const prompt = `Parse this resume text and extract structured information. Return ONLY valid JSON with the following structure:
 
     {
       "personal": {
@@ -79,13 +85,14 @@ export async function parseResumeWithAI(resumeText) {
     }
 
     Resume Text:
-    ${resumeText}
+    ${truncatedText}
 
-    Instructions:
-    - Extract all information accurately
-    - If a field is not found, use empty string or empty array
+    CRITICAL INSTRUCTIONS:
+    - Return ONLY valid JSON - no markdown, no code blocks, no explanations
+    - Escape all special characters properly in strings (quotes, newlines, etc.)
+    - If a field is not found, use empty string "" or empty array []
+    - Keep bullet points concise to avoid JSON size limits
     - Organize skills into logical categories (Frontend, Backend, Tools, etc.)
-    - Preserve all bullet points and achievements
     - Format dates consistently
     - Extract URLs if present`
 
@@ -94,19 +101,26 @@ export async function parseResumeWithAI(resumeText) {
       messages: [
         {
           role: 'system',
-          content: 'You are an expert at parsing resumes and extracting structured data. Return only valid JSON, no additional text.'
+          content: 'You are an expert at parsing resumes and extracting structured data. Return ONLY valid, properly escaped JSON. No markdown formatting, no code blocks, no explanations. Ensure all strings are properly escaped and terminated.'
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      temperature: 0.3,
-      max_tokens: 2000,
+      temperature: 0.2,
+      max_tokens: 3000,
       response_format: { type: 'json_object' }
     })
 
-    const parsedData = JSON.parse(response.choices[0].message.content)
+    let jsonContent = response.choices[0].message.content.trim()
+
+    // Clean up potential markdown code blocks
+    jsonContent = jsonContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '')
+
+    console.log('AI Response (first 200 chars):', jsonContent.substring(0, 200))
+
+    const parsedData = JSON.parse(jsonContent)
 
     // Add IDs to experience and education items
     if (parsedData.experience) {
@@ -129,7 +143,15 @@ export async function parseResumeWithAI(resumeText) {
     return parsedData
   } catch (error) {
     console.error('Error parsing resume with AI:', error)
-    throw new Error('Failed to parse resume. Please try again or enter data manually.')
+
+    // Retry once if it's a JSON parsing error
+    if (error instanceof SyntaxError && retryCount < 1) {
+      console.log('JSON parse failed, retrying with stricter prompt...')
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
+      return parseResumeWithAI(resumeText, retryCount + 1)
+    }
+
+    throw new Error('Failed to parse resume. The AI returned invalid data. Please try again or enter data manually.')
   }
 }
 
