@@ -5,9 +5,16 @@
 
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
+import OpenAI from 'openai'
 
 // Set up PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+
+// Initialize OpenAI with API key from environment
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true
+})
 
 /**
  * Extract text from PDF file
@@ -39,21 +46,16 @@ export async function extractTextFromDOCX(file) {
 /**
  * Parse resume text using AI (OpenAI)
  */
-export async function parseResumeWithAI(resumeText) {
-  const apiKey = localStorage.getItem('openai_api_key')
+export async function parseResumeWithAI(resumeText, retryCount = 0) {
+  try {
+    // Truncate resume text if too long to avoid token limits
+    const maxResumeLength = 8000
+    const truncatedText = resumeText.length > maxResumeLength
+      ? resumeText.substring(0, maxResumeLength) + '...'
+      : resumeText
 
-  if (!apiKey) {
-    throw new Error('OpenAI API key not found. Please add your API key in settings.')
-  }
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -106,32 +108,26 @@ export async function parseResumeWithAI(resumeText) {
   ]
 }
 
-Return ONLY the JSON object, no explanations or markdown formatting.`
+Return ONLY the JSON object, no explanations or markdown formatting. Ensure all strings are properly escaped and terminated.`
         },
         {
           role: 'user',
-          content: `Parse this resume:\n\n${resumeText}`
+          content: `Parse this resume:\n\n${truncatedText}`
         }
       ],
-      temperature: 0.3,
-      max_tokens: 2000
+      temperature: 0.2,
+      max_tokens: 3000,
+      response_format: { type: 'json_object' }
     })
-  })
 
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`)
-  }
+    let content = response.choices[0].message.content.trim()
 
-  const data = await response.json()
-  const content = data.choices[0].message.content.trim()
+    // Clean up potential markdown code blocks
+    content = content.replace(/^```json\s*/i, '').replace(/\s*```$/, '')
 
-  // Remove markdown code blocks if present
-  const jsonMatch = content.match(/```(?:json)?\n?([\s\S]*?)\n?```/) || [null, content]
-  const jsonString = jsonMatch[1] || content
+    console.log('AI Resume Parse Response (first 200 chars):', content.substring(0, 200))
 
-  try {
-    const parsedData = JSON.parse(jsonString)
+    const parsedData = JSON.parse(content)
 
     // Ensure all required fields exist with defaults
     return {
@@ -175,7 +171,16 @@ Return ONLY the JSON object, no explanations or markdown formatting.`
       jobDescription: ''
     }
   } catch (error) {
-    throw new Error(`Failed to parse AI response: ${error.message}`)
+    console.error('Error parsing resume with AI:', error)
+
+    // Retry once if it's a JSON parsing error
+    if (error instanceof SyntaxError && retryCount < 1) {
+      console.log('JSON parse failed, retrying with stricter prompt...')
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
+      return parseResumeWithAI(resumeText, retryCount + 1)
+    }
+
+    throw new Error(`Failed to parse resume. The AI returned invalid data. Please try again or enter data manually.`)
   }
 }
 

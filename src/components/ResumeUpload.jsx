@@ -48,6 +48,11 @@ const ResumeUpload = ({ onClose }) => {
     setProgress('Reading file...')
 
     try {
+      // Check if API key is configured
+      if (!import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY === 'your-openai-api-key-here') {
+        throw new Error('OpenAI API key not found. Please add your API key to the .env file and restart the dev server.')
+      }
+
       // Validate file type
       const validTypes = [
         'application/pdf',
