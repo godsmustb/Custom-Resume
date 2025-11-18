@@ -13,7 +13,7 @@ const PDFUpload = ({ onResumeLoaded, onClose }) => {
 
     // Check if API key is configured
     if (!import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY === 'your-openai-api-key-here') {
-      setError('OpenAI API key not found. Please add your API key to the .env file and restart the dev server.')
+      setError('OpenAI API key not configured. For local development, add VITE_OPENAI_API_KEY to your .env file. For production, configure the GitHub Secret.')
       setUploading(false)
       console.error('❌ API Key missing! Check .env file has: VITE_OPENAI_API_KEY=sk-your-key')
       return

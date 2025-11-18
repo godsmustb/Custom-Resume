@@ -50,7 +50,7 @@ const ResumeUpload = ({ onClose }) => {
     try {
       // Check if API key is configured
       if (!import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY === 'your-openai-api-key-here') {
-        throw new Error('OpenAI API key not found. Please add your API key to the .env file and restart the dev server.')
+        throw new Error('OpenAI API key not configured. For local development, add VITE_OPENAI_API_KEY to your .env file. For production, configure the GitHub Secret.')
       }
 
       // Validate file type
