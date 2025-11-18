@@ -148,3 +148,17 @@
     font-size: 0.9rem;
   }
 }
+
+/* Manager Button */
+.manager-btn {
+  background: rgba(255, 215, 0, 0.3) !important;
+  border-color: rgba(255, 215, 0, 0.5) !important;
+  font-weight: 600;
+}
+
+.manager-btn:hover {
+  background: rgba(255, 215, 0, 0.4) !important;
+  border-color: rgba(255, 215, 0, 0.7) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
+}
