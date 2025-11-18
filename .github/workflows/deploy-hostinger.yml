@@ -1,0 +1,58 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main  # Deploy when pushing to main branch
+      - claude/*  # Also deploy from claude branches for testing
+  workflow_dispatch:  # Allow manual triggering from GitHub UI
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          # Build-time environment variables (baked into the JavaScript bundle)
+          VITE_OPENAI_API_KEY: ${{ secrets.VITE_OPENAI_API_KEY }}
+
+      - name: Verify build output
+        run: |
+          echo "=== Checking dist/ folder contents ==="
+          ls -la dist/
+          echo "=== Checking dist/index.html content (first 30 lines) ==="
+          head -30 dist/index.html
+          echo "=== Checking for assets folder ==="
+          ls -la dist/assets/ || echo "No assets folder found!"
+
+      - name: Deploy to Hostinger via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_FTP_SERVER }}
+          username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: /public_html/
+          dangerous-clean-slate: true  # Clean the directory first to remove old files
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env
+          log-level: verbose
