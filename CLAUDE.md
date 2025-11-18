@@ -41,15 +41,24 @@ npm run lint
 
 ## Environment Setup
 
-The application requires an OpenAI API key for AI features:
+The application requires environment variables for AI features and cloud data persistence:
 
 1. **Copy the template**: `cp .env.example .env`
-2. **Add your API key**: Edit `.env` and replace `your-openai-api-key-here` with your actual OpenAI API key
+2. **Add your API keys**: Edit `.env` and add the following:
    ```
+   # OpenAI API Configuration
    VITE_OPENAI_API_KEY=sk-proj-your-actual-key-here
+
+   # Supabase Configuration
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key-here
    ```
-3. **Restart dev server**: Changes to `.env` only load on server startup
-4. **Security note**: The API key is used client-side (see `src/services/aiService.js:5` and `src/services/resumeParserService.js:14`). This is acceptable for local development but not recommended for production deployment.
+3. **Get Supabase credentials**:
+   - Create a project at [Supabase](https://supabase.com)
+   - Copy your project URL and anon key from Settings → API
+   - Run the SQL migrations from `SUPABASE_SCHEMA.md` to set up database tables
+4. **Restart dev server**: Changes to `.env` only load on server startup
+5. **Security note**: The OpenAI API key is used client-side (see `src/services/aiService.js:5` and `src/services/resumeParserService.js:14`). The Supabase anon key is safe to expose in client-side code as it's protected by Row Level Security (RLS) policies.
 
 **Important**: All AI services now use `import.meta.env.VITE_OPENAI_API_KEY` from the `.env` file. The old `localStorage` approach has been deprecated.
 
@@ -67,16 +76,18 @@ The project includes GitHub Actions workflow for automated deployment to Hosting
 - Manual: Triggered via GitHub Actions UI
 
 **Required GitHub Secrets** (configure in repo Settings → Secrets and variables → Actions):
-- `HOSTINGER_FTP_SERVER`: FTP server hostname (e.g., `ftp.yourdomain.com`)
+- `HOSTINGER_FTP_SERVER`: FTP server hostname (e.g., `157.173.208.194` - NO ftp:// prefix!)
 - `HOSTINGER_FTP_USERNAME`: FTP username from Hostinger
 - `HOSTINGER_FTP_PASSWORD`: FTP password from Hostinger
 - `VITE_OPENAI_API_KEY`: OpenAI API key (baked into build)
+- `VITE_SUPABASE_URL`: Supabase project URL (e.g., `https://xxxxx.supabase.co`)
+- `VITE_SUPABASE_ANON_KEY`: Supabase anonymous key (safe for client-side use)
 
 **Deployment steps**:
 1. Checkout repository code
 2. Setup Node.js 18 with npm caching
 3. Install dependencies (`npm ci`)
-4. Build application with `VITE_OPENAI_API_KEY` environment variable
+4. Build application with environment variables (OpenAI, Supabase)
 5. Verify build output in `dist/` folder
 6. Deploy to Hostinger FTP at `/public_html/` using clean-slate mode
 
@@ -97,9 +108,15 @@ For detailed setup instructions, troubleshooting, and FTP configuration, see **[
 **ResumeContext** (`src/context/ResumeContext.jsx`) is the central state manager:
 - Manages all resume data (personal info, experience, education, skills, certifications)
 - Handles template selection and customization
-- Provides localStorage persistence
+- Provides **dual persistence**: localStorage (local) + Supabase (cloud)
 - Exposes CRUD operations for all resume sections
 - Pattern: Context API with hook (`useResume()`)
+
+**AuthContext** (`src/context/AuthContext.jsx`) manages authentication:
+- Supabase authentication (email/password + Google OAuth)
+- User session management
+- Sign up, sign in, sign out, password reset
+- Pattern: Context API with hook (`useAuth()`)
 
 Key state structure:
 ```javascript
@@ -140,6 +157,40 @@ Template architecture:
    - `MinimalistLayout`: Clean Scandinavian style
 
 **How templates map to layouts**: The `LAYOUT_MAP` in `TemplateRenderer.jsx` maps each template's `component` field to one of the 5 actual layout components. This allows reusing layouts across multiple templates with different styling/customization.
+
+### Supabase Cloud Integration
+
+**Architecture**: Dual persistence strategy - localStorage (instant) + Supabase (cloud backup)
+
+**Key Services:**
+- **Authentication** (`src/context/AuthContext.jsx`):
+  - Email/password authentication
+  - Google OAuth integration
+  - Session management with auto-refresh
+  - Password reset functionality
+
+- **Resume Storage** (`src/services/supabaseResumeService.js`):
+  - Cloud backup of all resume data
+  - Multi-resume support (users can save multiple versions)
+  - CRUD operations: fetch, create, update, delete
+  - Auto-migration from localStorage on first login
+
+**Database Schema** (see `SUPABASE_SCHEMA.md`):
+- `resumes` table: Stores resume data as JSONB with RLS policies
+- `user_profiles` table: User metadata and subscription tiers
+- Row Level Security (RLS): Users can only access their own data
+
+**Persistence Strategy:**
+1. **Offline mode**: All data saved to localStorage (works without auth)
+2. **Online mode**: Syncs to Supabase when user is authenticated
+3. **First login**: Automatically migrates localStorage data to cloud
+4. **Subsequent sessions**: Loads from Supabase, keeps localStorage in sync
+
+**Setup Requirements:**
+- Supabase project created at [supabase.com](https://supabase.com)
+- SQL migrations from `SUPABASE_SCHEMA.md` executed in Supabase SQL Editor
+- Environment variables configured (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+- GitHub Secrets configured for deployment
 
 ### AI Services
 
@@ -215,9 +266,24 @@ Template architecture:
 
 ### Data Persistence
 
-- All resume data persists to **localStorage** automatically
-- Keys: `resumeData`, `currentTemplate`, `templateCustomization`
-- Backwards compatibility handling for schema changes (see `ResumeContext.jsx:91-94`)
+**Dual Persistence Strategy:**
+- **localStorage** (Primary): Instant saves, works offline, no authentication required
+- **Supabase** (Cloud Backup): Syncs when authenticated, multi-device access, version history
+
+**localStorage Keys:**
+- `resumeData` - All resume content
+- `currentTemplate` - Selected template ID
+- `templateCustomization` - Color/font/spacing preferences
+
+**Supabase Storage:**
+- Database table: `resumes` (JSONB column for resume data)
+- Row Level Security (RLS): Users only access their own resumes
+- Auto-sync: When user is authenticated, changes sync to cloud
+- Migration: First login automatically migrates localStorage → Supabase
+
+**Backwards Compatibility:**
+- Schema changes handled gracefully (see `ResumeContext.jsx:91-94`)
+- Missing fields auto-initialized with defaults
 
 ## Key Patterns and Conventions
 
@@ -335,10 +401,11 @@ Apply via CSS variables in layout components.
 
 ## Technical Debt and Known Issues
 
-- **Client-side API key**: OpenAI API key is exposed in browser (see `aiService.js:5` warning). Production should use backend proxy.
+- **Client-side API keys**: Both OpenAI API key and Supabase anon key are exposed in browser bundle (see `aiService.js:5` and `supabase.js:10`). The Supabase anon key is protected by RLS policies, but OpenAI key should ideally be proxied through a backend in production.
 - **PDF parsing limitations**: Text-based parsing struggles with complex layouts, tables, multi-column resumes
 - **No test suite**: Project currently has no automated tests
 - **Template thumbnails**: Thumbnail images referenced in catalog (`thumbnailUrl`) may not exist in `/public/templates/thumbnails/`
+- **Supabase setup required**: Deployment will fail if Supabase environment variables are not configured in GitHub Secrets (see error: "Missing Supabase environment variables")
 
 ## Future Enhancement Areas
 
@@ -394,31 +461,41 @@ e3da64c - Test deployment workflow with configured secrets
 
 ### Recent Feature Additions
 
-1. **Automated Deployment** (Latest)
+1. **Supabase Cloud Integration** (Latest) ⭐
+   - Complete authentication system (email/password + Google OAuth)
+   - Cloud resume storage with Row Level Security (RLS)
+   - Multi-resume support for authenticated users
+   - Auto-migration from localStorage to cloud on first login
+   - Dual persistence: localStorage (offline) + Supabase (cloud sync)
+   - Files: `src/config/supabase.js`, `src/context/AuthContext.jsx`, `src/services/supabaseResumeService.js`, `SUPABASE_SCHEMA.md`
+   - **IMPORTANT**: Requires GitHub Secrets configuration for deployment
+
+2. **Automated Deployment**
    - GitHub Actions workflow for FTP deployment to Hostinger
    - Triggers on push to `main` or `claude/*` branches
-   - Required secrets: FTP credentials + OpenAI API key
+   - Required secrets: FTP credentials + OpenAI API key + Supabase credentials
    - Clean-slate deployment with verbose logging
    - Files: `.github/workflows/deploy-hostinger.yml`, `DEPLOYMENT.md`
 
-2. **Dual Upload System**
+3. **Dual Upload System**
    - Primary: `ResumeUpload.jsx` (PDF + DOCX support via `resumeParserService.js`)
    - Legacy: `PDFUpload.jsx` (PDF only via `pdfService.js`)
    - Both use OpenAI GPT-4o-mini for AI parsing
 
-3. **API Key Migration**
-   - Unified to `import.meta.env.VITE_OPENAI_API_KEY`
-   - Deprecated localStorage approach
+4. **Environment Variables Migration**
+   - All API keys unified to `import.meta.env.*` pattern
+   - OpenAI: `VITE_OPENAI_API_KEY`
+   - Supabase: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+   - Deprecated localStorage approach for API keys
    - Build-time injection via GitHub Actions
-   - Environment variable debugging in App.jsx
 
-4. **Template System Enhancements**
+5. **Template System Enhancements**
    - 50 templates across 3 tiers (FREE, FREEMIUM, PREMIUM)
    - Template preview modal with full-screen view
    - Increased preview scale (0.6 → 1.0 for better visibility)
    - 5 reusable layout components (map 50 templates to 5 layouts)
 
-5. **Score Calculation Fixes**
+6. **Score Calculation Fixes**
    - Fixed to use updated resume data after AI improvements
    - Proper state synchronization between iterations
    - Retry logic for JSON parsing errors
@@ -467,6 +544,7 @@ git push origin main
 /README.md          # User-facing documentation (437 lines)
 /CLAUDE.md          # This file - Claude instructions (comprehensive)
 /DEPLOYMENT.md      # Deployment guide (235 lines)
+/SUPABASE_SCHEMA.md # Supabase database schema & SQL migrations (349 lines)
 ```
 
 ### Source Code Structure
@@ -501,12 +579,21 @@ git push origin main
   /context/
     ResumeContext.jsx                 # Central state manager (368 lines)
                                       # - 35+ CRUD operations
-                                      # - localStorage persistence
+                                      # - Dual persistence (localStorage + Supabase)
                                       # - Backwards compatibility handling
+    AuthContext.jsx                   # Supabase authentication (108 lines)
+                                      # - Email/password auth
+                                      # - Google OAuth
+                                      # - Session management
 
   /data/
     sampleData.js                     # Default resume data
     templateCatalog.js                # 50 template definitions (1,140 lines)
+
+  /config/
+    supabase.js                       # Supabase client configuration (17 lines)
+                                      # - Environment variable validation
+                                      # - Auto-refresh & session persistence
 
   /services/
     aiService.js                      # OpenAI integration (761 lines)
@@ -529,6 +616,10 @@ git push origin main
                                       # - 20 skill categories
                                       # - 597 job titles
                                       # - Role-based suggestions
+    supabaseResumeService.js          # Supabase CRUD operations (140 lines)
+                                      # - Resume fetch/create/update/delete
+                                      # - localStorage migration
+                                      # - Multi-resume support
 
   /types/
     templateTypes.js                  # Type definitions
@@ -548,6 +639,7 @@ git push origin main
   "react": "^19.2.0",              // React 19
   "react-dom": "^19.2.0",
   "openai": "^6.8.1",              // OpenAI API client
+  "@supabase/supabase-js": "^2.x", // Supabase client for auth & database
   "jspdf": "^3.0.3",               // PDF generation
   "pdfjs-dist": "^5.4.394",        // PDF parsing
   "mammoth": "^1.11.0",            // DOCX parsing
@@ -893,11 +985,14 @@ try {
 
 ### Common Development Issues
 
-**1. "API key is not defined" error**
+**1. "API key is not defined" or "Missing Supabase environment variables" error**
 ```bash
 # Solution:
 cp .env.example .env
-# Add: VITE_OPENAI_API_KEY=sk-proj-...
+# Add all required environment variables:
+# VITE_OPENAI_API_KEY=sk-proj-...
+# VITE_SUPABASE_URL=https://xxxxx.supabase.co
+# VITE_SUPABASE_ANON_KEY=eyJ...
 npm run dev  # Restart required!
 ```
 
@@ -924,12 +1019,36 @@ npm run build
 // Ensure component name matches template's "component" field
 ```
 
+**5. "supabaseUrl is required" error in production**
+```bash
+# This error occurs when Supabase environment variables are missing
+# from GitHub Secrets during deployment
+
+# Solution:
+# 1. Go to GitHub repo → Settings → Secrets and variables → Actions
+# 2. Add the following secrets:
+#    - VITE_SUPABASE_URL (e.g., https://xxxxx.supabase.co)
+#    - VITE_SUPABASE_ANON_KEY (from Supabase project settings)
+# 3. Re-run the deployment workflow or push a new commit
+```
+
+**6. Supabase RLS policy errors**
+```bash
+# Error: "permission denied for table resumes"
+# Solution: Ensure RLS policies are created in Supabase SQL Editor
+# Run all SQL from SUPABASE_SCHEMA.md
+```
+
 ### Common User Issues
 
 **1. Resume not saving**
-- localStorage full (5-10MB limit)
-- Incognito/private browsing blocks localStorage
-- Solution: Download PDF backup, clear localStorage
+- **localStorage full** (5-10MB limit)
+- **Incognito/private browsing** blocks localStorage
+- **Supabase not authenticated**: Cloud sync only works when logged in
+- **Solution**:
+  - Download PDF backup
+  - Clear localStorage
+  - Sign in to enable cloud sync
 
 **2. AI features not working**
 - API key missing/invalid
@@ -955,8 +1074,8 @@ npm run build
 - [ ] A/B testing for bullet points
 
 **Mid-term (3-6 months):**
-- [ ] User authentication & accounts
-- [ ] Cloud storage for resumes
+- [x] User authentication & accounts ✅ (Supabase auth implemented)
+- [x] Cloud storage for resumes ✅ (Supabase integration complete)
 - [ ] Resume analytics (views, downloads)
 - [ ] Cover letter generator
 - [ ] LinkedIn profile optimization
