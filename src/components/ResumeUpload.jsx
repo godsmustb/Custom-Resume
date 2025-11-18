@@ -161,10 +161,6 @@ const ResumeUpload = ({ onClose }) => {
               <li>Review and edit as needed</li>
               <li>Choose from 50 professional templates</li>
             </ol>
-            <p className="upload-note">
-              <strong>Note:</strong> This feature uses OpenAI's AI to automatically extract your resume data.
-              Processing typically takes 10-20 seconds.
-            </p>
           </div>
         </div>
       </div>
