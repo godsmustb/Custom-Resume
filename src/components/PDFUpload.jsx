@@ -11,6 +11,14 @@ const PDFUpload = ({ onResumeLoaded, onClose }) => {
     setUploading(true)
     setError(null)
 
+    // Check if API key is configured
+    if (!import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY === 'your-openai-api-key-here') {
+      setError('OpenAI API key not found. Please add your API key to the .env file and restart the dev server.')
+      setUploading(false)
+      console.error('❌ API Key missing! Check .env file has: VITE_OPENAI_API_KEY=sk-your-key')
+      return
+    }
+
     try {
       const parsedData = await uploadAndParseResumePDF(file)
       onResumeLoaded(parsedData)
