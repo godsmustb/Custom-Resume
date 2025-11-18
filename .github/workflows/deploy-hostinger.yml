@@ -1,5 +1,8 @@
 name: Deploy to Hostinger
 
+# Automated deployment to Hostinger via FTP
+# Triggers on push to main or claude/* branches
+
 on:
   push:
     branches:
