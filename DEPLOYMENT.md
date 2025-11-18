@@ -1,6 +1,6 @@
 # Deployment Guide - Hostinger FTP
 
-> **Status**: Active deployment pipeline configured and tested
+> **Status**: Testing deployment with corrected FTP server configuration
 
 This document explains how to deploy the Custom-Resume application to Hostinger using GitHub Actions and FTP.
 
