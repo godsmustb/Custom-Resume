@@ -8,6 +8,18 @@
 import { supabase } from '../config/supabase.js';
 
 /**
+ * Check if Supabase is configured
+ * @returns {boolean}
+ */
+const isSupabaseConfigured = () => {
+  if (!supabase) {
+    console.warn('⚠️ Supabase not configured. Cover letter cloud features are disabled.');
+    return false;
+  }
+  return true;
+};
+
+/**
  * Fetch all cover letter templates
  * @param {Object} filters - Optional filters
  * @param {string} filters.industry - Filter by industry (optional)
@@ -16,6 +28,8 @@ import { supabase } from '../config/supabase.js';
  * @returns {Promise<Array>} - Array of templates
  */
 export const fetchTemplates = async (filters = {}) => {
+  if (!isSupabaseConfigured()) return [];
+
   try {
     let query = supabase
       .from('cover_letter_templates')
@@ -57,8 +71,10 @@ export const fetchTemplates = async (filters = {}) => {
  * @returns {Promise<Object|null>} - Template object or null
  */
 export const fetchTemplateById = async (templateId) => {
+  if (!isSupabaseConfigured()) return null;
+
   try {
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('cover_letter_templates')
       .select('*')
       .eq('id', templateId)
@@ -82,6 +98,8 @@ export const fetchTemplateById = async (templateId) => {
  * @returns {Promise<Array>} - Array of user cover letters
  */
 export const fetchUserCoverLetters = async (userId) => {
+  if (!isSupabaseConfigured()) return [];
+
   try {
     if (!userId) {
       throw new Error('User ID is required');
@@ -118,6 +136,7 @@ export const fetchUserCoverLetters = async (userId) => {
  * @returns {Promise<Object>} - Created cover letter object
  */
 export const createUserCoverLetter = async (coverLetterData) => {
+  if (!isSupabaseConfigured()) return null;
   try {
     const { user_id, template_id, title, customized_content } = coverLetterData;
 
@@ -163,6 +182,7 @@ export const createUserCoverLetter = async (coverLetterData) => {
  * @returns {Promise<Object>} - Updated cover letter object
  */
 export const updateUserCoverLetter = async (coverLetterId, updates) => {
+  if (!isSupabaseConfigured()) return null;
   try {
     if (!coverLetterId) {
       throw new Error('Cover letter ID is required');
@@ -193,6 +213,7 @@ export const updateUserCoverLetter = async (coverLetterId, updates) => {
  * @returns {Promise<void>}
  */
 export const deleteUserCoverLetter = async (coverLetterId) => {
+  if (!isSupabaseConfigured()) return false;
   try {
     if (!coverLetterId) {
       throw new Error('Cover letter ID is required');
@@ -220,6 +241,7 @@ export const deleteUserCoverLetter = async (coverLetterId) => {
  * @returns {Promise<Object|null>} - Cover letter object or null
  */
 export const fetchUserCoverLetterById = async (coverLetterId, userId) => {
+  if (!isSupabaseConfigured()) return null;
   try {
     if (!coverLetterId) {
       throw new Error('Cover letter ID is required');
@@ -256,6 +278,7 @@ export const fetchUserCoverLetterById = async (coverLetterId, userId) => {
  * @returns {Promise<Object>} - Statistics object
  */
 export const getTemplateStats = async () => {
+  if (!isSupabaseConfigured()) return null;
   try {
     const { data: templates, error: templatesError } = await supabase
       .from('cover_letter_templates')
@@ -294,6 +317,7 @@ export const getTemplateStats = async () => {
  * @returns {Promise<Object>} - New cover letter object
  */
 export const duplicateUserCoverLetter = async (coverLetterId, userId) => {
+  if (!isSupabaseConfigured()) return null;
   try {
     // Fetch the original cover letter
     const original = await fetchUserCoverLetterById(coverLetterId, userId);
