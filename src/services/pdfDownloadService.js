@@ -2,8 +2,10 @@ import jsPDF from 'jspdf'
 
 /**
  * Generate and download a professionally formatted PDF resume
+ * @param {Object} resumeData - Resume data to export
+ * @param {string} customFilename - Optional custom filename (without .pdf extension)
  */
-export function downloadResumePDF(resumeData) {
+export function downloadResumePDF(resumeData, customFilename = null) {
   const pdf = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -325,6 +327,13 @@ export function downloadResumePDF(resumeData) {
   pdf.text(footer, pageWidth / 2, pageHeight - 10, { align: 'center' })
 
   // Save the PDF
-  const fileName = `${resumeData.personal.name.replace(/\s+/g, '_')}_Resume.pdf`
+  let fileName
+  if (customFilename) {
+    // Use custom filename if provided
+    fileName = customFilename.endsWith('.pdf') ? customFilename : `${customFilename}.pdf`
+  } else {
+    // Generate default filename from user's name
+    fileName = `${resumeData.personal.name.replace(/\s+/g, '_')}_Resume.pdf`
+  }
   pdf.save(fileName)
 }
