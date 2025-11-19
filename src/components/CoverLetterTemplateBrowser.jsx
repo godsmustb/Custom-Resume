@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCoverLetter } from '../context/CoverLetterContext';
 import { INDUSTRIES, EXPERIENCE_LEVELS } from '../types/coverLetterTypes';
+import CoverLetterPreview from './CoverLetterPreview';
 
 const CoverLetterTemplateBrowser = () => {
   const {
@@ -340,19 +341,13 @@ const CoverLetterTemplateBrowser = () => {
                       e.currentTarget.style.borderColor = '#e5e7eb';
                     }}
                   >
-                    {/* Template Preview Placeholder */}
+                    {/* Template Preview */}
                     <div style={{
-                      height: '280px',
-                      backgroundColor: '#f3f4f6',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
                       borderBottom: '1px solid #e5e7eb',
-                      position: 'relative'
+                      position: 'relative',
+                      backgroundColor: '#f9fafb'
                     }}>
-                      <svg style={{ width: '4rem', height: '4rem', color: '#d1d5db' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                      <CoverLetterPreview template={template} />
                       {/* Experience Level Badge */}
                       <div style={{
                         position: 'absolute',
@@ -365,7 +360,8 @@ const CoverLetterTemplateBrowser = () => {
                         fontSize: '0.75rem',
                         fontWeight: '600',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.05em'
+                        letterSpacing: '0.05em',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                       }}>
                         {template.experience_level}
                       </div>
