@@ -56,10 +56,11 @@ jobs:
           port: 21  # Explicit FTP port
           local-dir: ./dist/
           server-dir: /public_html/
-          dangerous-clean-slate: true  # Clean the directory first to remove old files
+          dangerous-clean-slate: false  # Don't clean - just overwrite to prevent partial uploads
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             **/.env
           log-level: verbose
+          timeout: 300000  # 5 minute timeout for large files
