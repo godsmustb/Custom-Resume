@@ -1,40 +1,36 @@
 /**
  * Cover Letter Editor
  *
- * Split-view editor with form fields on left and live preview on right.
- * Supports real-time placeholder replacement, copy, save, and PDF download.
+ * Split-view editor for customizing cover letter templates.
+ * Left: Form fields | Right: Live preview
+ * Redesigned with professional spacing and Resume.io style
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCoverLetter } from '../context/CoverLetterContext';
 import { useAuth } from '../context/AuthContext';
-import {
-  PLACEHOLDER_MAP,
-  replacePlaceholders,
-  getUnfilledPlaceholders,
-  formatFieldName,
-} from '../types/coverLetterTypes';
+import { replacePlaceholders, PLACEHOLDER_MAP } from '../types/coverLetterTypes';
+import { downloadCoverLetterAsPDF } from '../services/coverLetterPDFService';
 
 const CoverLetterEditor = () => {
   const { user } = useAuth();
   const {
-    showEditor,
     currentTemplate,
-    currentLetter,
     formData,
     customizedContent,
     updateFormField,
     updateCustomizedContent,
     saveCoverLetter,
-    resetEditor,
+    showEditor,
+    closeEditor,
   } = useCoverLetter();
 
-  const [title, setTitle] = useState('Untitled Cover Letter');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
-  const [copyMessage, setCopyMessage] = useState('');
+  const [saveError, setSaveError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
-  // Update customized content when form data changes
+  // Update customized content when form data or template changes
   useEffect(() => {
     if (currentTemplate) {
       const updated = replacePlaceholders(currentTemplate.template_content, formData);
@@ -42,247 +38,331 @@ const CoverLetterEditor = () => {
     }
   }, [formData, currentTemplate]);
 
-  // Set initial title from current letter or template
-  useEffect(() => {
-    if (currentLetter) {
-      setTitle(currentLetter.title);
-    } else if (currentTemplate) {
-      setTitle(`Cover Letter - ${currentTemplate.job_title}`);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(customizedContent);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
     }
-  }, [currentLetter, currentTemplate]);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      const filename = formData.fullName
+        ? `${formData.fullName} - Cover Letter`
+        : 'Cover Letter';
+      await downloadCoverLetterAsPDF(customizedContent, filename);
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+    }
+  };
 
   const handleSave = async () => {
     if (!user) {
-      setSaveMessage('Please sign in to save your cover letter');
-      setTimeout(() => setSaveMessage(''), 3000);
+      alert('Please sign in to save your cover letter');
       return;
     }
 
     setIsSaving(true);
-    setSaveMessage('');
+    setSaveError(null);
+    setSaveSuccess(false);
 
     try {
+      const title = formData.fullName
+        ? `${formData.fullName} - ${currentTemplate.job_title}`
+        : `Cover Letter - ${currentTemplate.job_title}`;
+
       await saveCoverLetter(title);
-      setSaveMessage('Saved successfully!');
-      setTimeout(() => setSaveMessage(''), 3000);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
-      console.error('Error saving:', error);
-      setSaveMessage(`Error: ${error.message}`);
-      setTimeout(() => setSaveMessage(''), 5000);
+      console.error('Failed to save:', error);
+      setSaveError(error.message);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(customizedContent);
-      setCopyMessage('Copied to clipboard!');
-      setTimeout(() => setCopyMessage(''), 2000);
-    } catch (error) {
-      console.error('Error copying:', error);
-      setCopyMessage('Failed to copy');
-      setTimeout(() => setCopyMessage(''), 2000);
-    }
-  };
+  // Count filled vs total placeholders
+  const totalPlaceholders = Object.keys(PLACEHOLDER_MAP).length;
+  const filledPlaceholders = Object.values(formData).filter(v => v && v.trim()).length;
+  const progress = Math.round((filledPlaceholders / totalPlaceholders) * 100);
 
-  const handleDownloadPDF = async () => {
-    // Import PDF service dynamically
-    const { downloadCoverLetterAsPDF } = await import('../services/coverLetterPDFService');
-
-    try {
-      await downloadCoverLetterAsPDF(customizedContent, title);
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      alert('Failed to download PDF. Please try again.');
-    }
-  };
-
-  const handleClose = () => {
-    if (confirm('Are you sure you want to close? Unsaved changes will be lost.')) {
-      resetEditor();
-    }
-  };
-
-  const unfilledPlaceholders = getUnfilledPlaceholders(customizedContent);
-
-  if (!showEditor) {
-    return null;
-  }
+  if (!showEditor || !currentTemplate) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left: Title */}
-            <div className="flex items-center">
-              <button
-                onClick={handleClose}
-                className="mr-4 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <div>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="text-lg font-semibold text-gray-900 border-none focus:ring-0 focus:outline-none bg-transparent"
-                  placeholder="Enter title..."
-                />
-                {currentTemplate && (
-                  <p className="text-xs text-gray-500">
-                    Template: {currentTemplate.job_title}
-                  </p>
-                )}
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      zIndex: 9999,
+      overflow: 'hidden',
+      backdropFilter: 'blur(4px)'
+    }}>
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#ffffff'
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '1.5rem 2rem',
+          borderBottom: '1px solid #e5e7eb',
+          backgroundColor: '#ffffff',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#111827',
+                marginBottom: '0.25rem'
+              }}>
+                {currentTemplate.job_title} - Cover Letter
+              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                  {currentTemplate.industry} • {currentTemplate.experience_level}
+                </span>
+                <span style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: progress === 100 ? '#059669' : '#4f46e5',
+                  backgroundColor: progress === 100 ? '#d1fae5' : '#eef2ff',
+                  padding: '0.25rem 0.625rem',
+                  borderRadius: '0.375rem'
+                }}>
+                  {progress}% Complete
+                </span>
               </div>
             </div>
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-3">
-              {/* Unfilled placeholders indicator */}
-              {unfilledPlaceholders.length > 0 && (
-                <span className="text-sm text-amber-600 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  {unfilledPlaceholders.length} field{unfilledPlaceholders.length !== 1 ? 's' : ''} remaining
-                </span>
-              )}
-
-              {/* Copy button */}
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
               <button
                 onClick={handleCopy}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: copySuccess ? '#d1fae5' : '#ffffff',
+                  color: copySuccess ? '#059669' : '#374151',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => !copySuccess && (e.currentTarget.style.backgroundColor = '#f9fafb')}
+                onMouseOut={(e) => !copySuccess && (e.currentTarget.style.backgroundColor = '#ffffff')}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                {copyMessage || 'Copy'}
+                {copySuccess ? '✓ Copied!' : 'Copy Text'}
               </button>
 
-              {/* Download PDF button */}
               <button
                 onClick={handleDownloadPDF}
-                className="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: '#ffffff',
+                  color: '#374151',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
                 Download PDF
               </button>
 
-              {/* Save button */}
+              {user && (
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  style={{
+                    padding: '0.625rem 1.25rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    backgroundColor: saveSuccess ? '#059669' : '#4f46e5',
+                    color: '#ffffff',
+                    cursor: isSaving ? 'not-allowed' : 'pointer',
+                    opacity: isSaving ? 0.7 : 1,
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => !isSaving && !saveSuccess && (e.currentTarget.style.backgroundColor = '#4338ca')}
+                  onMouseOut={(e) => !isSaving && !saveSuccess && (e.currentTarget.style.backgroundColor = '#4f46e5')}
+                >
+                  {isSaving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save to Account'}
+                </button>
+              )}
+
               <button
-                onClick={handleSave}
-                disabled={isSaving || !user}
-                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                onClick={closeEditor}
+                style={{
+                  width: '2.25rem',
+                  height: '2.25rem',
+                  borderRadius: '0.375rem',
+                  border: 'none',
+                  backgroundColor: '#f3f4f6',
+                  color: '#6b7280',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#e5e7eb';
+                  e.currentTarget.style.color = '#111827';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#6b7280';
+                }}
               >
-                {isSaving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                    </svg>
-                    {saveMessage || 'Save'}
-                  </>
-                )}
+                ×
               </button>
             </div>
           </div>
+
+          {/* Error/Success Messages */}
+          {saveError && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '0.75rem 1rem',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '0.5rem',
+              color: '#991b1b',
+              fontSize: '0.875rem'
+            }}>
+              {saveError}
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Split View */}
-      <div className="h-[calc(100vh-4rem)] flex">
-        {/* Left: Form */}
-        <div className="w-1/2 border-r border-gray-200 overflow-y-auto bg-gray-50">
-          <div className="p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Fill in Your Details</h2>
+        {/* Split View */}
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {/* Left: Form Fields */}
+          <div style={{
+            width: '45%',
+            borderRight: '1px solid #e5e7eb',
+            overflow: 'auto',
+            backgroundColor: '#f9fafb'
+          }}>
+            <div style={{ padding: '2rem' }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: '1.5rem'
+              }}>
+                Fill in your information
+              </h3>
 
-            <div className="space-y-6">
-              {Object.entries(PLACEHOLDER_MAP).map(([placeholder, field]) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {formatFieldName(field)}
-                    {unfilledPlaceholders.includes(placeholder) && (
-                      <span className="ml-2 text-xs text-amber-600">• Not filled</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {Object.entries(PLACEHOLDER_MAP).map(([placeholder, fieldName]) => (
+                  <div key={fieldName}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '0.5rem'
+                    }}>
+                      {placeholder.replace(/[\[\]]/g, '')}
+                      {!formData[fieldName] && (
+                        <span style={{ color: '#dc2626', marginLeft: '0.25rem' }}>*</span>
+                      )}
+                    </label>
+                    {fieldName === 'yourAddress' || fieldName === 'companyAddress' ? (
+                      <textarea
+                        value={formData[fieldName] || ''}
+                        onChange={(e) => updateFormField(fieldName, e.target.value)}
+                        placeholder={`Enter ${placeholder.replace(/[\[\]]/g, '').toLowerCase()}`}
+                        rows={3}
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem 1rem',
+                          border: `2px solid ${!formData[fieldName] ? '#fecaca' : '#d1d5db'}`,
+                          borderRadius: '0.5rem',
+                          fontSize: '0.9375rem',
+                          fontFamily: 'inherit',
+                          outline: 'none',
+                          transition: 'all 0.2s',
+                          resize: 'vertical',
+                          backgroundColor: '#ffffff'
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = '#4f46e5'}
+                        onBlur={(e) => e.target.style.borderColor = !formData[fieldName] ? '#fecaca' : '#d1d5db'}
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={formData[fieldName] || ''}
+                        onChange={(e) => updateFormField(fieldName, e.target.value)}
+                        placeholder={`Enter ${placeholder.replace(/[\[\]]/g, '').toLowerCase()}`}
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem 1rem',
+                          border: `2px solid ${!formData[fieldName] ? '#fecaca' : '#d1d5db'}`,
+                          borderRadius: '0.5rem',
+                          fontSize: '0.9375rem',
+                          outline: 'none',
+                          transition: 'all 0.2s',
+                          backgroundColor: '#ffffff'
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = '#4f46e5'}
+                        onBlur={(e) => e.target.style.borderColor = !formData[fieldName] ? '#fecaca' : '#d1d5db'}
+                      />
                     )}
-                  </label>
-                  {field === 'yourAddress' || field === 'companyAddress' ? (
-                    <textarea
-                      value={formData[field]}
-                      onChange={(e) => updateFormField(field, e.target.value)}
-                      placeholder={placeholder}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    />
-                  ) : (
-                    <input
-                      type={field === 'emailAddress' ? 'email' : field === 'phoneNumber' ? 'tel' : 'text'}
-                      value={formData[field]}
-                      onChange={(e) => updateFormField(field, e.target.value)}
-                      placeholder={placeholder}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {!user && (
-              <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <strong>Note:</strong> Sign in to save your cover letters to the cloud and access them from any device.
-                </p>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right: Live Preview */}
-        <div className="w-1/2 overflow-y-auto bg-white">
-          <div className="p-8">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Live Preview</h2>
-              {unfilledPlaceholders.length === 0 && (
-                <span className="text-sm text-green-600 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  All fields filled
-                </span>
-              )}
             </div>
+          </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
-              <div
-                className="whitespace-pre-wrap font-serif text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: customizedContent
-                    .split('\n')
-                    .map((line) => {
-                      // Highlight unfilled placeholders
-                      let processedLine = line;
-                      unfilledPlaceholders.forEach((placeholder) => {
-                        processedLine = processedLine.replace(
-                          new RegExp(placeholder.replace(/[[\]]/g, '\\$&'), 'g'),
-                          `<mark class="bg-yellow-200 px-1 rounded">${placeholder}</mark>`
-                        );
-                      });
-                      return processedLine;
-                    })
-                    .join('\n'),
-                }}
-              />
+          {/* Right: Preview */}
+          <div style={{
+            flex: 1,
+            overflow: 'auto',
+            backgroundColor: '#ffffff'
+          }}>
+            <div style={{ padding: '2rem' }}>
+              <div style={{
+                maxWidth: '700px',
+                margin: '0 auto',
+                backgroundColor: '#ffffff',
+                padding: '3rem 2.5rem',
+                borderRadius: '0.5rem',
+                border: '1px solid #e5e7eb',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                fontFamily: 'Georgia, serif',
+                fontSize: '0.9375rem',
+                lineHeight: '1.6',
+                color: '#1f2937'
+              }}>
+                {customizedContent.split('\n').map((line, index) => (
+                  <p key={index} style={{
+                    margin: '0 0 0.75rem 0',
+                    backgroundColor: line.includes('[') && line.includes(']') ? '#fef3c7' : 'transparent',
+                    padding: line.includes('[') && line.includes(']') ? '0.25rem 0.5rem' : '0',
+                    borderRadius: line.includes('[') && line.includes(']') ? '0.25rem' : '0'
+                  }}>
+                    {line || <br />}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -111,163 +111,250 @@ function App() {
 
       {/* Cover Letter Builder View */}
       {currentView === 'coverletter' && (
-        <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1rem' }}>
-              Cover Letter Builder
-            </h1>
-            <p style={{ fontSize: '1.125rem', color: '#6b7280', marginBottom: '2rem' }}>
-              Choose from 30 professional templates and customize for your dream job
-            </p>
+        <div style={{ minHeight: 'calc(100vh - 200px)', backgroundColor: '#f9fafb' }}>
+          {/* Hero Section */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #e5e7eb',
+            paddingTop: '4rem',
+            paddingBottom: '4rem'
+          }}>
+            <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 2rem' }}>
+              <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+                <h1 style={{
+                  fontSize: '3rem',
+                  fontWeight: '700',
+                  color: '#111827',
+                  marginBottom: '1.5rem',
+                  lineHeight: '1.2',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Professional Cover Letter Builder
+                </h1>
+                <p style={{
+                  fontSize: '1.25rem',
+                  color: '#6b7280',
+                  marginBottom: '2.5rem',
+                  lineHeight: '1.6'
+                }}>
+                  Create a compelling cover letter in minutes with our professionally-designed templates. Choose from 30 industry-specific formats tailored to your career level.
+                </p>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <button
-                onClick={openTemplateBrowser}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  backgroundColor: '#2563eb',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  transition: 'all 0.2s',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
-              >
-                <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Browse Templates
-              </button>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+                  <button
+                    onClick={openTemplateBrowser}
+                    style={{
+                      padding: '1rem 2rem',
+                      fontSize: '1.125rem',
+                      fontWeight: '600',
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      cursor: 'pointer',
+                      backgroundColor: '#4f46e5',
+                      color: '#fff',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.3)',
+                      minWidth: '200px'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#4338ca';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 12px -2px rgba(79, 70, 229, 0.4)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = '#4f46e5';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(79, 70, 229, 0.3)';
+                    }}
+                  >
+                    Create Cover Letter
+                  </button>
 
-              {user && (
-                <button
-                  onClick={openSavedLetters}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    borderRadius: '0.5rem',
-                    border: '2px solid #2563eb',
-                    cursor: 'pointer',
-                    backgroundColor: '#fff',
-                    color: '#2563eb',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = '#eff6ff'
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fff'
-                  }}
-                >
-                  <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-                  </svg>
-                  My Saved Letters
-                </button>
-              )}
+                  {user && (
+                    <button
+                      onClick={openSavedLetters}
+                      style={{
+                        padding: '1rem 2rem',
+                        fontSize: '1.125rem',
+                        fontWeight: '600',
+                        borderRadius: '0.5rem',
+                        border: '2px solid #4f46e5',
+                        cursor: 'pointer',
+                        backgroundColor: '#fff',
+                        color: '#4f46e5',
+                        transition: 'all 0.2s',
+                        minWidth: '200px'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#eef2ff';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fff';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      My Saved Letters
+                    </button>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>
+                  No credit card required • Free templates available
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Section */}
+          <div style={{ backgroundColor: '#f9fafb', padding: '3rem 0' }}>
+            <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 2rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', textAlign: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#4f46e5', marginBottom: '0.5rem' }}>30+</div>
+                  <div style={{ fontSize: '1rem', color: '#6b7280' }}>Professional Templates</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#4f46e5', marginBottom: '0.5rem' }}>12</div>
+                  <div style={{ fontSize: '1rem', color: '#6b7280' }}>Customizable Fields</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#4f46e5', marginBottom: '0.5rem' }}>PDF</div>
+                  <div style={{ fontSize: '1rem', color: '#6b7280' }}>Export Ready</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#4f46e5', marginBottom: '0.5rem' }}>∞</div>
+                  <div style={{ fontSize: '1rem', color: '#6b7280' }}>Unlimited Edits</div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Feature Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginTop: '3rem' }}>
-            <div style={{
-              padding: '1.5rem',
-              backgroundColor: '#fff',
-              borderRadius: '0.5rem',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-              border: '1px solid #e5e7eb'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                backgroundColor: '#dbeafe',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '1rem'
+          <div style={{ backgroundColor: '#ffffff', padding: '4rem 0' }}>
+            <div style={{ maxWidth: '1140px', margin: '0 auto', padding: '0 2rem' }}>
+              <h2 style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#111827',
+                textAlign: 'center',
+                marginBottom: '3rem'
               }}>
-                <svg style={{ width: '1.5rem', height: '1.5rem', color: '#2563eb' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
-                30 Professional Templates
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                Industry-specific templates for every job role, from entry-level to executive positions
-              </p>
-            </div>
+                Everything you need to land your dream job
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+                <div style={{
+                  padding: '2rem',
+                  backgroundColor: '#fff',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #e5e7eb',
+                  transition: 'all 0.3s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}>
+                  <div style={{
+                    width: '3.5rem',
+                    height: '3.5rem',
+                    backgroundColor: '#eef2ff',
+                    borderRadius: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <svg style={{ width: '2rem', height: '2rem', color: '#4f46e5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 style={{ fontSize: '1.375rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem' }}>
+                    Industry-Specific Templates
+                  </h3>
+                  <p style={{ color: '#6b7280', fontSize: '1rem', lineHeight: '1.6' }}>
+                    Choose from templates designed for Technology, Healthcare, Business, Creative, and more. Each template is optimized for your industry.
+                  </p>
+                </div>
 
-            <div style={{
-              padding: '1.5rem',
-              backgroundColor: '#fff',
-              borderRadius: '0.5rem',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-              border: '1px solid #e5e7eb'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                backgroundColor: '#dbeafe',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '1rem'
-              }}>
-                <svg style={{ width: '1.5rem', height: '1.5rem', color: '#2563eb' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
-                Live Preview
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                See your changes in real-time as you fill in your information with instant placeholder replacement
-              </p>
-            </div>
+                <div style={{
+                  padding: '2rem',
+                  backgroundColor: '#fff',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #e5e7eb',
+                  transition: 'all 0.3s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}>
+                  <div style={{
+                    width: '3.5rem',
+                    height: '3.5rem',
+                    backgroundColor: '#eef2ff',
+                    borderRadius: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <svg style={{ width: '2rem', height: '2rem', color: '#4f46e5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </div>
+                  <h3 style={{ fontSize: '1.375rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem' }}>
+                    Real-Time Preview
+                  </h3>
+                  <p style={{ color: '#6b7280', fontSize: '1rem', lineHeight: '1.6' }}>
+                    See your cover letter take shape instantly. Our live editor shows you exactly how your final document will look.
+                  </p>
+                </div>
 
-            <div style={{
-              padding: '1.5rem',
-              backgroundColor: '#fff',
-              borderRadius: '0.5rem',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-              border: '1px solid #e5e7eb'
-            }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                backgroundColor: '#dbeafe',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '1rem'
-              }}>
-                <svg style={{ width: '1.5rem', height: '1.5rem', color: '#2563eb' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                </svg>
+                <div style={{
+                  padding: '2rem',
+                  backgroundColor: '#fff',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #e5e7eb',
+                  transition: 'all 0.3s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}>
+                  <div style={{
+                    width: '3.5rem',
+                    height: '3.5rem',
+                    backgroundColor: '#eef2ff',
+                    borderRadius: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <svg style={{ width: '2rem', height: '2rem', color: '#4f46e5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                  </div>
+                  <h3 style={{ fontSize: '1.375rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem' }}>
+                    Export & Cloud Save
+                  </h3>
+                  <p style={{ color: '#6b7280', fontSize: '1rem', lineHeight: '1.6' }}>
+                    Download professional PDFs, copy to clipboard, or save to your account for access anywhere, anytime.
+                  </p>
+                </div>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
-                Export & Save
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                Download as PDF, copy to clipboard, or save to your account for easy access across devices
-              </p>
             </div>
           </div>
         </div>
