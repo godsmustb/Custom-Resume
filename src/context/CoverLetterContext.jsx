@@ -267,6 +267,11 @@ export const CoverLetterProvider = ({ children }) => {
   };
 
   /**
+   * Close editor (alias for resetEditor for better semantics)
+   */
+  const closeEditor = resetEditor;
+
+  /**
    * Open template browser
    */
   const openTemplateBrowser = () => {
@@ -341,6 +346,7 @@ export const CoverLetterProvider = ({ children }) => {
     updateFormData,
     updateCustomizedContent,
     resetEditor,
+    closeEditor,
 
     // UI state
     showTemplateBrowser,
