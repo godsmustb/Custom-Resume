@@ -5,6 +5,7 @@ import { downloadResumePDF } from '../services/pdfDownloadService'
 import ResumeUpload from './ResumeUpload'
 import TemplateBrowser from './TemplateBrowser'
 import ResumeManager from './ResumeManager'
+import DownloadModal from './DownloadModal'
 import SyncStatus from './SyncStatus'
 import './ControlPanel.css'
 
@@ -14,10 +15,11 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const [showResumeManager, setShowResumeManager] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = (customFilename) => {
     try {
-      downloadResumePDF(resumeData)
+      downloadResumePDF(resumeData, customFilename)
     } catch (error) {
       console.error('Error downloading PDF:', error)
       alert('Failed to download PDF. Please try again.')
@@ -79,7 +81,7 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
 
             <button
               className="control-btn download-btn"
-              onClick={handleDownloadPDF}
+              onClick={() => setShowDownloadModal(true)}
               title="Download professional PDF resume"
             >
               📥 Download PDF
@@ -115,6 +117,13 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
       {showResumeManager && (
         <ResumeManager
           onClose={() => setShowResumeManager(false)}
+        />
+      )}
+
+      {showDownloadModal && (
+        <DownloadModal
+          onClose={() => setShowDownloadModal(false)}
+          onDownload={handleDownloadPDF}
         />
       )}
     </>

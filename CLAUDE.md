@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Current Status:** Production-ready with automated FTP deployment to Hostinger
 **Version:** 1.0.0
-**Last Documentation Update:** 2025-11-18
+**Last Documentation Update:** 2025-01-19
 **Deployment Status:** ✅ Active (GitHub Actions → Hostinger FTP)
 
 ### Quick Stats
@@ -245,6 +245,16 @@ Template architecture:
 - Supports multi-page resumes with automatic pagination
 - Styled sections with color-coded headers
 - Word wrapping and spacing optimization
+- **NEW**: Accepts custom filename parameter for user-defined filenames
+
+**Download Customization** (`src/components/DownloadModal.jsx`):
+- Professional modal UI for filename customization before download
+- **3 Quick Options**: Name Only, Name+Date, Date+Name
+- Custom filename input with real-time preview
+- Smart sanitization (removes invalid characters, converts spaces to underscores)
+- File format info display (PDF, estimated size, ATS compatibility)
+- Auto-generates intelligent default from user's name
+- Example: "John_Doe_Resume_20250119.pdf"
 
 ### Component Structure
 
@@ -461,7 +471,17 @@ e3da64c - Test deployment workflow with configured secrets
 
 ### Recent Feature Additions
 
-1. **Supabase Cloud Integration** (Latest) ⭐
+1. **Filename Customization for Downloads** (Latest - Phase 4.2) ⭐
+   - Professional download modal with filename customization before PDF export
+   - 3 quick filename options: Name Only, Name+Date, Date+Name
+   - Custom filename input with real-time preview
+   - Smart sanitization (auto-converts spaces to underscores, removes invalid chars)
+   - File info display (format, size, ATS compatibility)
+   - Example outputs: "John_Doe_Resume.pdf", "John_Doe_Resume_20250119.pdf"
+   - Files: `src/components/DownloadModal.jsx`, `src/components/DownloadModal.css`
+   - Updated: `src/services/pdfDownloadService.js`, `src/components/ControlPanel.jsx`
+
+2. **Supabase Cloud Integration** ⭐
    - Complete authentication system (email/password + Google OAuth)
    - Cloud resume storage with Row Level Security (RLS)
    - Multi-resume support for authenticated users
@@ -470,32 +490,32 @@ e3da64c - Test deployment workflow with configured secrets
    - Files: `src/config/supabase.js`, `src/context/AuthContext.jsx`, `src/services/supabaseResumeService.js`, `SUPABASE_SCHEMA.md`
    - **IMPORTANT**: Requires GitHub Secrets configuration for deployment
 
-2. **Automated Deployment**
+3. **Automated Deployment**
    - GitHub Actions workflow for FTP deployment to Hostinger
    - Triggers on push to `main` or `claude/*` branches
    - Required secrets: FTP credentials + OpenAI API key + Supabase credentials
    - Clean-slate deployment with verbose logging
    - Files: `.github/workflows/deploy-hostinger.yml`, `DEPLOYMENT.md`
 
-3. **Dual Upload System**
+4. **Dual Upload System**
    - Primary: `ResumeUpload.jsx` (PDF + DOCX support via `resumeParserService.js`)
    - Legacy: `PDFUpload.jsx` (PDF only via `pdfService.js`)
    - Both use OpenAI GPT-4o-mini for AI parsing
 
-4. **Environment Variables Migration**
+5. **Environment Variables Migration**
    - All API keys unified to `import.meta.env.*` pattern
    - OpenAI: `VITE_OPENAI_API_KEY`
    - Supabase: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
    - Deprecated localStorage approach for API keys
    - Build-time injection via GitHub Actions
 
-5. **Template System Enhancements**
+6. **Template System Enhancements**
    - 50 templates across 3 tiers (FREE, FREEMIUM, PREMIUM)
    - Template preview modal with full-screen view
    - Increased preview scale (0.6 → 1.0 for better visibility)
    - 5 reusable layout components (map 50 templates to 5 layouts)
 
-6. **Score Calculation Fixes**
+7. **Score Calculation Fixes**
    - Fixed to use updated resume data after AI improvements
    - Proper state synchronization between iterations
    - Retry logic for JSON parsing errors
