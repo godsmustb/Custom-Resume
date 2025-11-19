@@ -52,15 +52,16 @@ jobs:
           server: ${{ secrets.HOSTINGER_FTP_SERVER }}
           username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-          protocol: ftps  # Use FTPS (FTP over SSL/TLS) - required by most Hostinger servers
-          port: 21  # Explicit FTP port
+          protocol: ftps
+          port: 21
           local-dir: ./dist/
           server-dir: /public_html/
-          dangerous-clean-slate: false  # Don't clean - just overwrite to prevent partial uploads
+          dangerous-clean-slate: true  # Re-enable to force fresh upload
+          state-name: .ftp-deploy-sync-state-new.json  # Use new state file to force reupload
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             **/.env
           log-level: verbose
-          timeout: 300000  # 5 minute timeout for large files
+          timeout: 600000  # 10 minute timeout
