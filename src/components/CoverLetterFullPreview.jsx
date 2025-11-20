@@ -207,11 +207,28 @@ const CoverLetterFullPreview = ({ template, onClose, onUseTemplate }) => {
               lineHeight: '1.6',
               textAlign: 'justify'
             }}>
-              {template.template_content.split('\n\n').slice(3).map((paragraph, index) => (
+              {template.template_content.split('\n\n').map((paragraph, index) => (
                 <p key={index} style={{ marginBottom: '1rem' }}>
                   {paragraph}
                 </p>
               ))}
+            </div>
+
+            {/* Closing */}
+            <div style={{
+              fontSize: '1rem',
+              color: '#111827',
+              marginTop: '2rem'
+            }}>
+              Sincerely,
+            </div>
+            <div style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: '#111827',
+              marginTop: '2.5rem'
+            }}>
+              [Your Full Name]
             </div>
           </div>
         </div>

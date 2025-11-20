@@ -372,7 +372,12 @@ const CoverLetterTemplateBrowser = () => {
                     </div>
 
                     {/* Template Info */}
-                    <div style={{ padding: '1.25rem' }}>
+                    <div style={{
+                      padding: '1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      minHeight: '200px'
+                    }}>
                       <h3 style={{
                         fontSize: '1.125rem',
                         fontWeight: '600',
@@ -405,38 +410,50 @@ const CoverLetterTemplateBrowser = () => {
                         fontSize: '0.875rem',
                         color: '#6b7280',
                         lineHeight: '1.5',
-                        marginBottom: '1rem',
+                        marginBottom: '1.5rem',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
+                        WebkitBoxOrient: 'vertical',
+                        minHeight: '2.5rem'
                       }}>
                         {template.preview_text}
                       </p>
 
-                      <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <div style={{
+                        display: 'flex',
+                        gap: '0.75rem',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginTop: 'auto',
+                        paddingTop: '0.5rem'
+                      }}>
                         <button
                           onClick={() => setPreviewTemplate(template)}
                           style={{
                             flex: 1,
-                            padding: '0.75rem 1rem',
+                            maxWidth: '140px',
+                            padding: '0.625rem 1.25rem',
                             backgroundColor: '#ffffff',
                             color: '#4f46e5',
                             border: '2px solid #4f46e5',
                             borderRadius: '0.5rem',
-                            fontSize: '1rem',
+                            fontSize: '0.9375rem',
                             fontWeight: '600',
                             cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap'
                           }}
                           onMouseOver={(e) => {
                             e.currentTarget.style.backgroundColor = '#eef2ff';
-                            e.currentTarget.style.transform = 'scale(1.02)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(79, 70, 229, 0.3)';
                           }}
                           onMouseOut={(e) => {
                             e.currentTarget.style.backgroundColor = '#ffffff';
-                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
                           }}
                         >
                           Preview
@@ -445,23 +462,28 @@ const CoverLetterTemplateBrowser = () => {
                           onClick={() => handleSelectTemplate(template)}
                           style={{
                             flex: 1,
-                            padding: '0.75rem 1rem',
+                            maxWidth: '140px',
+                            padding: '0.625rem 1.25rem',
                             backgroundColor: '#4f46e5',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '0.5rem',
-                            fontSize: '1rem',
+                            fontSize: '0.9375rem',
                             fontWeight: '600',
                             cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap',
+                            boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
                           }}
                           onMouseOver={(e) => {
                             e.currentTarget.style.backgroundColor = '#4338ca';
-                            e.currentTarget.style.transform = 'scale(1.02)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 6px 12px rgba(79, 70, 229, 0.4)';
                           }}
                           onMouseOut={(e) => {
                             e.currentTarget.style.backgroundColor = '#4f46e5';
-                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(79, 70, 229, 0.2)';
                           }}
                         >
                           Use Template
