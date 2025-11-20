@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { useCoverLetter } from '../context/CoverLetterContext';
 import { INDUSTRIES, EXPERIENCE_LEVELS } from '../types/coverLetterTypes';
 import CoverLetterPreview from './CoverLetterPreview';
+import CoverLetterFullPreview from './CoverLetterFullPreview';
 
 const CoverLetterTemplateBrowser = () => {
   const {
@@ -26,6 +27,9 @@ const CoverLetterTemplateBrowser = () => {
   const [selectedIndustry, setSelectedIndustry] = useState('All Industries');
   const [selectedExperience, setSelectedExperience] = useState('All Levels');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Preview state
+  const [previewTemplate, setPreviewTemplate] = useState(null);
 
   // Fetch templates when filters change
   useEffect(() => {
@@ -411,31 +415,58 @@ const CoverLetterTemplateBrowser = () => {
                         {template.preview_text}
                       </p>
 
-                      <button
-                        onClick={() => handleSelectTemplate(template)}
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem 1rem',
-                          backgroundColor: '#4f46e5',
-                          color: '#ffffff',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          fontSize: '1rem',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => {
-                          e.currentTarget.style.backgroundColor = '#4338ca';
-                          e.currentTarget.style.transform = 'scale(1.02)';
-                        }}
-                        onMouseOut={(e) => {
-                          e.currentTarget.style.backgroundColor = '#4f46e5';
-                          e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                      >
-                        Use This Template
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button
+                          onClick={() => setPreviewTemplate(template)}
+                          style={{
+                            flex: 1,
+                            padding: '0.75rem 1rem',
+                            backgroundColor: '#ffffff',
+                            color: '#4f46e5',
+                            border: '2px solid #4f46e5',
+                            borderRadius: '0.5rem',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = '#eef2ff';
+                            e.currentTarget.style.transform = 'scale(1.02)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ffffff';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => handleSelectTemplate(template)}
+                          style={{
+                            flex: 1,
+                            padding: '0.75rem 1rem',
+                            backgroundColor: '#4f46e5',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '0.5rem',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = '#4338ca';
+                            e.currentTarget.style.transform = 'scale(1.02)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = '#4f46e5';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          Use Template
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -444,6 +475,15 @@ const CoverLetterTemplateBrowser = () => {
           </div>
         </div>
       </div>
+
+      {/* Full Preview Modal */}
+      {previewTemplate && (
+        <CoverLetterFullPreview
+          template={previewTemplate}
+          onClose={() => setPreviewTemplate(null)}
+          onUseTemplate={() => handleSelectTemplate(previewTemplate)}
+        />
+      )}
     </div>
   );
 };
