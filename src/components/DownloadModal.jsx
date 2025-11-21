@@ -12,6 +12,7 @@ const DownloadModal = ({ onClose, onDownload }) => {
   const [filename, setFilename] = useState('')
   const [filenameOption, setFilenameOption] = useState('name')
   const [format, setFormat] = useState('pdf') // 'pdf' or 'docx'
+  const [useTemplateDesign, setUseTemplateDesign] = useState(true) // true = template-aware, false = generic
 
   // Generate default filename based on selected option
   useEffect(() => {
@@ -52,7 +53,7 @@ const DownloadModal = ({ onClose, onDownload }) => {
       return
     }
 
-    onDownload(cleanFilename, format)
+    onDownload(cleanFilename, format, useTemplateDesign)
     onClose()
   }
 
@@ -86,6 +87,31 @@ const DownloadModal = ({ onClose, onDownload }) => {
                 📝 DOCX
               </button>
             </div>
+          </div>
+
+          <div className="export-style-selection">
+            <label className="option-label">Export Style:</label>
+            <div className="export-style-toggle">
+              <button
+                className={`export-style-btn ${useTemplateDesign ? 'active' : ''}`}
+                onClick={() => setUseTemplateDesign(true)}
+                title="Export with your selected template design (recommended)"
+              >
+                🎨 Template Design
+              </button>
+              <button
+                className={`export-style-btn ${!useTemplateDesign ? 'active' : ''}`}
+                onClick={() => setUseTemplateDesign(false)}
+                title="Export with generic formatting"
+              >
+                📄 Generic Format
+              </button>
+            </div>
+            <p className="export-style-hint">
+              {useTemplateDesign
+                ? '✓ Exports with your selected template\'s exact design and colors'
+                : 'Simple black & white format, compatible with all systems'}
+            </p>
           </div>
 
           <div className="filename-options">
