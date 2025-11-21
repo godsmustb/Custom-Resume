@@ -1,6 +1,6 @@
 /**
  * Download Modal Component
- * Allows users to customize filename before downloading resume
+ * Allows users to customize filename and format before downloading resume
  */
 
 import { useState, useEffect } from 'react'
@@ -11,6 +11,7 @@ const DownloadModal = ({ onClose, onDownload }) => {
   const { resumeData } = useResume()
   const [filename, setFilename] = useState('')
   const [filenameOption, setFilenameOption] = useState('name')
+  const [format, setFormat] = useState('pdf') // 'pdf' or 'docx'
 
   // Generate default filename based on selected option
   useEffect(() => {
@@ -51,7 +52,7 @@ const DownloadModal = ({ onClose, onDownload }) => {
       return
     }
 
-    onDownload(cleanFilename)
+    onDownload(cleanFilename, format)
     onClose()
   }
 
@@ -69,6 +70,24 @@ const DownloadModal = ({ onClose, onDownload }) => {
         </div>
 
         <div className="download-modal-content">
+          <div className="format-selection">
+            <label className="option-label">Format:</label>
+            <div className="format-buttons">
+              <button
+                className={`format-btn ${format === 'pdf' ? 'active' : ''}`}
+                onClick={() => setFormat('pdf')}
+              >
+                📄 PDF
+              </button>
+              <button
+                className={`format-btn ${format === 'docx' ? 'active' : ''}`}
+                onClick={() => setFormat('docx')}
+              >
+                📝 DOCX
+              </button>
+            </div>
+          </div>
+
           <div className="filename-options">
             <label className="option-label">Quick Options:</label>
             <div className="option-buttons">
@@ -107,7 +126,7 @@ const DownloadModal = ({ onClose, onDownload }) => {
                 placeholder="Enter filename..."
                 maxLength={100}
               />
-              <span className="filename-extension">.pdf</span>
+              <span className="filename-extension">.{format}</span>
             </div>
             <p className="filename-hint">
               Letters, numbers, hyphens, and underscores only. Spaces will be converted to underscores.
@@ -119,7 +138,7 @@ const DownloadModal = ({ onClose, onDownload }) => {
             <div className="preview-box">
               <span className="preview-icon">📄</span>
               <span className="preview-name">
-                {filename.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '') || 'filename'}.pdf
+                {filename.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '') || 'filename'}.{format}
               </span>
             </div>
           </div>
@@ -127,15 +146,35 @@ const DownloadModal = ({ onClose, onDownload }) => {
           <div className="download-info">
             <div className="info-row">
               <span className="info-label">Format:</span>
-              <span className="info-value">PDF (Portable Document Format)</span>
+              <span className="info-value">
+                {format === 'pdf'
+                  ? 'PDF (Portable Document Format)'
+                  : 'DOCX (Microsoft Word Document)'}
+              </span>
             </div>
             <div className="info-row">
               <span className="info-label">Size:</span>
-              <span className="info-value">~50-200 KB (estimated)</span>
+              <span className="info-value">
+                {format === 'pdf'
+                  ? '~50-200 KB (estimated)'
+                  : '~30-150 KB (estimated)'}
+              </span>
             </div>
             <div className="info-row">
               <span className="info-label">Compatibility:</span>
-              <span className="info-value">All devices & ATS systems</span>
+              <span className="info-value">
+                {format === 'pdf'
+                  ? 'All devices & ATS systems'
+                  : 'Microsoft Word, Google Docs & ATS systems'}
+              </span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Editable:</span>
+              <span className="info-value">
+                {format === 'pdf'
+                  ? 'No (use DOCX for editing)'
+                  : 'Yes (fully editable in Word)'}
+              </span>
             </div>
           </div>
         </div>
@@ -145,7 +184,7 @@ const DownloadModal = ({ onClose, onDownload }) => {
             Cancel
           </button>
           <button className="download-confirm-btn" onClick={handleDownload}>
-            📥 Download PDF
+            📥 Download {format.toUpperCase()}
           </button>
         </div>
       </div>

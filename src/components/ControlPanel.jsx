@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
 import { useAuth } from '../context/AuthContext'
 import { downloadResumePDF } from '../services/pdfDownloadService'
+import { downloadResumeDOCX } from '../services/docxDownloadService'
 import ResumeUpload from './ResumeUpload'
 import TemplateBrowser from './TemplateBrowser'
 import ResumeManager from './ResumeManager'
@@ -17,12 +18,16 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
   const [showResumeManager, setShowResumeManager] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
 
-  const handleDownloadPDF = (customFilename) => {
+  const handleDownload = async (customFilename, format) => {
     try {
-      downloadResumePDF(resumeData, customFilename)
+      if (format === 'pdf') {
+        downloadResumePDF(resumeData, customFilename)
+      } else if (format === 'docx') {
+        await downloadResumeDOCX(resumeData, customFilename)
+      }
     } catch (error) {
-      console.error('Error downloading PDF:', error)
-      alert('Failed to download PDF. Please try again.')
+      console.error(`Error downloading ${format.toUpperCase()}:`, error)
+      alert(`Failed to download ${format.toUpperCase()}. Please try again.`)
     }
   }
 
@@ -123,7 +128,7 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
       {showDownloadModal && (
         <DownloadModal
           onClose={() => setShowDownloadModal(false)}
-          onDownload={handleDownloadPDF}
+          onDownload={handleDownload}
         />
       )}
     </>
