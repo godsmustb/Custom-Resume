@@ -87,9 +87,17 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
             <button
               className="control-btn download-btn"
               onClick={() => setShowDownloadModal(true)}
-              title="Download professional PDF resume"
+              title="Download professional PDF/DOCX resume"
             >
-              📥 Download PDF
+              📥 Download
+            </button>
+
+            <button
+              className="control-btn print-btn"
+              onClick={() => window.print()}
+              title="Print resume"
+            >
+              🖨️ Print
             </button>
 
             <button

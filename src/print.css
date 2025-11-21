@@ -1,0 +1,438 @@
+/**
+ * Print Optimization Styles
+ * Ensures resumes print beautifully on any printer
+ */
+
+@media print {
+  /* ===== GLOBAL PRINT SETTINGS ===== */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 0.5in;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  /* ===== HIDE UI ELEMENTS ===== */
+  .control-panel,
+  .auth-button-container,
+  .job-description-input,
+  .template-browser-overlay,
+  .download-modal-overlay,
+  .resume-upload-modal,
+  .template-customization,
+  button,
+  .control-btn,
+  .edit-button,
+  .add-button,
+  .remove-button,
+  .ai-button,
+  nav,
+  header:not(.resume-header),
+  footer:not(.resume-footer),
+  .modal,
+  .overlay {
+    display: none !important;
+  }
+
+  /* ===== RESUME CONTAINER ===== */
+  .resume-container,
+  .template-renderer,
+  .resume-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* ===== PAGE BREAKS ===== */
+  /* Avoid breaking inside these elements */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .resume-section,
+  .experience-item,
+  .education-item,
+  .certification-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Force page breaks before major sections if needed */
+  .page-break-before {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* ===== TYPOGRAPHY ===== */
+  h1 {
+    font-size: 24pt;
+    margin: 0 0 8pt 0;
+  }
+
+  h2 {
+    font-size: 16pt;
+    margin: 16pt 0 8pt 0;
+    border-bottom: 1pt solid #333;
+    padding-bottom: 4pt;
+  }
+
+  h3 {
+    font-size: 14pt;
+    margin: 12pt 0 6pt 0;
+  }
+
+  p, li {
+    font-size: 11pt;
+    line-height: 1.4;
+    margin: 0 0 6pt 0;
+  }
+
+  ul, ol {
+    margin: 0 0 12pt 20pt;
+    padding: 0;
+  }
+
+  li {
+    margin-bottom: 4pt;
+  }
+
+  /* ===== LINKS ===== */
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+
+  a[href]:after {
+    content: none !important;
+  }
+
+  /* ===== COLORS FOR PRINT ===== */
+  /* Optimize colors to save ink while maintaining readability */
+  .section-header,
+  .resume-header {
+    background: none !important;
+    color: #000 !important;
+  }
+
+  /* Convert bright colors to darker, print-friendly versions */
+  .highlight,
+  .accent-color {
+    color: #333 !important;
+    background: none !important;
+  }
+
+  /* ===== SPACING ===== */
+  .resume-section {
+    margin-bottom: 16pt;
+  }
+
+  .section-header {
+    margin-top: 12pt;
+    margin-bottom: 8pt;
+  }
+
+  /* ===== TWO-COLUMN LAYOUTS ===== */
+  .two-column-layout {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 30%;
+    padding-right: 12pt;
+  }
+
+  .main-content {
+    width: 70%;
+  }
+
+  /* ===== SPECIFIC TEMPLATE STYLES ===== */
+
+  /* Classic Single Column */
+  .classic-single-column {
+    max-width: 100%;
+  }
+
+  /* Modern Two Column */
+  .modern-two-column .sidebar {
+    background: #f5f5f5 !important;
+    padding: 12pt;
+  }
+
+  /* Executive Layout */
+  .executive-layout .header {
+    border-bottom: 2pt solid #333;
+    padding-bottom: 12pt;
+    margin-bottom: 12pt;
+  }
+
+  /* Creative Layout */
+  .creative-layout {
+    /* Simplify for print */
+    background: white !important;
+  }
+
+  /* Minimalist Layout */
+  .minimalist-layout {
+    /* Already print-friendly */
+  }
+
+  /* ===== CONTACT INFORMATION ===== */
+  .contact-info {
+    font-size: 10pt;
+    margin-bottom: 12pt;
+  }
+
+  .contact-item {
+    display: inline-block;
+    margin-right: 12pt;
+  }
+
+  .contact-item:after {
+    content: " | ";
+    margin-left: 12pt;
+  }
+
+  .contact-item:last-child:after {
+    content: "";
+  }
+
+  /* ===== SKILLS SECTION ===== */
+  .skills-grid,
+  .skills-list {
+    display: block !important;
+  }
+
+  .skill-category {
+    margin-bottom: 8pt;
+  }
+
+  .skill-tag,
+  .skill-item {
+    display: inline;
+    margin-right: 8pt;
+  }
+
+  .skill-tag:after,
+  .skill-item:after {
+    content: ", ";
+  }
+
+  .skill-tag:last-child:after,
+  .skill-item:last-child:after {
+    content: "";
+  }
+
+  /* ===== EXPERIENCE SECTION ===== */
+  .experience-item {
+    margin-bottom: 12pt;
+  }
+
+  .job-title {
+    font-weight: bold;
+    font-size: 12pt;
+  }
+
+  .company-name {
+    font-style: italic;
+    font-size: 11pt;
+  }
+
+  .date-range {
+    font-size: 10pt;
+    color: #666;
+  }
+
+  .job-description {
+    margin-top: 6pt;
+  }
+
+  /* ===== EDUCATION SECTION ===== */
+  .education-item {
+    margin-bottom: 10pt;
+  }
+
+  .degree {
+    font-weight: bold;
+    font-size: 12pt;
+  }
+
+  .school-name {
+    font-style: italic;
+  }
+
+  /* ===== CERTIFICATIONS ===== */
+  .certification-item {
+    margin-bottom: 8pt;
+  }
+
+  .certification-name {
+    font-weight: bold;
+  }
+
+  .certification-issuer {
+    font-style: italic;
+  }
+
+  /* ===== IMAGES AND ICONS ===== */
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  /* Hide decorative icons */
+  .icon,
+  .emoji {
+    display: none;
+  }
+
+  /* ===== BORDERS AND SHADOWS ===== */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .border,
+  .divider {
+    border-color: #999 !important;
+  }
+
+  /* ===== BACKGROUNDS ===== */
+  /* Remove or simplify backgrounds to save ink */
+  .background-gradient,
+  .background-pattern {
+    background: none !important;
+  }
+
+  /* Keep light backgrounds for contrast */
+  .light-background {
+    background: #f9f9f9 !important;
+  }
+
+  /* ===== TABLES ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    padding: 6pt;
+    border: 1pt solid #ddd;
+    text-align: left;
+  }
+
+  th {
+    font-weight: bold;
+    background: #f5f5f5 !important;
+  }
+
+  /* ===== UTILITY CLASSES ===== */
+  .print-only {
+    display: block !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .keep-together {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* ===== WIDOWS AND ORPHANS ===== */
+  p, li {
+    widows: 3;
+    orphans: 3;
+  }
+
+  /* ===== ENSURE PROPER WIDTH ===== */
+  .container,
+  .wrapper,
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* ===== HIDE OVERFLOW ===== */
+  * {
+    overflow: visible !important;
+  }
+
+  /* ===== SPECIFIC FIXES FOR COMMON ISSUES ===== */
+
+  /* Fix flex layouts for print */
+  .flex-container {
+    display: block !important;
+  }
+
+  /* Fix grid layouts for print */
+  .grid-container {
+    display: block !important;
+  }
+
+  /* Ensure text is selectable */
+  * {
+    user-select: auto !important;
+  }
+
+  /* ===== ACCESSIBILITY ===== */
+  /* Ensure good contrast for printing */
+  .text-muted,
+  .text-secondary {
+    color: #666 !important;
+  }
+
+  /* ===== FOOTER ===== */
+  .resume-footer {
+    margin-top: 20pt;
+    padding-top: 8pt;
+    border-top: 1pt solid #999;
+    font-size: 9pt;
+    color: #999;
+    text-align: center;
+  }
+
+  /* ===== FORCE SINGLE PAGE (Optional) ===== */
+  /* Uncomment if you want to force single-page resumes */
+  /*
+  .resume-container {
+    transform: scale(0.9);
+    transform-origin: top left;
+  }
+  */
+}
+
+/* ===== PRINT PREPARATION STYLES (applies when print dialog is open) ===== */
+@media screen {
+  .print-preview {
+    max-width: 8.5in;
+    margin: 0 auto;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+}
