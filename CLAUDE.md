@@ -491,7 +491,22 @@ e3da64c - Test deployment workflow with configured secrets
 
 ### Recent Feature Additions
 
-1. **Print Optimization** (Latest - Phase 4.4) ⭐
+1. **Template-Aware Export** (Latest - Phase 4.3) ⭐⭐⭐
+   - Exports now match your selected template design exactly!
+   - Export Style Selection in download modal:
+     * 🎨 Template Design - captures exact visual appearance
+     * 📄 Generic Format - simple black & white layout
+   - Uses html2canvas + jsPDF for high-quality PDF generation
+   - Preserves all template styling, colors, fonts, and spacing
+   - Two-column layouts export perfectly
+   - Multi-page support with proper pagination
+   - Loading indicator during export process
+   - Works with all 50 templates
+   - Example: Modern Two Column template exports with sidebar colors intact!
+   - Files: `src/services/templateAwareExportService.js` (200+ lines, new)
+   - Updated: `src/components/DownloadModal.jsx`, `DownloadModal.css`, `ControlPanel.jsx`
+
+2. **Print Optimization** (Phase 4.4) ⭐
    - Professional print support for all resume templates!
    - Print button (🖨️) in control panel
    - Comprehensive print stylesheet (430 lines):
