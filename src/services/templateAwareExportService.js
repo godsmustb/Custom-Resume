@@ -74,6 +74,9 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
       }
     })
 
+    // Collect all clickable links from the DOM before restoring
+    const links = collectClickableLinks(resumeElement)
+
     // Restore interactive elements
     interactiveElements.forEach(el => {
       el.style.display = el.dataset.originalDisplay || ''
@@ -112,6 +115,9 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
       heightLeft -= pageHeight
     }
 
+    // Add clickable link annotations on top of the image
+    addClickableLinksToPDF(pdf, links, resumeElement, canvas, imgWidth, imgHeight)
+
     // Generate filename
     const fileName = customFilename
       ? (customFilename.endsWith('.pdf') ? customFilename : `${customFilename}.pdf`)
@@ -141,6 +147,92 @@ export async function downloadTemplateAwareDOCX(resumeData, customFilename = nul
   // In the future, we could create template-specific DOCX generators
   const { downloadResumeDOCX } = await import('./docxDownloadService')
   return downloadResumeDOCX(resumeData, customFilename)
+}
+
+/**
+ * Collect all clickable links from the resume DOM
+ * Returns array of {url, rect} objects with link positions
+ */
+function collectClickableLinks(resumeElement) {
+  const links = []
+
+  // Find all anchor tags with href attributes
+  const anchorElements = resumeElement.querySelectorAll('a[href]')
+  anchorElements.forEach(anchor => {
+    const href = anchor.getAttribute('href')
+    if (href && href.trim()) {
+      const rect = anchor.getBoundingClientRect()
+      const containerRect = resumeElement.getBoundingClientRect()
+
+      // Calculate position relative to the resume container
+      links.push({
+        url: href,
+        rect: {
+          x: rect.left - containerRect.left,
+          y: rect.top - containerRect.top,
+          width: rect.width,
+          height: rect.height
+        }
+      })
+    }
+  })
+
+  // Also look for social media links in the header (LinkedIn, GitHub, Portfolio)
+  // These might not be anchor tags but have data attributes or specific classes
+  const socialLinks = resumeElement.querySelectorAll('[data-link], .social-link, .linkedin-link, .github-link, .portfolio-link')
+  socialLinks.forEach(element => {
+    const url = element.getAttribute('data-link') || element.getAttribute('href')
+    if (url && url.trim()) {
+      const rect = element.getBoundingClientRect()
+      const containerRect = resumeElement.getBoundingClientRect()
+
+      links.push({
+        url: url,
+        rect: {
+          x: rect.left - containerRect.left,
+          y: rect.top - containerRect.top,
+          width: rect.width,
+          height: rect.height
+        }
+      })
+    }
+  })
+
+  return links
+}
+
+/**
+ * Add clickable link annotations to the PDF
+ * Maps DOM link positions to PDF coordinates
+ */
+function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidth, pdfHeight) {
+  if (!links || links.length === 0) return
+
+  // Calculate scale factors
+  // The canvas is rendered at scale:2, so we need to account for that
+  const canvasScale = 2 // This matches the html2canvas scale option
+  const containerWidth = resumeElement.offsetWidth
+  const containerHeight = resumeElement.offsetHeight
+
+  // Scale from DOM pixels to PDF mm
+  const scaleX = pdfWidth / containerWidth
+  const scaleY = pdfHeight / containerHeight
+
+  links.forEach(link => {
+    try {
+      // Convert DOM coordinates to PDF coordinates
+      const pdfX = link.rect.x * scaleX
+      const pdfY = link.rect.y * scaleY
+      const pdfLinkWidth = link.rect.width * scaleX
+      const pdfLinkHeight = link.rect.height * scaleY
+
+      // Add clickable link annotation to PDF
+      // Note: jsPDF link uses (x, y, width, height) where y is from top
+      pdf.link(pdfX, pdfY, pdfLinkWidth, pdfLinkHeight, { url: link.url })
+    } catch (error) {
+      console.warn('Failed to add link annotation:', error)
+    }
+  })
 }
 
 /**
