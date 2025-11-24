@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx'
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, ExternalHyperlink } from 'docx'
 
 /**
  * Generate and download a professionally formatted DOCX resume
@@ -48,30 +48,75 @@ export async function downloadResumeDOCX(resumeData, customFilename = null) {
     )
   }
 
-  // Social Links
-  const linksParts = []
+  // Social Links - with clickable hyperlinks
+  const linksChildren = []
+
   if (resumeData.personal.linkedin?.trim()) {
-    linksParts.push(`LinkedIn: ${resumeData.personal.linkedin}`)
-  }
-  if (resumeData.personal.github?.trim()) {
-    linksParts.push(`GitHub: ${resumeData.personal.github}`)
-  }
-  if (resumeData.personal.portfolio?.trim()) {
-    linksParts.push(`Portfolio: ${resumeData.personal.portfolio}`)
+    if (linksChildren.length > 0) {
+      linksChildren.push(new TextRun({ text: ' • ', size: 20 }))
+    }
+    linksChildren.push(
+      new ExternalHyperlink({
+        children: [
+          new TextRun({
+            text: 'LinkedIn',
+            style: 'Hyperlink',
+            size: 20,
+            color: '1A73E8',
+            underline: {}
+          })
+        ],
+        link: resumeData.personal.linkedin
+      })
+    )
   }
 
-  if (linksParts.length > 0) {
+  if (resumeData.personal.github?.trim()) {
+    if (linksChildren.length > 0) {
+      linksChildren.push(new TextRun({ text: ' • ', size: 20 }))
+    }
+    linksChildren.push(
+      new ExternalHyperlink({
+        children: [
+          new TextRun({
+            text: 'GitHub',
+            style: 'Hyperlink',
+            size: 20,
+            color: '1A73E8',
+            underline: {}
+          })
+        ],
+        link: resumeData.personal.github
+      })
+    )
+  }
+
+  if (resumeData.personal.portfolio?.trim()) {
+    if (linksChildren.length > 0) {
+      linksChildren.push(new TextRun({ text: ' • ', size: 20 }))
+    }
+    linksChildren.push(
+      new ExternalHyperlink({
+        children: [
+          new TextRun({
+            text: 'Portfolio',
+            style: 'Hyperlink',
+            size: 20,
+            color: '1A73E8',
+            underline: {}
+          })
+        ],
+        link: resumeData.personal.portfolio
+      })
+    )
+  }
+
+  if (linksChildren.length > 0) {
     sections.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { after: 300 },
-        children: [
-          new TextRun({
-            text: linksParts.join(' • '),
-            size: 20,
-            color: '1A73E8'
-          })
-        ]
+        children: linksChildren
       })
     )
   }
@@ -303,14 +348,24 @@ export async function downloadResumeDOCX(resumeData, customFilename = null) {
         )
       }
 
-      // Credential URL
+      // Credential URL - clickable hyperlink
       if (cert.credentialUrl?.trim()) {
         sections.push(
           new Paragraph({
             children: [
               new TextRun({
-                text: `Verification: ${cert.credentialUrl}`,
-                color: '1A73E8'
+                text: 'Verification: '
+              }),
+              new ExternalHyperlink({
+                children: [
+                  new TextRun({
+                    text: cert.credentialUrl,
+                    style: 'Hyperlink',
+                    color: '1A73E8',
+                    underline: {}
+                  })
+                ],
+                link: cert.credentialUrl
               })
             ],
             spacing: { after: 100 }

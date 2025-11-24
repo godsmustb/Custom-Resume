@@ -33,7 +33,8 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: resumeElement.scrollWidth,
+      width: 1000, // Fixed width for consistent rendering
+      windowWidth: 1000,
       windowHeight: resumeElement.scrollHeight,
       onclone: (clonedDoc) => {
         // Ensure all content is visible in the clone
@@ -44,7 +45,32 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
           clonedElement.style.transform = 'none'
           clonedElement.style.boxShadow = 'none'
           clonedElement.style.maxWidth = 'none'
+          clonedElement.style.width = '1000px'
         }
+
+        // Fix two-column layouts - ensure grid/flexbox is preserved
+        const gridContainers = clonedDoc.querySelectorAll('.modern-grid, [class*="grid"], [class*="two-column"]')
+        gridContainers.forEach(grid => {
+          grid.style.display = 'grid'
+          grid.style.gridTemplateColumns = grid.style.gridTemplateColumns || '1fr 350px'
+          grid.style.gap = grid.style.gap || '2.5rem'
+          grid.style.width = '100%'
+        })
+
+        // Fix sidebar positioning issues
+        const sidebars = clonedDoc.querySelectorAll('.modern-sidebar, [class*="sidebar"]')
+        sidebars.forEach(sidebar => {
+          sidebar.style.position = 'relative' // Remove sticky positioning
+          sidebar.style.top = 'auto'
+          sidebar.style.height = 'auto'
+        })
+
+        // Ensure main content areas have proper width
+        const mainContent = clonedDoc.querySelectorAll('.modern-main-content, [class*="main-content"]')
+        mainContent.forEach(content => {
+          content.style.minWidth = '0'
+          content.style.width = '100%'
+        })
       }
     })
 
