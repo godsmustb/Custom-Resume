@@ -33,9 +33,7 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      width: 1000, // Fixed width for consistent rendering
-      windowWidth: 1000,
-      windowHeight: resumeElement.scrollHeight,
+      // Let html2canvas use the natural dimensions of the element
       onclone: (clonedDoc) => {
         // Ensure all content is visible in the clone
         const clonedElement = clonedDoc.querySelector('.template-renderer') ||
@@ -45,31 +43,23 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
           clonedElement.style.transform = 'none'
           clonedElement.style.boxShadow = 'none'
           clonedElement.style.maxWidth = 'none'
-          clonedElement.style.width = '1000px'
+          // Don't force width - let it use natural width
         }
 
-        // Fix two-column layouts - ensure grid/flexbox is preserved
-        const gridContainers = clonedDoc.querySelectorAll('.modern-grid, [class*="grid"], [class*="two-column"]')
-        gridContainers.forEach(grid => {
-          grid.style.display = 'grid'
-          grid.style.gridTemplateColumns = grid.style.gridTemplateColumns || '1fr 350px'
-          grid.style.gap = grid.style.gap || '2.5rem'
-          grid.style.width = '100%'
-        })
-
-        // Fix sidebar positioning issues
+        // Fix sidebar positioning issues (sticky breaks html2canvas)
         const sidebars = clonedDoc.querySelectorAll('.modern-sidebar, [class*="sidebar"]')
         sidebars.forEach(sidebar => {
           sidebar.style.position = 'relative' // Remove sticky positioning
           sidebar.style.top = 'auto'
-          sidebar.style.height = 'auto'
         })
 
-        // Ensure main content areas have proper width
-        const mainContent = clonedDoc.querySelectorAll('.modern-main-content, [class*="main-content"]')
-        mainContent.forEach(content => {
-          content.style.minWidth = '0'
-          content.style.width = '100%'
+        // Remove any overflow hidden that might clip content
+        const allElements = clonedDoc.querySelectorAll('*')
+        allElements.forEach(el => {
+          const computed = window.getComputedStyle(el)
+          if (computed.overflow === 'hidden') {
+            el.style.overflow = 'visible'
+          }
         })
       }
     })
@@ -88,9 +78,9 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     const imgHeight = (canvas.height * imgWidth) / canvas.width
     const pageHeight = 297 // A4 height in mm
 
-    // Create PDF
+    // Create PDF with correct orientation
     const pdf = new jsPDF({
-      orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
+      orientation: 'portrait', // Always use portrait for resumes
       unit: 'mm',
       format: 'a4',
       compress: true
@@ -99,20 +89,21 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     // Add image to PDF
     const imgData = canvas.toDataURL('image/jpeg', 0.95)
 
-    // Handle multi-page resumes
-    let heightLeft = imgHeight
-    let position = 0
+    // Handle multi-page resumes properly
+    let pageNumber = 0
+    let yPosition = 0
 
     // Add first page
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, '', 'FAST')
-    heightLeft -= pageHeight
+    pdf.addImage(imgData, 'JPEG', 0, yPosition, imgWidth, imgHeight, '', 'FAST')
 
-    // Add additional pages if needed
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
+    // Add additional pages if image is taller than one page
+    let heightRemaining = imgHeight - pageHeight
+    while (heightRemaining > 0) {
+      pageNumber++
+      yPosition = -pageHeight * pageNumber
       pdf.addPage()
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, '', 'FAST')
-      heightLeft -= pageHeight
+      pdf.addImage(imgData, 'JPEG', 0, yPosition, imgWidth, imgHeight, '', 'FAST')
+      heightRemaining -= pageHeight
     }
 
     // Add clickable link annotations on top of the image
@@ -204,13 +195,12 @@ function collectClickableLinks(resumeElement) {
 /**
  * Add clickable link annotations to the PDF
  * Maps DOM link positions to PDF coordinates
+ * Handles multi-page PDFs correctly
  */
 function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidth, pdfHeight) {
   if (!links || links.length === 0) return
 
-  // Calculate scale factors
-  // The canvas is rendered at scale:2, so we need to account for that
-  const canvasScale = 2 // This matches the html2canvas scale option
+  const pageHeight = 297 // A4 height in mm
   const containerWidth = resumeElement.offsetWidth
   const containerHeight = resumeElement.offsetHeight
 
@@ -226,9 +216,15 @@ function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidth, pdf
       const pdfLinkWidth = link.rect.width * scaleX
       const pdfLinkHeight = link.rect.height * scaleY
 
-      // Add clickable link annotation to PDF
-      // Note: jsPDF link uses (x, y, width, height) where y is from top
-      pdf.link(pdfX, pdfY, pdfLinkWidth, pdfLinkHeight, { url: link.url })
+      // Determine which page this link is on
+      const pageNumber = Math.floor(pdfY / pageHeight) + 1
+      const yOnPage = pdfY % pageHeight
+
+      // Set to the correct page
+      pdf.setPage(pageNumber)
+
+      // Add clickable link annotation to PDF at the correct position on this page
+      pdf.link(pdfX, yOnPage, pdfLinkWidth, pdfLinkHeight, { url: link.url })
     } catch (error) {
       console.warn('Failed to add link annotation:', error)
     }
