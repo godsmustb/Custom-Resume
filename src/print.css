@@ -170,10 +170,23 @@
     max-width: 100%;
   }
 
-  /* Modern Two Column */
-  .modern-two-column .sidebar {
-    background: #f5f5f5 !important;
+  /* Modern Two Column - Remove gray background and sticky positioning for print */
+  .modern-sidebar {
+    background: white !important;
     padding: 12pt;
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+  }
+
+  .modern-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 350px !important;
+    gap: 2.5rem !important;
+  }
+
+  .modern-main-content {
+    min-width: 0 !important;
   }
 
   /* Executive Layout */
