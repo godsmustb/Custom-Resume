@@ -7,18 +7,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Custom Resume** is an AI-powered resume builder built with React and Vite. It helps users create ATS-optimized resumes tailored to specific job descriptions using OpenAI's API. The application features 50+ professional resume templates, PDF generation/parsing, and real-time resume customization.
 
 **Current Status:** Production-ready with automated FTP deployment to Hostinger
-**Version:** 1.0.0
-**Last Documentation Update:** 2025-01-19
+**Version:** 2.0.0
+**Last Documentation Update:** 2025-11-25
 **Deployment Status:** ✅ Active (GitHub Actions → Hostinger FTP)
 
 ### Quick Stats
-- **Codebase Size:** ~8,000-10,000 lines of code
-- **Components:** 25+ React components
-- **Templates:** 50 professional templates (3 tiers)
+- **Codebase Size:** ~12,000-15,000 lines of code
+- **Components:** 35+ React components
+- **Resume Templates:** 50 professional templates (3 tiers)
+- **Cover Letter Templates:** 30 professional templates
 - **AI Functions:** 11 OpenAI GPT-4o-mini functions
 - **Skills Library:** 690+ categorized skills
 - **Job Titles:** 597 autocomplete suggestions
 - **Supported Formats:** PDF, DOCX (import), PDF & DOCX (export)
+- **Features:** Resume Builder, Cover Letter Builder, Multi-Resume Management, Cloud Sync
 
 ## Development Commands
 
@@ -276,6 +278,109 @@ Template architecture:
   * "John_Doe_Resume_20250119.pdf"
   * "John_Doe_Resume_20250119.docx"
 
+### Cover Letter Builder System
+
+**Architecture**: Template-based cover letter creation with cloud sync
+
+**Key Components:**
+- **CoverLetterTemplateBrowser** (`src/components/CoverLetterTemplateBrowser.jsx`):
+  - Grid view of 30 professional templates
+  - Filter by industry (Technology, Healthcare, Business, etc.)
+  - Filter by experience level (Entry-level, Mid-level, Senior)
+  - Search by job title
+  - Quick preview modal with full template content
+  - Real-time filtering and search
+
+- **CoverLetterEditor** (`src/components/CoverLetterEditor.jsx`):
+  - Split-view interface: form on left, live preview on right
+  - 12 customizable placeholder fields:
+    * Personal: [Your Name], [Your Email], [Your Phone], [Your Address]
+    * Company: [Company Name], [Hiring Manager Name], [Job Title]
+    * Content: [Specific Achievement], [Relevant Skill], [Years of Experience]
+    * Dates: [Today's Date], [Notice Period]
+  - Real-time placeholder replacement
+  - Yellow highlighting for unfilled placeholders
+  - Progress indicator showing completion percentage
+  - Auto-save to context state
+
+- **SavedCoverLetters** (`src/components/SavedCoverLetters.jsx`):
+  - Dashboard view of all saved letters
+  - Grid layout with template cards
+  - Actions: Edit, Duplicate, Delete
+  - Metadata: Job title, industry, creation date, last updated
+  - Content preview (first 200 characters)
+  - Load saved letter into editor
+
+**Cover Letter Services:**
+- **coverLetterService.js** (`src/services/coverLetterService.js`):
+  - `fetchTemplates()` - Load all 30 templates from Supabase
+  - `fetchUserLetters(userId)` - Get user's saved letters
+  - `saveUserLetter(userId, letterData)` - Save to cloud
+  - `updateUserLetter(letterId, letterData)` - Update existing
+  - `deleteUserLetter(letterId)` - Delete saved letter
+  - All operations use Supabase RLS for security
+
+- **coverLetterPDFService.js** (`src/services/coverLetterPDFService.js`):
+  - Professional PDF generation using jsPDF
+  - Business letter formatting:
+    * Header: Name, contact info, date (right-aligned)
+    * Recipient: Hiring manager, company (left-aligned)
+    * Subject line (bold)
+    * Body paragraphs with proper spacing
+    * Signature section
+  - Multi-page support with automatic pagination
+  - Custom filename support
+  - Proper margins and typography
+
+**Database Schema** (see `COVER_LETTER_SCHEMA.md`):
+- `cover_letter_templates` table:
+  - Stores 30 pre-written templates
+  - Fields: job_title, industry, experience_level, template_content, preview_text
+  - Indexed by industry, experience_level, job_title
+
+- `user_cover_letters` table:
+  - Stores user's saved and customized letters
+  - Fields: user_id, template_id, title, customized_content
+  - RLS policies: Users only access their own letters
+  - Cascading deletes when user is deleted
+
+**Template Structure:**
+Each template includes:
+```javascript
+{
+  id: "uuid",
+  jobTitle: "Software Engineer",
+  industry: "Technology",
+  experienceLevel: "Mid-level",
+  templateContent: "Dear [Hiring Manager Name]...",
+  previewText: "First 200 characters...",
+  metadata: {
+    keywords: [...],  // Industry-specific keywords
+    tone: "Professional",
+    length: "Medium"
+  }
+}
+```
+
+**Placeholder System:**
+- Templates use bracket syntax: `[Placeholder Name]`
+- Editor provides input fields for each unique placeholder
+- Real-time replacement as user types
+- Unfilled placeholders highlighted in yellow for visibility
+- Smart defaults for common fields (e.g., today's date)
+
+**Export Options:**
+1. **Copy to Clipboard**: One-click copy of final text
+2. **Download PDF**: Professional formatting via jsPDF
+3. **Save to Account**: Cloud sync via Supabase (requires authentication)
+
+**Use Cases:**
+- Browse 30 pre-written professional templates
+- Customize template with personal details
+- Save multiple versions for different job applications
+- Export as PDF for submission
+- Access saved letters from any device (cloud sync)
+
 ### Component Structure
 
 **Main App Flow**:
@@ -449,10 +554,16 @@ Based on codebase analysis, consider:
 
 ## Common Tasks
 
-**Add a new template:**
+**Add a new resume template:**
 1. Add template metadata to `TEMPLATE_CATALOG` in `src/data/templateCatalog.js`
 2. Map to existing layout or create new layout component in `src/components/templates/layouts/`
 3. Update `LAYOUT_MAP` in `TemplateRenderer.jsx` if using new layout
+
+**Add a new cover letter template:**
+1. Create template object with required fields (jobTitle, industry, experienceLevel, templateContent, previewText)
+2. Insert into Supabase `cover_letter_templates` table via SQL Editor
+3. Template will automatically appear in CoverLetterTemplateBrowser
+4. Use bracket syntax `[Placeholder Name]` for customizable fields
 
 **Modify AI prompts:**
 - Edit functions in `src/services/aiService.js`
@@ -465,11 +576,28 @@ Based on codebase analysis, consider:
 3. Add to context value object
 4. Create component in `src/components/`
 5. Update layout components to render new section
+6. Update `pdfDownloadService.js` and `docxDownloadService.js` for exports
 
 **Customize template styling:**
 - Edit CSS in layout components (`src/components/templates/layouts/`)
 - Use `customization` prop for color schemes and fonts
 - Apply CSS variables for theming consistency
+
+**Work with multi-resume management:**
+- Access via `ResumeManager` component (ControlPanel → "My Resumes")
+- Create new resume: `createNewResume(title)`
+- Switch resume: `switchResume(id)`
+- Rename: `renameResume(id, newTitle)`
+- Duplicate: `duplicateResume(id)`
+- Delete: `deleteCurrentResume()`
+- All operations sync to Supabase if authenticated
+
+**Manage cover letters:**
+- Access via `SavedCoverLetters` component
+- Save new letter: `saveUserLetter(userId, letterData)`
+- Update existing: `updateUserLetter(letterId, letterData)`
+- Delete: `deleteUserLetter(letterId)`
+- All operations require authentication
 
 ## Recent Changes & Git Workflow
 
@@ -477,21 +605,111 @@ Based on codebase analysis, consider:
 
 **Production Branch:** `main`
 **Testing Branches:** `claude/*` (auto-deploys for testing)
-**Current Working Branch:** `claude/ftp-hostinger-deployment-01TCwHDWhndCgnmnQu5ahd8p`
+**Current Working Branch:** `claude/update-docs-context-01EyJwHJZPAQK1mkcC3wHdTV`
 
-### Recent Major Changes (Last 5 Commits)
+### Recent Major Changes (Last 10 Commits)
 
 ```
-40321b9 - Test deployment with corrected FTP server IP address (removed ftp:// prefix)
-103ae65 - Add explicit FTP port 21 configuration to deployment workflow
-1834bb6 - Test deployment with corrected FTP server configuration
-e3da64c - Test deployment workflow with configured secrets
-5b26eb6 - Add automated FTP deployment to Hostinger via GitHub Actions
+7ca3dc8 - Merge pull request #21 from godsmustb/claude/fix-supabase-env-vars-019mZDfybE7BgNt7nptM4QoZ
+08e3b05 - Trigger Hostinger deployment - all PDF fixes ready
+5f5c482 - Fix two-column PDF: proper sizing, bottom margins, and page count
+041bfc8 - Fix template-aware PDF: proper sizing, formatting, and professional appearance
+8c69e14 - Fix template-aware PDF rendering as tiny photo instead of full resume
+a341e73 - Fix two-column template overlapping and multi-page issues
+008a9ac - Add clickable links to template-aware PDF exports
+cf83664 - Fix print preview: Remove gray sidebar background
+c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
+2a11426 - Update CLAUDE.md: Document template-aware export feature (Phase 4.3)
 ```
 
 ### Recent Feature Additions
 
-1. **Template-Aware Export** (Latest - Phase 4.3) ⭐⭐⭐
+1. **Cover Letter Builder** (Latest - Phase 5.0) ⭐⭐⭐⭐
+   - Complete cover letter creation system with 30 professional templates!
+   - **Template Browser**: Grid view with filters (industry, experience level, job title)
+   - **Live Editor**: Split-view interface with real-time preview
+   - **30 Pre-Written Templates**:
+     * 3 experience levels: Entry-level, Mid-level, Senior
+     * 15+ industries: Technology, Healthcare, Business, Marketing, Finance, etc.
+     * Pre-written with quantifiable achievements and action verbs
+   - **Export Options**:
+     * Copy to clipboard (one-click)
+     * Download as PDF (professional formatting)
+     * Save to cloud (Supabase sync for authenticated users)
+   - **My Saved Letters Dashboard**: View, edit, duplicate, delete saved letters
+   - **Smart Placeholder System**: 12 customizable fields with auto-replacement
+   - **Progress Indicator**: Shows remaining unfilled fields
+   - Files:
+     * `src/components/CoverLetterEditor.jsx` (244 lines)
+     * `src/components/CoverLetterTemplateBrowser.jsx` (371 lines)
+     * `src/components/SavedCoverLetters.jsx` (248 lines)
+     * `src/context/CoverLetterContext.jsx` (362 lines)
+     * `src/services/coverLetterService.js` (330 lines)
+     * `src/services/coverLetterPDFService.js` (254 lines)
+     * `src/types/coverLetterTypes.js` (180 lines)
+     * `src/data/coverLetterTemplates.json`
+   - Database:
+     * `cover_letter_templates` table (stores 30 templates)
+     * `user_cover_letters` table (stores user's saved letters)
+   - Documentation: `COVER_LETTER_FEATURE.md`, `COVER_LETTER_SCHEMA.md`
+   - Total: ~2,000 lines of new code
+
+2. **Multi-Resume Management** (Phase 5.1) ⭐⭐⭐
+   - Manage multiple resumes in the cloud for authenticated users!
+   - **Resume Manager Component** (`src/components/ResumeManager.jsx`, 220 lines):
+     * Create new resumes with custom titles
+     * Switch between saved resumes
+     * Rename existing resumes
+     * Duplicate resumes for variations
+     * Delete resumes
+     * View all resumes in grid layout
+   - **ResumeContext Enhancements**:
+     * `userResumes` - Array of all user's resumes
+     * `currentResumeId` - Active resume identifier
+     * `currentResumeTitle` - Active resume name
+     * `switchResume(id)` - Switch to different resume
+     * `createNewResume(title)` - Create new resume
+     * `deleteCurrentResume()` - Delete active resume
+     * `renameResume(id, newTitle)` - Rename resume
+     * `duplicateResume(id)` - Clone resume
+   - **Cloud Sync**: All resumes automatically sync to Supabase
+   - **localStorage Fallback**: Works offline, syncs when authenticated
+   - Use Case: Create different resumes for different job types or companies
+
+3. **Sync Status Indicator** (Phase 5.2) ⭐
+   - Real-time cloud synchronization status display!
+   - **SyncStatus Component** (`src/components/SyncStatus.jsx`, 61 lines):
+     * Visual indicator: 🔄 Saving... / ✅ Saved to cloud / ❌ Sync error
+     * Shows current resume title
+     * Only visible when user is authenticated
+     * Updates in real-time during save operations
+   - **Status States**:
+     * `syncing` - Currently saving to cloud
+     * `synced` - Successfully saved
+     * `error` - Sync failed (with error message)
+     * `idle` - Ready to save
+   - CSS: `src/components/SyncStatus.css`
+   - Integrated into main UI for user confidence
+
+4. **Enhanced Authentication UI** (Phase 5.3) ⭐⭐
+   - Completely refactored authentication components for better UX!
+   - **Separate Components**:
+     * `src/components/auth/Login.jsx` (137 lines) - Login form with email/password
+     * `src/components/auth/Register.jsx` (176 lines) - Registration form
+     * `src/components/auth/AuthModal.jsx` (17 lines) - Modal wrapper
+     * `src/components/auth/AuthCallback.jsx` (43 lines) - OAuth callback handler
+     * `src/components/auth/Auth.css` - Unified styling
+   - **Features**:
+     * Email/password authentication
+     * Google OAuth integration
+     * Password reset functionality
+     * Form validation with error messages
+     * Loading states during authentication
+     * Smooth transitions between login/register
+   - **Security**: All auth handled by Supabase with RLS policies
+   - Total: ~373 lines of auth UI code
+
+5. **Template-Aware Export** (Phase 4.3) ⭐⭐⭐
    - Exports now match your selected template design exactly!
    - Export Style Selection in download modal:
      * 🎨 Template Design - captures exact visual appearance
@@ -631,10 +849,13 @@ git push origin main
 ### Documentation Files
 
 ```
-/README.md          # User-facing documentation (437 lines)
-/CLAUDE.md          # This file - Claude instructions (comprehensive)
-/DEPLOYMENT.md      # Deployment guide (235 lines)
-/SUPABASE_SCHEMA.md # Supabase database schema & SQL migrations (349 lines)
+/README.md                    # User-facing documentation (437 lines)
+/CLAUDE.md                    # This file - Claude instructions (comprehensive)
+/DEPLOYMENT.md                # Deployment guide (235 lines)
+/SUPABASE_SCHEMA.md           # Supabase database schema & SQL migrations (349 lines)
+/COVER_LETTER_FEATURE.md      # Cover letter feature documentation
+/COVER_LETTER_SCHEMA.md       # Cover letter database schema & SQL
+/COMPLETE_DATABASE_SETUP.sql  # Complete database setup script
 ```
 
 ### Source Code Structure
@@ -650,35 +871,54 @@ git push origin main
         CreativeLayout.jsx            # Visual creative designs
         MinimalistLayout.jsx          # Scandinavian minimalist
       TemplateRenderer.jsx            # Layout selector with LAYOUT_MAP
+    /auth/                            # ⭐ NEW: Authentication components
+      Login.jsx                       # Login form (137 lines)
+      Register.jsx                    # Registration form (176 lines)
+      AuthModal.jsx                   # Modal wrapper (17 lines)
+      AuthCallback.jsx                # OAuth callback handler (43 lines)
+      Auth.css                        # Unified auth styling
     About.jsx                         # Professional summary section
     Certifications.jsx                # Certifications section
     Contact.jsx                       # Contact information
     ControlPanel.jsx                  # Main toolbar (Import/Templates/Edit/Download/Reset)
+    CoverLetterEditor.jsx             # ⭐ NEW: Cover letter live editor (244 lines)
+    CoverLetterTemplateBrowser.jsx    # ⭐ NEW: Cover letter template browser (371 lines)
+    DownloadModal.jsx                 # Download customization modal
     Education.jsx                     # Education section
     Experience.jsx                    # Work experience section
     Header.jsx                        # Personal info & contact details
     JobDescriptionInput.jsx           # AI analysis panel (914 lines!)
     PDFUpload.jsx                     # Legacy PDF-only upload
+    ResumeManager.jsx                 # ⭐ NEW: Multi-resume management (220 lines)
     ResumeUpload.jsx                  # Primary PDF/DOCX upload ⭐
+    SavedCoverLetters.jsx             # ⭐ NEW: Saved cover letters dashboard (248 lines)
     Skills.jsx                        # Skills section
+    SyncStatus.jsx                    # ⭐ NEW: Cloud sync indicator (61 lines)
     TemplateBrowser.jsx               # Template selection modal (291 lines)
     TemplateCustomization.jsx         # Color/font/spacing controls
     TemplatePreview.jsx               # Mini template preview
     TemplatePreviewModal.jsx          # Full-screen template preview
 
   /context/
-    ResumeContext.jsx                 # Central state manager (368 lines)
+    ResumeContext.jsx                 # Central state manager (enhanced)
                                       # - 35+ CRUD operations
                                       # - Dual persistence (localStorage + Supabase)
-                                      # - Backwards compatibility handling
+                                      # - Multi-resume management ⭐ NEW
+                                      # - Cloud sync status tracking ⭐ NEW
     AuthContext.jsx                   # Supabase authentication (108 lines)
                                       # - Email/password auth
                                       # - Google OAuth
                                       # - Session management
+    CoverLetterContext.jsx            # ⭐ NEW: Cover letter state manager (362 lines)
+                                      # - Template browsing & selection
+                                      # - Live editing with placeholders
+                                      # - Save/load/delete operations
+                                      # - Supabase cloud sync
 
   /data/
     sampleData.js                     # Default resume data
-    templateCatalog.js                # 50 template definitions (1,140 lines)
+    templateCatalog.js                # 50 resume template definitions (1,140 lines)
+    coverLetterTemplates.json         # ⭐ NEW: 30 cover letter templates
 
   /config/
     supabase.js                       # Supabase client configuration (17 lines)
@@ -693,6 +933,17 @@ git push origin main
     bulletPointSuggestions.js         # Bullet point library (260 lines)
                                       # - 15 role categories
                                       # - STAR method bullets
+    coverLetterService.js             # ⭐ NEW: Cover letter Supabase CRUD (330 lines)
+                                      # - Fetch templates from database
+                                      # - Save/load/delete user letters
+                                      # - Cloud synchronization
+    coverLetterPDFService.js          # ⭐ NEW: Cover letter PDF generation (254 lines)
+                                      # - Professional formatting
+                                      # - Multi-page support
+                                      # - jsPDF integration
+    docxDownloadService.js            # DOCX generation (370 lines)
+                                      # - Microsoft Word format
+                                      # - Fully editable output
     pdfDownloadService.js             # jsPDF PDF generation (331 lines)
                                       # - Multi-page support
                                       # - Professional formatting
@@ -706,20 +957,27 @@ git push origin main
                                       # - 20 skill categories
                                       # - 597 job titles
                                       # - Role-based suggestions
-    supabaseResumeService.js          # Supabase CRUD operations (140 lines)
+    supabaseResumeService.js          # Supabase CRUD operations (enhanced)
                                       # - Resume fetch/create/update/delete
                                       # - localStorage migration
-                                      # - Multi-resume support
+                                      # - Multi-resume support ⭐ ENHANCED
+    templateAwareExportService.js     # Template-aware PDF export (200+ lines)
+                                      # - Captures template design
+                                      # - html2canvas + jsPDF
+                                      # - Multi-page support
 
   /types/
-    templateTypes.js                  # Type definitions
+    templateTypes.js                  # Resume template type definitions
+    coverLetterTypes.js               # ⭐ NEW: Cover letter type definitions (180 lines)
 
   App.jsx                             # Root component
   main.jsx                            # React entry point
   index.css                           # Global styles
+  print.css                           # Print stylesheet (430 lines)
 
 /public/
   pdf.worker.min.mjs                  # PDF.js worker file
+  .htaccess                           # ⭐ NEW: Apache configuration for deployment
 ```
 
 ### Major Dependencies
@@ -1158,17 +1416,20 @@ npm run build
 
 **Short-term (Next 1-3 months):**
 - [ ] Backend API proxy for OpenAI (security)
-- [ ] DOCX export functionality
 - [ ] Template thumbnail generation
 - [ ] Resume version history (compare iterations)
 - [ ] A/B testing for bullet points
+- [ ] Cover letter AI customization (tailor to job description)
 
 **Mid-term (3-6 months):**
 - [x] User authentication & accounts ✅ (Supabase auth implemented)
 - [x] Cloud storage for resumes ✅ (Supabase integration complete)
+- [x] DOCX export functionality ✅ (Phase 4.1)
+- [x] Cover letter generator ✅ (Phase 5.0 - 30 templates)
+- [x] Multi-resume management ✅ (Phase 5.1)
 - [ ] Resume analytics (views, downloads)
-- [ ] Cover letter generator
 - [ ] LinkedIn profile optimization
+- [ ] Cover letter template customization (colors, fonts)
 
 **Long-term (6-12 months):**
 - [ ] Automated testing suite (Jest + React Testing Library)
@@ -1252,4 +1513,4 @@ npm run build
 
 ---
 
-**End of CLAUDE.md** | Last Updated: 2025-11-18 | Version: 1.0.0
+**End of CLAUDE.md** | Last Updated: 2025-11-25 | Version: 2.0.0

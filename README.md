@@ -1,6 +1,6 @@
-# Custom Resume - AI-Powered Resume Builder
+# Custom Resume - AI-Powered Resume & Cover Letter Builder
 
-An intelligent resume builder powered by OpenAI that helps you create ATS-optimized resumes tailored to specific job descriptions. Features 50+ professional templates, AI-driven content optimization, and automated deployment.
+An intelligent resume and cover letter builder powered by OpenAI that helps you create ATS-optimized resumes and professional cover letters tailored to specific job descriptions. Features 50+ resume templates, 30+ cover letter templates, AI-driven content optimization, and cloud sync.
 
 ## Features
 
@@ -12,6 +12,21 @@ An intelligent resume builder powered by OpenAI that helps you create ATS-optimi
   - 20 PREMIUM templates (executive & specialized)
   - Real-time template customization (colors, fonts, spacing)
 
+- **30+ Professional Cover Letter Templates** ⭐ NEW
+  - Pre-written templates for 15+ industries
+  - 3 experience levels (Entry, Mid, Senior)
+  - Live editor with real-time preview
+  - Smart placeholder system (12 customizable fields)
+  - Export as PDF or copy to clipboard
+  - Cloud sync for authenticated users
+
+- **Multi-Resume & Cover Letter Management** ⭐ NEW
+  - Create, save, and manage multiple resumes
+  - Save multiple cover letter variations
+  - Switch between documents seamlessly
+  - Cloud sync across devices (Supabase)
+  - Rename, duplicate, and delete functionality
+
 - **AI-Powered Resume Optimization**
   - OpenAI GPT-4o-mini integration
   - ATS score calculation (0-100%)
@@ -21,14 +36,18 @@ An intelligent resume builder powered by OpenAI that helps you create ATS-optimi
 
 - **Resume Import & Export**
   - PDF and DOCX file upload with AI parsing
-  - Professional PDF download with jsPDF
-  - Drag-and-drop resume upload interface
+  - Professional PDF & DOCX download
+  - Template-aware PDF export (matches template design)
+  - Print-optimized layouts
+  - Drag-and-drop upload interface
   - Automatic data extraction from existing resumes
 
-- **Real-Time Editing**
+- **Real-Time Editing & Cloud Sync**
   - Live preview of all changes
   - Inline editing for all resume sections
+  - Real-time sync status indicator
   - localStorage persistence (auto-save)
+  - Cloud backup via Supabase
   - Template switching with data preservation
 
 ## Getting Started
@@ -432,5 +451,5 @@ For issues, questions, or feature requests, please open an issue on the GitHub r
 
 **Live Demo:** [Your Hostinger domain here]
 
-**Version:** 1.0.0
-**Last Updated:** 2025-11-18
+**Version:** 2.0.0
+**Last Updated:** 2025-11-25
