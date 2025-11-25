@@ -166,6 +166,16 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     const pageWidthMM = 215.9 // Letter width in mm (8.5")
     const pageHeightMM = 279.4 // Letter height in mm (11")
 
+    // Add page margins (professional resume margins: 0.5" = 12.7mm)
+    const marginTopMM = 12.7
+    const marginBottomMM = 12.7
+    const marginLeftMM = 12.7
+    const marginRightMM = 12.7
+
+    // Calculate effective content area (page minus margins)
+    const contentWidthMM = pageWidthMM - marginLeftMM - marginRightMM
+    const contentHeightMM = pageHeightMM - marginTopMM - marginBottomMM
+
     // Create PDF with Letter format (standard for US resumes)
     const pdf = new jsPDF({
       orientation: 'portrait',
@@ -181,24 +191,24 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     const canvasActualWidth = canvas.width / 2
     const canvasActualHeight = canvas.height / 2
 
-    // Calculate image dimensions to fit Letter page width
-    // Scale image to fit page width exactly
-    const imgWidthMM = pageWidthMM
+    // Calculate image dimensions to fit content area (respecting margins)
+    const imgWidthMM = contentWidthMM
     const aspectRatio = canvasActualHeight / canvasActualWidth
     const imgHeightMM = imgWidthMM * aspectRatio
 
-    // Add image to fill the entire page width
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMM, imgHeightMM, '', 'FAST')
+    // Add image with margins on first page
+    pdf.addImage(imgData, 'PNG', marginLeftMM, marginTopMM, imgWidthMM, imgHeightMM, '', 'FAST')
 
-    // Handle multi-page resumes - only add pages if content exceeds page height
-    let remainingHeight = imgHeightMM - pageHeightMM
+    // Handle multi-page resumes - only add pages if content exceeds content height (not full page)
+    let remainingHeight = imgHeightMM - contentHeightMM
     let pageCount = 1
 
     while (remainingHeight > 0) {
       pdf.addPage()
-      const yOffset = -pageHeightMM * pageCount
-      pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidthMM, imgHeightMM, '', 'FAST')
-      remainingHeight -= pageHeightMM
+      // Offset by content height (not full page height) and add top margin
+      const yOffset = marginTopMM - (contentHeightMM * pageCount)
+      pdf.addImage(imgData, 'PNG', marginLeftMM, yOffset, imgWidthMM, imgHeightMM, '', 'FAST')
+      remainingHeight -= contentHeightMM
       pageCount++
     }
 
@@ -291,31 +301,36 @@ function collectClickableLinks(resumeElement) {
 /**
  * Add clickable link annotations to the PDF
  * Maps DOM link positions to PDF coordinates
- * Handles multi-page PDFs correctly
+ * Handles multi-page PDFs correctly with margins
  */
 function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidthMM, pdfHeightMM) {
   if (!links || links.length === 0) return
 
+  // Page dimensions and margins (must match PDF generation settings)
   const pageHeightMM = 279.4 // Letter height in mm
+  const marginTopMM = 12.7 // 0.5 inch top margin
+  const marginLeftMM = 12.7 // 0.5 inch left margin
+  const marginBottomMM = 12.7
+  const contentHeightMM = pageHeightMM - marginTopMM - marginBottomMM
+
   const containerWidth = resumeElement.offsetWidth
   const containerHeight = resumeElement.scrollHeight
 
-  // Calculate scale from DOM pixels to PDF mm
-  // pdfWidthMM is the full page width, containerWidth is the DOM width
+  // Calculate scale from DOM pixels to PDF mm (content area, not full page)
   const scaleX = pdfWidthMM / containerWidth
   const scaleY = pdfHeightMM / containerHeight
 
   links.forEach(link => {
     try {
       // Convert DOM coordinates to PDF coordinates
-      const pdfX = link.rect.x * scaleX
-      const pdfY = link.rect.y * scaleY
+      const pdfX = (link.rect.x * scaleX) + marginLeftMM // Add left margin offset
+      const pdfY = (link.rect.y * scaleY) + marginTopMM // Add top margin offset
       const pdfLinkWidth = link.rect.width * scaleX
       const pdfLinkHeight = link.rect.height * scaleY
 
-      // Determine which page this link is on
-      const pageNumber = Math.floor(pdfY / pageHeightMM) + 1
-      const yOnPage = pdfY % pageHeightMM
+      // Determine which page this link is on (based on content height, not full page)
+      const pageNumber = Math.floor((link.rect.y * scaleY) / contentHeightMM) + 1
+      const yOnPage = ((link.rect.y * scaleY) % contentHeightMM) + marginTopMM
 
       // Only add link if it's within valid page range
       if (pageNumber <= pdf.internal.getNumberOfPages()) {
