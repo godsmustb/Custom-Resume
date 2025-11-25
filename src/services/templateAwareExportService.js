@@ -37,9 +37,10 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     const LETTER_WIDTH_PX = 816 // 8.5 inches at 96 DPI
     const LETTER_HEIGHT_PX = 1056 // 11 inches at 96 DPI
 
-    // For two-column layouts, use much wider canvas to prevent responsive breakpoint (900px)
+    // For two-column layouts, use slightly wider canvas to prevent responsive breakpoint (900px)
+    // Use 950px - just above breakpoint but not too wide (prevents tiny text)
     const isTwoColumn = resumeElement.querySelector('.modern-grid, .modern-two-column, [class*="two-column"]') !== null
-    const canvasWidth = isTwoColumn ? 1200 : LETTER_WIDTH_PX // Increased to 1200px to stay well above 900px breakpoint
+    const canvasWidth = isTwoColumn ? 950 : LETTER_WIDTH_PX
 
     // Capture the resume at high quality with proper dimensions
     const canvas = await html2canvas(resumeElement, {
@@ -69,14 +70,13 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
           clonedResume.style.boxShadow = 'none'
           clonedResume.style.margin = '0'
 
-          // Moderate padding for professional appearance (0.4 inch = ~38px)
-          clonedResume.style.padding = '38px'
-          clonedResume.style.paddingBottom = '38px'
+          // No internal padding - PDF margins will handle spacing
+          clonedResume.style.padding = '0'
           clonedResume.style.boxSizing = 'border-box'
 
-          // Moderate font size reduction (not too aggressive)
-          clonedResume.style.fontSize = '92%'
-          clonedResume.style.lineHeight = '1.35'
+          // Keep original font size (100%) for professional appearance
+          clonedResume.style.fontSize = '100%'
+          clonedResume.style.lineHeight = '1.5' // Standard professional line height
         }
 
         // Fix sidebar positioning (sticky/fixed breaks html2canvas)
@@ -85,16 +85,16 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
           sidebar.style.position = 'relative !important'
           sidebar.style.top = 'auto !important'
           sidebar.style.height = 'auto !important'
-          sidebar.style.fontSize = '90%'
-          sidebar.style.lineHeight = '1.3'
+          sidebar.style.fontSize = '95%' // Keep closer to original size
+          sidebar.style.lineHeight = '1.4'
         })
 
         // Ensure grid layouts are preserved - match original CSS exactly
         const grids = clonedDoc.querySelectorAll('.modern-grid, [class*="grid"]')
         grids.forEach(grid => {
           grid.style.display = 'grid !important'
-          grid.style.gridTemplateColumns = '1fr 350px !important' // Match original CSS (350px sidebar)
-          grid.style.gap = '2rem !important' // Moderate gap
+          grid.style.gridTemplateColumns = '1fr 300px !important' // Reduce sidebar to 300px to fit better
+          grid.style.gap = '1.5rem !important' // Tighter gap to save space
           grid.style.minWidth = '900px !important' // Prevent responsive collapse
         })
 
@@ -105,25 +105,25 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
           main.style.overflow = 'visible !important'
         })
 
-        // Moderate section spacing reduction (not too aggressive)
+        // Modest section spacing reduction to fit content without being cramped
         const sections = clonedDoc.querySelectorAll('.section, [class*="section"]')
         sections.forEach(section => {
           const currentMargin = parseFloat(window.getComputedStyle(section).marginBottom) || 0
-          section.style.marginBottom = `${currentMargin * 0.75}px`
+          section.style.marginBottom = `${currentMargin * 0.85}px` // Less aggressive reduction
         })
 
-        // Moderate heading spacing
+        // Keep heading spacing natural
         const headings = clonedDoc.querySelectorAll('h1, h2, h3, h4, h5, h6')
         headings.forEach(heading => {
-          heading.style.marginTop = '0.4em'
-          heading.style.marginBottom = '0.4em'
+          heading.style.marginTop = '0.5em'
+          heading.style.marginBottom = '0.5em'
         })
 
-        // Moderate paragraph spacing
+        // Keep paragraph spacing natural
         const paragraphs = clonedDoc.querySelectorAll('p')
         paragraphs.forEach(p => {
-          p.style.marginTop = '0.3em'
-          p.style.marginBottom = '0.3em'
+          p.style.marginTop = '0.4em'
+          p.style.marginBottom = '0.4em'
         })
 
         // Disable responsive media queries by adding a style tag
@@ -166,11 +166,12 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     const pageWidthMM = 215.9 // Letter width in mm (8.5")
     const pageHeightMM = 279.4 // Letter height in mm (11")
 
-    // Add page margins (professional resume margins: 0.5" = 12.7mm)
-    const marginTopMM = 12.7
-    const marginBottomMM = 12.7
-    const marginLeftMM = 12.7
-    const marginRightMM = 12.7
+    // Add page margins (professional resume margins: 0.4" = 10.16mm)
+    // Slightly smaller than 0.5" to provide more content space while remaining professional
+    const marginTopMM = 10.16
+    const marginBottomMM = 10.16
+    const marginLeftMM = 10.16
+    const marginRightMM = 10.16
 
     // Calculate effective content area (page minus margins)
     const contentWidthMM = pageWidthMM - marginLeftMM - marginRightMM
@@ -203,7 +204,10 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     let remainingHeight = imgHeightMM - contentHeightMM
     let pageCount = 1
 
-    while (remainingHeight > 0) {
+    // Only add pages if there's meaningful content (> 20mm threshold to avoid blank pages)
+    const MIN_PAGE_CONTENT_MM = 20
+
+    while (remainingHeight > MIN_PAGE_CONTENT_MM) {
       pdf.addPage()
       // Offset by content height (not full page height) and add top margin
       const yOffset = marginTopMM - (contentHeightMM * pageCount)
@@ -308,9 +312,9 @@ function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidthMM, p
 
   // Page dimensions and margins (must match PDF generation settings)
   const pageHeightMM = 279.4 // Letter height in mm
-  const marginTopMM = 12.7 // 0.5 inch top margin
-  const marginLeftMM = 12.7 // 0.5 inch left margin
-  const marginBottomMM = 12.7
+  const marginTopMM = 10.16 // 0.4 inch top margin
+  const marginLeftMM = 10.16 // 0.4 inch left margin
+  const marginBottomMM = 10.16
   const contentHeightMM = pageHeightMM - marginTopMM - marginBottomMM
 
   const containerWidth = resumeElement.offsetWidth
