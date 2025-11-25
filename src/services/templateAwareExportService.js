@@ -37,9 +37,9 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     const LETTER_WIDTH_PX = 816 // 8.5 inches at 96 DPI
     const LETTER_HEIGHT_PX = 1056 // 11 inches at 96 DPI
 
-    // For two-column layouts, use wider canvas to prevent column wrapping
+    // For two-column layouts, use much wider canvas to prevent responsive breakpoint (900px)
     const isTwoColumn = resumeElement.querySelector('.modern-grid, .modern-two-column, [class*="two-column"]') !== null
-    const canvasWidth = isTwoColumn ? 1000 : LETTER_WIDTH_PX // Increased from 900 to 1000
+    const canvasWidth = isTwoColumn ? 1200 : LETTER_WIDTH_PX // Increased to 1200px to stay well above 900px breakpoint
 
     // Capture the resume at high quality with proper dimensions
     const canvas = await html2canvas(resumeElement, {
@@ -69,57 +69,79 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
           clonedResume.style.boxShadow = 'none'
           clonedResume.style.margin = '0'
 
-          // Very compact padding (0.3 inch = ~29px)
-          clonedResume.style.padding = '29px'
-          clonedResume.style.paddingBottom = '29px' // Ensure bottom margin
+          // Moderate padding for professional appearance (0.4 inch = ~38px)
+          clonedResume.style.padding = '38px'
+          clonedResume.style.paddingBottom = '38px'
           clonedResume.style.boxSizing = 'border-box'
 
-          // Reduce font sizes more aggressively
-          clonedResume.style.fontSize = '88%' // Reduced from 95%
-          clonedResume.style.lineHeight = '1.3' // Tighter line height
+          // Moderate font size reduction (not too aggressive)
+          clonedResume.style.fontSize = '92%'
+          clonedResume.style.lineHeight = '1.35'
         }
 
         // Fix sidebar positioning (sticky/fixed breaks html2canvas)
         const sidebars = clonedDoc.querySelectorAll('.modern-sidebar, [class*="sidebar"]')
         sidebars.forEach(sidebar => {
-          sidebar.style.position = 'relative'
-          sidebar.style.top = 'auto'
-          sidebar.style.height = 'auto'
-          // More compact sidebar
-          sidebar.style.fontSize = '85%' // Reduced from 90%
-          sidebar.style.lineHeight = '1.2'
+          sidebar.style.position = 'relative !important'
+          sidebar.style.top = 'auto !important'
+          sidebar.style.height = 'auto !important'
+          sidebar.style.fontSize = '90%'
+          sidebar.style.lineHeight = '1.3'
         })
 
-        // Ensure grid layouts are preserved with tighter spacing
+        // Ensure grid layouts are preserved - match original CSS exactly
         const grids = clonedDoc.querySelectorAll('.modern-grid, [class*="grid"]')
         grids.forEach(grid => {
-          grid.style.display = 'grid'
-          // Much tighter gap
-          grid.style.gap = '1rem' // Reduced from 1.5rem
-          // Force grid columns to not collapse
-          grid.style.gridTemplateColumns = '1fr 300px'
+          grid.style.display = 'grid !important'
+          grid.style.gridTemplateColumns = '1fr 350px !important' // Match original CSS (350px sidebar)
+          grid.style.gap = '2rem !important' // Moderate gap
+          grid.style.minWidth = '900px !important' // Prevent responsive collapse
         })
 
-        // Very compact section spacing
+        // Force main content to respect grid
+        const mainContents = clonedDoc.querySelectorAll('.modern-main-content, [class*="main-content"]')
+        mainContents.forEach(main => {
+          main.style.minWidth = '0 !important'
+          main.style.overflow = 'visible !important'
+        })
+
+        // Moderate section spacing reduction (not too aggressive)
         const sections = clonedDoc.querySelectorAll('.section, [class*="section"]')
         sections.forEach(section => {
           const currentMargin = parseFloat(window.getComputedStyle(section).marginBottom) || 0
-          section.style.marginBottom = `${currentMargin * 0.6}px` // Reduced from 0.8
+          section.style.marginBottom = `${currentMargin * 0.75}px`
         })
 
-        // Compact headings
+        // Moderate heading spacing
         const headings = clonedDoc.querySelectorAll('h1, h2, h3, h4, h5, h6')
         headings.forEach(heading => {
-          heading.style.marginTop = '0.3em'
-          heading.style.marginBottom = '0.3em'
+          heading.style.marginTop = '0.4em'
+          heading.style.marginBottom = '0.4em'
         })
 
-        // Compact paragraphs
+        // Moderate paragraph spacing
         const paragraphs = clonedDoc.querySelectorAll('p')
         paragraphs.forEach(p => {
-          p.style.marginTop = '0.2em'
-          p.style.marginBottom = '0.2em'
+          p.style.marginTop = '0.3em'
+          p.style.marginBottom = '0.3em'
         })
+
+        // Disable responsive media queries by adding a style tag
+        const styleTag = clonedDoc.createElement('style')
+        styleTag.textContent = `
+          /* Override responsive breakpoints for PDF export */
+          @media (max-width: 900px) {
+            .modern-grid {
+              grid-template-columns: 1fr 350px !important;
+            }
+          }
+          /* Ensure grid always displays as two columns */
+          .modern-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 350px !important;
+          }
+        `
+        clonedDoc.head.appendChild(styleTag)
 
         // Remove overflow hidden to prevent clipping
         const allElements = clonedDoc.querySelectorAll('*')
