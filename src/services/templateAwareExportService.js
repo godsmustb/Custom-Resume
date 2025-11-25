@@ -27,57 +27,64 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
       el.style.display = 'none'
     })
 
-    // Get current dimensions before capture
-    const originalWidth = resumeElement.offsetWidth
-    const originalHeight = resumeElement.scrollHeight
+    // Scroll to top to ensure we capture from the beginning
+    window.scrollTo(0, 0)
 
-    // Set optimal width for A4 format (210mm = ~794px at 96dpi)
-    const targetWidth = 1000 // Good size for A4 resume
-    const scale = targetWidth / originalWidth
+    // Calculate proper dimensions for A4 resume (8.5" x 11" at 96 DPI)
+    const A4_WIDTH_PX = 816 // 8.5 inches at 96 DPI
+    const A4_HEIGHT_PX = 1056 // 11 inches at 96 DPI
 
-    // Capture the resume at high quality
+    // Capture the resume at high quality with proper A4 dimensions
     const canvas = await html2canvas(resumeElement, {
-      scale: 2, // Higher quality
+      scale: 2, // 2x for high quality
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      width: targetWidth,
-      height: originalHeight * scale,
-      windowWidth: targetWidth,
-      windowHeight: originalHeight * scale,
-      onclone: (clonedDoc, clonedElement) => {
+      width: A4_WIDTH_PX,
+      height: resumeElement.scrollHeight,
+      windowWidth: A4_WIDTH_PX,
+      windowHeight: resumeElement.scrollHeight,
+      x: 0,
+      y: 0,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      onclone: (clonedDoc) => {
         // Find the resume element in the cloned document
         const clonedResume = clonedDoc.querySelector('.template-renderer') ||
                             clonedDoc.querySelector('.resume-container') ||
                             clonedDoc.querySelector('[class*="template"]')
 
         if (clonedResume) {
-          // Set explicit width for proper rendering
-          clonedResume.style.width = `${targetWidth}px`
+          // Set width to match A4 paper
+          clonedResume.style.width = `${A4_WIDTH_PX}px`
           clonedResume.style.maxWidth = 'none'
+          clonedResume.style.minHeight = `${A4_HEIGHT_PX}px`
           clonedResume.style.transform = 'none'
           clonedResume.style.boxShadow = 'none'
           clonedResume.style.margin = '0'
-          clonedResume.style.padding = '40px' // Add padding for better appearance
+          clonedResume.style.padding = '48px' // Standard resume margins (~0.5 inch)
+          clonedResume.style.boxSizing = 'border-box'
         }
 
-        // Fix sidebar positioning issues (sticky breaks html2canvas)
+        // Fix sidebar positioning (sticky/fixed breaks html2canvas)
         const sidebars = clonedDoc.querySelectorAll('.modern-sidebar, [class*="sidebar"]')
         sidebars.forEach(sidebar => {
           sidebar.style.position = 'relative'
           sidebar.style.top = 'auto'
+          sidebar.style.height = 'auto'
         })
 
-        // Ensure grid layouts work properly
+        // Ensure grid layouts are preserved
         const grids = clonedDoc.querySelectorAll('.modern-grid, [class*="grid"]')
         grids.forEach(grid => {
           grid.style.display = 'grid'
+          // Don't override grid-template-columns - let template's CSS handle it
         })
 
-        // Remove any overflow hidden that might clip content
+        // Remove overflow hidden to prevent clipping
         const allElements = clonedDoc.querySelectorAll('*')
         allElements.forEach(el => {
-          if (el.style.overflow === 'hidden') {
+          if (el.style.overflow === 'hidden' && !el.classList.contains('modern-grid')) {
             el.style.overflow = 'visible'
           }
         })
@@ -93,49 +100,47 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
       delete el.dataset.originalDisplay
     })
 
-    // Calculate PDF dimensions
-    const pageWidth = 210 // A4 width in mm
-    const pageHeight = 297 // A4 height in mm
+    // Calculate PDF dimensions for Letter size (8.5" x 11")
+    const pageWidthMM = 215.9 // Letter width in mm (8.5")
+    const pageHeightMM = 279.4 // Letter height in mm (11")
 
-    // Calculate image dimensions to fit A4 page
-    // Canvas dimensions already account for scale:2
-    const canvasAspectRatio = canvas.width / canvas.height
-
-    // Use full page width minus margins
-    const marginMM = 10 // 10mm margins on each side
-    const pdfWidth = pageWidth - (2 * marginMM)
-    const pdfHeight = pdfWidth / canvasAspectRatio
-
-    // Create PDF with correct orientation
+    // Create PDF with Letter format (standard for US resumes)
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4',
+      format: 'letter', // US Letter size
       compress: true
     })
 
-    // Add image to PDF
-    const imgData = canvas.toDataURL('image/jpeg', 0.95)
+    // Convert canvas to image data
+    const imgData = canvas.toDataURL('image/png', 1.0) // Use PNG for better quality
 
-    // Handle multi-page resumes properly
-    let pageNumber = 0
-    const xMargin = marginMM
+    // Calculate scaling - canvas is at scale:2, so actual width is canvas.width/2
+    const canvasActualWidth = canvas.width / 2
+    const canvasActualHeight = canvas.height / 2
 
-    // Add first page - centered with margins
-    pdf.addImage(imgData, 'JPEG', xMargin, marginMM, pdfWidth, pdfHeight, '', 'FAST')
+    // Convert canvas pixels to mm (96 DPI: 1 inch = 25.4mm = 96px)
+    const pxToMM = 25.4 / 96
+    const imgWidthMM = canvasActualWidth * pxToMM
+    const imgHeightMM = canvasActualHeight * pxToMM
 
-    // Add additional pages if image is taller than one page
-    let heightRemaining = pdfHeight - (pageHeight - 2 * marginMM)
-    while (heightRemaining > 0) {
-      pageNumber++
-      const yPosition = marginMM - ((pageHeight - marginMM) * pageNumber)
+    // Add image to fill the entire page (no extra margins - margins are in the canvas)
+    pdf.addImage(imgData, 'PNG', 0, 0, pageWidthMM, imgHeightMM, '', 'FAST')
+
+    // Handle multi-page resumes
+    let currentHeight = imgHeightMM
+    let pageCount = 1
+
+    while (currentHeight > pageHeightMM) {
       pdf.addPage()
-      pdf.addImage(imgData, 'JPEG', xMargin, yPosition, pdfWidth, pdfHeight, '', 'FAST')
-      heightRemaining -= (pageHeight - 2 * marginMM)
+      const yOffset = -pageHeightMM * pageCount
+      pdf.addImage(imgData, 'PNG', 0, yOffset, pageWidthMM, imgHeightMM, '', 'FAST')
+      currentHeight -= pageHeightMM
+      pageCount++
     }
 
-    // Add clickable link annotations on top of the image
-    addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidth, pdfHeight, marginMM)
+    // Add clickable link annotations
+    addClickableLinksToPDF(pdf, links, resumeElement, canvas, imgWidthMM, imgHeightMM)
 
     // Generate filename
     const fileName = customFilename
@@ -223,37 +228,37 @@ function collectClickableLinks(resumeElement) {
 /**
  * Add clickable link annotations to the PDF
  * Maps DOM link positions to PDF coordinates
- * Handles multi-page PDFs correctly with margins
+ * Handles multi-page PDFs correctly
  */
-function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidth, pdfHeight, marginMM) {
+function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidthMM, pdfHeightMM) {
   if (!links || links.length === 0) return
 
-  const pageHeight = 297 // A4 height in mm
-  const usablePageHeight = pageHeight - (2 * marginMM)
+  const pageHeightMM = 279.4 // Letter height in mm
   const containerWidth = resumeElement.offsetWidth
-  const containerHeight = resumeElement.offsetHeight
+  const containerHeight = resumeElement.scrollHeight
 
-  // Scale from DOM pixels to PDF mm
-  const scaleX = pdfWidth / containerWidth
-  const scaleY = pdfHeight / containerHeight
+  // Calculate scale from DOM pixels to PDF mm
+  const pxToMM = 25.4 / 96 // 96 DPI conversion
+  const scaleX = pxToMM
+  const scaleY = pxToMM
 
   links.forEach(link => {
     try {
       // Convert DOM coordinates to PDF coordinates
-      const pdfX = (link.rect.x * scaleX) + marginMM // Add margin offset
+      const pdfX = link.rect.x * scaleX
       const pdfY = link.rect.y * scaleY
       const pdfLinkWidth = link.rect.width * scaleX
       const pdfLinkHeight = link.rect.height * scaleY
 
       // Determine which page this link is on
-      const pageNumber = Math.floor(pdfY / usablePageHeight) + 1
-      const yOnPage = (pdfY % usablePageHeight) + marginMM // Add margin offset
+      const pageNumber = Math.floor(pdfY / pageHeightMM) + 1
+      const yOnPage = pdfY % pageHeightMM
 
-      // Set to the correct page
-      pdf.setPage(pageNumber)
-
-      // Add clickable link annotation to PDF at the correct position on this page
-      pdf.link(pdfX, yOnPage, pdfLinkWidth, pdfLinkHeight, { url: link.url })
+      // Only add link if it's within valid page range
+      if (pageNumber <= pdf.internal.getNumberOfPages()) {
+        pdf.setPage(pageNumber)
+        pdf.link(pdfX, yOnPage, pdfLinkWidth, pdfLinkHeight, { url: link.url })
+      }
     } catch (error) {
       console.warn('Failed to add link annotation:', error)
     }
