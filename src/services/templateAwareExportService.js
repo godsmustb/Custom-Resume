@@ -30,19 +30,26 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     // Scroll to top to ensure we capture from the beginning
     window.scrollTo(0, 0)
 
-    // Calculate proper dimensions for A4 resume (8.5" x 11" at 96 DPI)
-    const A4_WIDTH_PX = 816 // 8.5 inches at 96 DPI
-    const A4_HEIGHT_PX = 1056 // 11 inches at 96 DPI
+    // Wait a moment for scroll to complete
+    await new Promise(resolve => setTimeout(resolve, 100))
 
-    // Capture the resume at high quality with proper A4 dimensions
+    // Calculate proper dimensions for US Letter resume (8.5" x 11" at 96 DPI)
+    const LETTER_WIDTH_PX = 816 // 8.5 inches at 96 DPI
+    const LETTER_HEIGHT_PX = 1056 // 11 inches at 96 DPI
+
+    // For two-column layouts, use slightly wider canvas for better fit
+    const isTwoColumn = resumeElement.querySelector('.modern-grid, .modern-two-column, [class*="two-column"]') !== null
+    const canvasWidth = isTwoColumn ? 900 : LETTER_WIDTH_PX
+
+    // Capture the resume at high quality with proper dimensions
     const canvas = await html2canvas(resumeElement, {
       scale: 2, // 2x for high quality
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      width: A4_WIDTH_PX,
+      width: canvasWidth,
       height: resumeElement.scrollHeight,
-      windowWidth: A4_WIDTH_PX,
+      windowWidth: canvasWidth,
       windowHeight: resumeElement.scrollHeight,
       x: 0,
       y: 0,
@@ -55,15 +62,20 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
                             clonedDoc.querySelector('[class*="template"]')
 
         if (clonedResume) {
-          // Set width to match A4 paper
-          clonedResume.style.width = `${A4_WIDTH_PX}px`
+          // Set width to match canvas
+          clonedResume.style.width = `${canvasWidth}px`
           clonedResume.style.maxWidth = 'none'
-          clonedResume.style.minHeight = `${A4_HEIGHT_PX}px`
           clonedResume.style.transform = 'none'
           clonedResume.style.boxShadow = 'none'
           clonedResume.style.margin = '0'
-          clonedResume.style.padding = '48px' // Standard resume margins (~0.5 inch)
+
+          // Reduced padding for more compact layout (0.4 inch = ~38px)
+          clonedResume.style.padding = '38px'
+          clonedResume.style.paddingBottom = '38px' // Ensure bottom margin
           clonedResume.style.boxSizing = 'border-box'
+
+          // Slightly reduce font sizes for more compact layout
+          clonedResume.style.fontSize = '95%'
         }
 
         // Fix sidebar positioning (sticky/fixed breaks html2canvas)
@@ -72,13 +84,23 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
           sidebar.style.position = 'relative'
           sidebar.style.top = 'auto'
           sidebar.style.height = 'auto'
+          // Reduce spacing in sidebar
+          sidebar.style.fontSize = '90%'
         })
 
-        // Ensure grid layouts are preserved
+        // Ensure grid layouts are preserved with proper spacing
         const grids = clonedDoc.querySelectorAll('.modern-grid, [class*="grid"]')
         grids.forEach(grid => {
           grid.style.display = 'grid'
-          // Don't override grid-template-columns - let template's CSS handle it
+          // Reduce gap for more compact layout
+          grid.style.gap = '1.5rem'
+        })
+
+        // Compact section spacing
+        const sections = clonedDoc.querySelectorAll('.section, [class*="section"]')
+        sections.forEach(section => {
+          const currentMargin = parseFloat(window.getComputedStyle(section).marginBottom) || 0
+          section.style.marginBottom = `${currentMargin * 0.8}px`
         })
 
         // Remove overflow hidden to prevent clipping
@@ -119,23 +141,24 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     const canvasActualWidth = canvas.width / 2
     const canvasActualHeight = canvas.height / 2
 
-    // Convert canvas pixels to mm (96 DPI: 1 inch = 25.4mm = 96px)
-    const pxToMM = 25.4 / 96
-    const imgWidthMM = canvasActualWidth * pxToMM
-    const imgHeightMM = canvasActualHeight * pxToMM
+    // Calculate image dimensions to fit Letter page width
+    // Scale image to fit page width exactly
+    const imgWidthMM = pageWidthMM
+    const aspectRatio = canvasActualHeight / canvasActualWidth
+    const imgHeightMM = imgWidthMM * aspectRatio
 
-    // Add image to fill the entire page (no extra margins - margins are in the canvas)
-    pdf.addImage(imgData, 'PNG', 0, 0, pageWidthMM, imgHeightMM, '', 'FAST')
+    // Add image to fill the entire page width
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMM, imgHeightMM, '', 'FAST')
 
-    // Handle multi-page resumes
-    let currentHeight = imgHeightMM
+    // Handle multi-page resumes - only add pages if content exceeds page height
+    let remainingHeight = imgHeightMM - pageHeightMM
     let pageCount = 1
 
-    while (currentHeight > pageHeightMM) {
+    while (remainingHeight > 0) {
       pdf.addPage()
       const yOffset = -pageHeightMM * pageCount
-      pdf.addImage(imgData, 'PNG', 0, yOffset, pageWidthMM, imgHeightMM, '', 'FAST')
-      currentHeight -= pageHeightMM
+      pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidthMM, imgHeightMM, '', 'FAST')
+      remainingHeight -= pageHeightMM
       pageCount++
     }
 
@@ -238,9 +261,9 @@ function addClickableLinksToPDF(pdf, links, resumeElement, canvas, pdfWidthMM, p
   const containerHeight = resumeElement.scrollHeight
 
   // Calculate scale from DOM pixels to PDF mm
-  const pxToMM = 25.4 / 96 // 96 DPI conversion
-  const scaleX = pxToMM
-  const scaleY = pxToMM
+  // pdfWidthMM is the full page width, containerWidth is the DOM width
+  const scaleX = pdfWidthMM / containerWidth
+  const scaleY = pdfHeightMM / containerHeight
 
   links.forEach(link => {
     try {
