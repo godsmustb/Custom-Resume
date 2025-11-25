@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **AI Functions:** 11 OpenAI GPT-4o-mini functions
 - **Skills Library:** 690+ categorized skills
 - **Job Titles:** 597 autocomplete suggestions
-- **Supported Formats:** PDF, DOCX (import), PDF (export)
+- **Supported Formats:** PDF, DOCX (import), PDF & DOCX (export)
 
 ## Development Commands
 
@@ -245,16 +245,36 @@ Template architecture:
 - Supports multi-page resumes with automatic pagination
 - Styled sections with color-coded headers
 - Word wrapping and spacing optimization
-- **NEW**: Accepts custom filename parameter for user-defined filenames
+- Accepts custom filename parameter for user-defined filenames
+
+**DOCX Generation** (`src/services/docxDownloadService.js`): ⭐ NEW
+- Uses docx library (by dolanmiu) for Microsoft Word document creation
+- Professional formatting with:
+  * Centered header with name and title
+  * Color-coded section headers with bottom borders
+  * Proper heading hierarchy (H1, H2)
+  * Styled bullet points for experience descriptions
+  * Clickable social links (LinkedIn, GitHub, Portfolio)
+  * Consistent spacing and typography
+- Fully editable in Microsoft Word, Google Docs, LibreOffice
+- Smaller file sizes (~30-150 KB)
+- ATS-compatible like PDF
+- Async blob generation and download
+- Accepts custom filename parameter
 
 **Download Customization** (`src/components/DownloadModal.jsx`):
-- Professional modal UI for filename customization before download
-- **3 Quick Options**: Name Only, Name+Date, Date+Name
+- Professional modal UI for filename and format customization
+- **Format Selection**: PDF or DOCX toggle buttons
+- **3 Quick Filename Options**: Name Only, Name+Date, Date+Name
 - Custom filename input with real-time preview
 - Smart sanitization (removes invalid characters, converts spaces to underscores)
-- File format info display (PDF, estimated size, ATS compatibility)
+- Dynamic file info based on selected format:
+  * PDF: "All devices & ATS systems", "Not editable"
+  * DOCX: "Microsoft Word, Google Docs & ATS", "Fully editable"
 - Auto-generates intelligent default from user's name
-- Example: "John_Doe_Resume_20250119.pdf"
+- Example outputs:
+  * "John_Doe_Resume_20250119.pdf"
+  * "John_Doe_Resume_20250119.docx"
 
 ### Component Structure
 
@@ -471,8 +491,58 @@ e3da64c - Test deployment workflow with configured secrets
 
 ### Recent Feature Additions
 
-1. **Filename Customization for Downloads** (Latest - Phase 4.2) ⭐
-   - Professional download modal with filename customization before PDF export
+1. **Template-Aware Export** (Latest - Phase 4.3) ⭐⭐⭐
+   - Exports now match your selected template design exactly!
+   - Export Style Selection in download modal:
+     * 🎨 Template Design - captures exact visual appearance
+     * 📄 Generic Format - simple black & white layout
+   - Uses html2canvas + jsPDF for high-quality PDF generation
+   - Preserves all template styling, colors, fonts, and spacing
+   - Two-column layouts export perfectly
+   - Multi-page support with proper pagination
+   - Loading indicator during export process
+   - Works with all 50 templates
+   - Example: Modern Two Column template exports with sidebar colors intact!
+   - Files: `src/services/templateAwareExportService.js` (200+ lines, new)
+   - Updated: `src/components/DownloadModal.jsx`, `DownloadModal.css`, `ControlPanel.jsx`
+
+2. **Print Optimization** (Phase 4.4) ⭐
+   - Professional print support for all resume templates!
+   - Print button (🖨️) in control panel
+   - Comprehensive print stylesheet (430 lines):
+     * A4/Letter paper optimization
+     * Intelligent page break handling
+     * Hides all UI elements (buttons, nav, modals)
+     * Optimized colors for ink-saving
+     * Professional typography for print
+     * Prevents breaking inside sections
+     * Proper margins and spacing
+   - Works across all browsers (Chrome, Firefox, Safari, Edge)
+   - Supports all 50 templates
+   - Two-column layouts print correctly
+   - Skills displayed inline to save space
+   - Files: `src/print.css` (430 lines, new)
+   - Updated: `src/main.jsx`, `src/components/ControlPanel.jsx`
+
+2. **DOCX Export Functionality** (Phase 4.1) ⭐⭐
+   - Users can now download resumes in Microsoft Word format!
+   - Format selection in download modal (PDF/DOCX toggle buttons)
+   - Professional Word document formatting:
+     * Color-coded section headers with borders
+     * Proper heading hierarchy (H1/H2)
+     * Styled bullet points for experience
+     * Clickable social links
+     * Fully editable in Word, Google Docs, LibreOffice
+   - Smaller file sizes (~30-150 KB vs PDF ~50-200 KB)
+   - ATS-compatible like PDF
+   - Dynamic file info based on format selection
+   - Example: "John_Doe_Resume_20250119.docx"
+   - Files: `src/services/docxDownloadService.js` (370 lines, new)
+   - Updated: `src/components/DownloadModal.jsx`, `DownloadModal.css`, `ControlPanel.jsx`
+   - NPM Package: Added `docx` library
+
+3. **Filename Customization for Downloads** (Phase 4.2) ⭐
+   - Professional download modal with filename customization
    - 3 quick filename options: Name Only, Name+Date, Date+Name
    - Custom filename input with real-time preview
    - Smart sanitization (auto-converts spaces to underscores, removes invalid chars)
@@ -481,7 +551,7 @@ e3da64c - Test deployment workflow with configured secrets
    - Files: `src/components/DownloadModal.jsx`, `src/components/DownloadModal.css`
    - Updated: `src/services/pdfDownloadService.js`, `src/components/ControlPanel.jsx`
 
-2. **Supabase Cloud Integration** ⭐
+4. **Supabase Cloud Integration** ⭐
    - Complete authentication system (email/password + Google OAuth)
    - Cloud resume storage with Row Level Security (RLS)
    - Multi-resume support for authenticated users

@@ -67,14 +67,39 @@ export function downloadResumePDF(resumeData, customFilename = null) {
     pdf.text(contactLine, margin, 30)
   }
 
-  const linksLine = [
-    resumeData.personal.linkedin?.trim() && 'LinkedIn',
-    resumeData.personal.github?.trim() && 'GitHub',
-    resumeData.personal.portfolio?.trim() && 'Portfolio'
-  ].filter(Boolean).join(' • ')
+  // Social Links with clickable hyperlinks
+  const socialLinks = []
+  if (resumeData.personal.linkedin?.trim()) {
+    socialLinks.push({ label: 'LinkedIn', url: resumeData.personal.linkedin })
+  }
+  if (resumeData.personal.github?.trim()) {
+    socialLinks.push({ label: 'GitHub', url: resumeData.personal.github })
+  }
+  if (resumeData.personal.portfolio?.trim()) {
+    socialLinks.push({ label: 'Portfolio', url: resumeData.personal.portfolio })
+  }
 
-  if (linksLine) {
-    pdf.text(linksLine, margin, 35)
+  if (socialLinks.length > 0) {
+    let linkX = margin
+    socialLinks.forEach((linkItem, index) => {
+      if (index > 0) {
+        // Add separator
+        pdf.text(' • ', linkX, 35)
+        linkX += pdf.getTextWidth(' • ')
+      }
+
+      // Add clickable link
+      pdf.textWithLink(linkItem.label, linkX, 35, { url: linkItem.url })
+      pdf.setTextColor(100, 149, 237) // Cornflower blue to indicate link
+      pdf.text(linkItem.label, linkX, 35)
+
+      // Create clickable area
+      const linkWidth = pdf.getTextWidth(linkItem.label)
+      pdf.link(linkX, 35 - 3, linkWidth, 4, { url: linkItem.url })
+
+      linkX += linkWidth
+      pdf.setTextColor(255, 255, 255) // Reset to white for header
+    })
   }
 
   yPosition = 50
@@ -261,18 +286,41 @@ export function downloadResumePDF(resumeData, customFilename = null) {
         yPosition += 4.5
       }
 
-      // Credential URL (if exists)
+      // Credential URL (clickable hyperlink)
       if (cert.credentialUrl?.trim()) {
+        checkNewPage()
         pdf.setFontSize(9)
         pdf.setFont('helvetica', 'normal')
-        pdf.setTextColor(52, 152, 219)
-        const urlText = `Verification: ${cert.credentialUrl}`
-        const urlLines = pdf.splitTextToSize(urlText, contentWidth)
-        urlLines.forEach(line => {
-          checkNewPage()
-          pdf.text(line, margin, yPosition)
-          yPosition += 4.5
-        })
+        pdf.setTextColor(85, 85, 85)
+
+        // Add label
+        const labelText = 'Verification: '
+        pdf.text(labelText, margin, yPosition)
+
+        // Add clickable link
+        const labelWidth = pdf.getTextWidth(labelText)
+        const linkX = margin + labelWidth
+
+        pdf.setTextColor(52, 152, 219) // Blue color for link
+        pdf.setFont('helvetica', 'underline')
+
+        // Truncate URL if too long for display
+        const maxUrlWidth = contentWidth - labelWidth
+        let displayUrl = cert.credentialUrl
+        const urlLines = pdf.splitTextToSize(displayUrl, maxUrlWidth)
+
+        if (urlLines.length > 1) {
+          displayUrl = urlLines[0] + '...'
+        }
+
+        pdf.text(displayUrl, linkX, yPosition)
+
+        // Create clickable area
+        const urlWidth = pdf.getTextWidth(displayUrl)
+        pdf.link(linkX, yPosition - 3, urlWidth, 4, { url: cert.credentialUrl })
+
+        yPosition += 4.5
+        pdf.setFont('helvetica', 'normal') // Reset font
       }
 
       yPosition += 4

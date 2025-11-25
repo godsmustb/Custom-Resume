@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
 import { useAuth } from '../context/AuthContext'
 import { downloadResumePDF } from '../services/pdfDownloadService'
+import { downloadResumeDOCX } from '../services/docxDownloadService'
+import { downloadTemplateAwarePDF, downloadTemplateAwareDOCX } from '../services/templateAwareExportService'
 import ResumeUpload from './ResumeUpload'
 import TemplateBrowser from './TemplateBrowser'
 import ResumeManager from './ResumeManager'
@@ -17,12 +19,26 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
   const [showResumeManager, setShowResumeManager] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
 
-  const handleDownloadPDF = (customFilename) => {
+  const handleDownload = async (customFilename, format, useTemplateDesign = true) => {
     try {
-      downloadResumePDF(resumeData, customFilename)
+      if (useTemplateDesign) {
+        // Template-aware export
+        if (format === 'pdf') {
+          await downloadTemplateAwarePDF(customFilename)
+        } else if (format === 'docx') {
+          await downloadTemplateAwareDOCX(resumeData, customFilename)
+        }
+      } else {
+        // Generic export
+        if (format === 'pdf') {
+          downloadResumePDF(resumeData, customFilename)
+        } else if (format === 'docx') {
+          await downloadResumeDOCX(resumeData, customFilename)
+        }
+      }
     } catch (error) {
-      console.error('Error downloading PDF:', error)
-      alert('Failed to download PDF. Please try again.')
+      console.error(`Error downloading ${format.toUpperCase()}:`, error)
+      alert(`Failed to download ${format.toUpperCase()}. Please try again.`)
     }
   }
 
@@ -82,9 +98,17 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
             <button
               className="control-btn download-btn"
               onClick={() => setShowDownloadModal(true)}
-              title="Download professional PDF resume"
+              title="Download professional PDF/DOCX resume"
             >
-              📥 Download PDF
+              📥 Download
+            </button>
+
+            <button
+              className="control-btn print-btn"
+              onClick={() => window.print()}
+              title="Print resume"
+            >
+              🖨️ Print
             </button>
 
             <button
@@ -123,7 +147,7 @@ const ControlPanel = ({ showJobDescription, setShowJobDescription }) => {
       {showDownloadModal && (
         <DownloadModal
           onClose={() => setShowDownloadModal(false)}
-          onDownload={handleDownloadPDF}
+          onDownload={handleDownload}
         />
       )}
     </>
