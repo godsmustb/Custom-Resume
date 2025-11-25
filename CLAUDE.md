@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Custom Resume** is an AI-powered resume builder built with React and Vite. It helps users create ATS-optimized resumes tailored to specific job descriptions using OpenAI's API. The application features 50+ professional resume templates, PDF generation/parsing, and real-time resume customization.
 
 **Current Status:** Production-ready with automated FTP deployment to Hostinger
-**Version:** 2.0.0
+**Version:** 2.1.0
 **Last Documentation Update:** 2025-11-25
 **Deployment Status:** ✅ Active (GitHub Actions → Hostinger FTP)
 
@@ -197,15 +197,24 @@ Template architecture:
 ### AI Services
 
 **AI-powered features** (`src/services/aiService.js`):
-- `generateSummary()`: Creates tailored professional summaries
+- `generateSummary()`: Creates tailored professional summaries **in bullet-point format (6-9 bullets, 80-120 words)** ⭐ UPDATED
 - `generateBulletPoints()`: Generates achievement-focused experience bullets
 - `analyzeJobDescription()`: Extracts keywords, skills, responsibilities
 - `calculateMatchScore()`: ATS-style scoring (0-100) with gap analysis
-- `autoImproveResume()`: Aggressive keyword optimization for 95%+ match
+- `autoImproveResume()`: **Generates EXACTLY 6-7 bullets per job** with varied action verbs and scale context ⭐ UPDATED
 - `generateMultipleBulletOptions()`: Creates 10-15 individual gap-addressing bullets
 - `customizeResume()`: End-to-end resume tailoring
+- `categorizeSkills()`: **Organizes skills into 4 ATS-optimized categories** ⭐ NEW
 
-**Important**: All AI prompts use aggressive keyword matching to maximize ATS scores. Temperature varies by function (0.3-1.0) to balance creativity and precision.
+**Recent AI Improvements (Based on ChatGPT Feedback):**
+1. **Summary Format**: Now generates scannable bullet points (6-9 bullets, 12-15 words each) instead of dense paragraphs
+2. **Bullet Count**: Enforces EXACTLY 6-7 bullets per job (not 8-10+) for better readability
+3. **Action Verb Variety**: 14 different action verbs to prevent repetition (Architected, Spearheaded, Drove, Implemented, Optimized, Delivered, Established, Streamlined, Engineered, Designed, Pioneered, Orchestrated, Scaled, Transformed)
+4. **Scale Context**: First 2-3 bullets always include scope (team size, budget, # projects, users, systems)
+5. **Shorter Bullets**: 15-20 words max (was 15-25) for better scannability
+6. **Skill Structure**: New `categorizeSkills()` function groups skills into Business Analysis, Technical & Modeling, Agile/Project Management, Tools/Software
+
+**Important**: All AI prompts balance keyword density (for ATS) with human readability. Temperature varies by function (0.3-1.0) to balance creativity and precision.
 
 ### Resume Upload Services
 
@@ -624,7 +633,31 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
 
 ### Recent Feature Additions
 
-1. **Cover Letter Builder** (Latest - Phase 5.0) ⭐⭐⭐⭐
+1. **AI Resume Optimization Improvements** (Latest - Phase 5.4) ⭐⭐⭐
+   - Enhanced resume generation based on ChatGPT feedback for better ATS + human readability
+   - **Scannable Summary Format**:
+     * Bullet-point format (not paragraphs)
+     * 6-9 concise bullets (80-120 words total)
+     * Each bullet 12-15 words for quick scanning
+     * Scale/scope in first 2-3 bullets (team size, budget, projects, users)
+   - **Optimized Experience Bullets**:
+     * EXACTLY 6-7 bullets per job (not 8-10+)
+     * Shorter bullets: 15-20 words max (was 15-25)
+     * 14 varied action verbs to prevent repetition
+     * Clear structure: Scope → Action → Measurable Outcome
+   - **NEW: Skill Categorization** (`categorizeSkills()` function):
+     * Organizes skills into 4 ATS-optimized groups
+     * Business Analysis, Technical & Modeling, Agile/Project Management, Tools/Software
+     * Improves ATS parsing and recruiter readability
+   - **Benefits**:
+     * More scannable for human recruiters (skim in 10 seconds)
+     * Better ATS parsing with structured content
+     * No repetitive language or sentence structures
+     * Maintains 95%+ keyword match while improving readability
+   - Files: `src/services/aiService.js` (3 functions updated, 1 new function)
+   - Commit: 3910d1c
+
+2. **Cover Letter Builder** (Phase 5.0) ⭐⭐⭐⭐
    - Complete cover letter creation system with 30 professional templates!
    - **Template Browser**: Grid view with filters (industry, experience level, job title)
    - **Live Editor**: Split-view interface with real-time preview
@@ -1004,9 +1037,11 @@ git push origin main
 
 All functions use **OpenAI GPT-4o-mini** with `dangerouslyAllowBrowser: true`
 
-1. **generateSummary**(currentSummary, jobDescription)
+1. **generateSummary**(currentSummary, jobDescription) ⭐ UPDATED
    - Temperature: 0.7
-   - Output: 3-4 sentence professional summary
+   - Output: 6-9 bullet points (80-120 words total) in scannable format
+   - Each bullet: 12-15 words max, varied power words
+   - First 2-3 bullets include scale/scope (team size, budget, projects, users)
    - Keywords: Naturally integrated from job description
 
 2. **generateBulletPoints**(jobTitle, company, briefDescription, jobDescription)
@@ -1024,13 +1059,15 @@ All functions use **OpenAI GPT-4o-mini** with `dangerouslyAllowBrowser: true`
    - Scoring: Keyword Match (40pts) + Skills Overlap (30pts) + Experience Relevance (20pts) + Completeness (10pts)
    - Output: { matchScore, strengths[], gaps[] }
 
-5. **autoImproveResume**(resumeData, jobDescription, gaps)
+5. **autoImproveResume**(resumeData, jobDescription, gaps) ⭐ UPDATED
    - Temperature: 0.9-1.0 (HIGH creativity for variety)
-   - Strategy: AGGRESSIVE keyword optimization
-   - Summary: 5-6 sentences, 8-10 exact keywords
-   - Experience: 6-8 bullets per role, 3-4 keywords per bullet
+   - Strategy: Balanced ATS optimization + human readability
+   - Summary: 6-9 bullet points (80-120 words), varied power words, scale/scope upfront
+   - Experience: EXACTLY 6-7 bullets per role (not 8+), 15-20 words each
+   - Action verbs: 14 varied verbs (Architected, Spearheaded, Drove, Implemented, Optimized, Delivered, etc.)
+   - Structure: Scope → Action → Measurable Outcome
    - Skills: Extract 15-20 missing skills
-   - Goal: 95%+ match score
+   - Goal: 95%+ match score with better scannability
 
 6. **generateMultipleBulletOptions**(resumeData, jobDescription, gaps, currentScore)
    - Temperature: 0.85
@@ -1059,6 +1096,16 @@ All functions use **OpenAI GPT-4o-mini** with `dangerouslyAllowBrowser: true`
 11. **generateContentVariations**(content, count)
     - A/B testing variants
     - Multiple variations of same content
+
+12. **categorizeSkills**(skillsList, jobDescription) ⭐ NEW
+    - Temperature: 0.3 (precision)
+    - Organizes skills into 4 ATS-optimized categories:
+      * Business Analysis
+      * Technical & Modeling
+      * Agile/Project Management
+      * Tools/Software
+    - Improves ATS parsing and recruiter readability
+    - Each skill in one category only (no duplicates)
 
 ### AI Optimization Workflow (JobDescriptionInput.jsx)
 
@@ -1513,4 +1560,4 @@ npm run build
 
 ---
 
-**End of CLAUDE.md** | Last Updated: 2025-11-25 | Version: 2.0.0
+**End of CLAUDE.md** | Last Updated: 2025-11-25 | Version: 2.1.0
