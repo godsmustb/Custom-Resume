@@ -220,12 +220,18 @@ Template architecture:
 
 **Two Upload Systems** (both use OpenAI for AI parsing):
 
-1. **ResumeUpload** (`src/components/ResumeUpload.jsx`) - **Primary System** ⭐
+1. **ResumeUpload** (`src/components/ResumeUpload.jsx`) - **Primary System** ⭐⭐⭐
    - Supports **both PDF and DOCX** file uploads
    - Uses `resumeParserService.js` for file processing
    - Drag-and-drop interface with progress indicators
    - File validation: PDF/DOCX, max 10MB
    - API key validation before processing
+   - **Multi-Resume Upload Feature** (NEW):
+     * After parsing, shows modal: "What would you like to do?"
+     * Option 1: **Create New Resume** - saves as separate entry in cloud (requires auth)
+     * Option 2: **Replace Current Resume** - updates current resume (existing behavior)
+     * Smart title generation from resume name (e.g., "John Doe's Resume")
+     * Integrates with ResumeManager for managing uploaded resumes
    - **Currently used in ControlPanel**
 
 2. **PDFUpload** (`src/components/PDFUpload.jsx`) - **Legacy System**
@@ -657,7 +663,32 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Files: `src/services/aiService.js` (3 functions updated, 1 new function)
    - Commit: 3910d1c
 
-2. **Cover Letter Builder** (Phase 5.0) ⭐⭐⭐⭐
+2. **Multi-Resume Upload Integration** (Phase 5.5) ⭐⭐⭐ **NEW**
+   - Upload multiple resumes and store them separately in the cloud!
+   - **Enhanced Upload Flow**:
+     * After AI parses resume, shows modal: "What would you like to do?"
+     * Option 1: **Create New Resume** - saves as separate cloud entry (requires auth)
+     * Option 2: **Replace Current Resume** - updates current resume (existing behavior)
+   - **Smart Features**:
+     * Auto-generates default title from resume name (e.g., "John Doe's Resume")
+     * User can customize title before creating
+     * Keyboard shortcuts: Enter to confirm, Escape to cancel
+   - **Integration**:
+     * Works seamlessly with ResumeManager component
+     * All uploaded resumes appear in "My Resumes" dashboard
+     * Can delete, rename, duplicate uploaded resumes
+   - **Technical Implementation**:
+     * New function: `createNewResumeFromData(title, customResumeData, template, customization)`
+     * ResumeContext enhanced to accept custom resume data
+     * Modal system with action selection and title input
+   - **Files**:
+     * `src/context/ResumeContext.jsx` - Added createNewResumeFromData() function
+     * `src/components/ResumeUpload.jsx` - Enhanced with modal workflow (294 lines)
+     * `src/components/ResumeUpload.css` - New modal styles (493 lines total)
+   - **Use Case**: Upload resumes for different roles, keep all organized, switch between them
+   - Commit: 2a37029
+
+3. **Cover Letter Builder** (Phase 5.0) ⭐⭐⭐⭐
    - Complete cover letter creation system with 30 professional templates!
    - **Template Browser**: Grid view with filters (industry, experience level, job title)
    - **Live Editor**: Split-view interface with real-time preview
@@ -687,7 +718,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Documentation: `COVER_LETTER_FEATURE.md`, `COVER_LETTER_SCHEMA.md`
    - Total: ~2,000 lines of new code
 
-2. **Multi-Resume Management** (Phase 5.1) ⭐⭐⭐
+4. **Multi-Resume Management** (Phase 5.1) ⭐⭐⭐
    - Manage multiple resumes in the cloud for authenticated users!
    - **Resume Manager Component** (`src/components/ResumeManager.jsx`, 220 lines):
      * Create new resumes with custom titles
@@ -709,7 +740,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - **localStorage Fallback**: Works offline, syncs when authenticated
    - Use Case: Create different resumes for different job types or companies
 
-3. **Sync Status Indicator** (Phase 5.2) ⭐
+5. **Sync Status Indicator** (Phase 5.2) ⭐
    - Real-time cloud synchronization status display!
    - **SyncStatus Component** (`src/components/SyncStatus.jsx`, 61 lines):
      * Visual indicator: 🔄 Saving... / ✅ Saved to cloud / ❌ Sync error
@@ -724,7 +755,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - CSS: `src/components/SyncStatus.css`
    - Integrated into main UI for user confidence
 
-4. **Enhanced Authentication UI** (Phase 5.3) ⭐⭐
+6. **Enhanced Authentication UI** (Phase 5.3) ⭐⭐
    - Completely refactored authentication components for better UX!
    - **Separate Components**:
      * `src/components/auth/Login.jsx` (137 lines) - Login form with email/password
@@ -742,7 +773,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - **Security**: All auth handled by Supabase with RLS policies
    - Total: ~373 lines of auth UI code
 
-5. **Template-Aware Export** (Phase 4.3) ⭐⭐⭐
+7. **Template-Aware Export** (Phase 4.3) ⭐⭐⭐
    - Exports now match your selected template design exactly!
    - Export Style Selection in download modal:
      * 🎨 Template Design - captures exact visual appearance
@@ -757,7 +788,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Files: `src/services/templateAwareExportService.js` (200+ lines, new)
    - Updated: `src/components/DownloadModal.jsx`, `DownloadModal.css`, `ControlPanel.jsx`
 
-2. **Print Optimization** (Phase 4.4) ⭐
+8. **Print Optimization** (Phase 4.4) ⭐
    - Professional print support for all resume templates!
    - Print button (🖨️) in control panel
    - Comprehensive print stylesheet (430 lines):
@@ -775,7 +806,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Files: `src/print.css` (430 lines, new)
    - Updated: `src/main.jsx`, `src/components/ControlPanel.jsx`
 
-2. **DOCX Export Functionality** (Phase 4.1) ⭐⭐
+9. **DOCX Export Functionality** (Phase 4.1) ⭐⭐
    - Users can now download resumes in Microsoft Word format!
    - Format selection in download modal (PDF/DOCX toggle buttons)
    - Professional Word document formatting:
@@ -792,7 +823,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Updated: `src/components/DownloadModal.jsx`, `DownloadModal.css`, `ControlPanel.jsx`
    - NPM Package: Added `docx` library
 
-3. **Filename Customization for Downloads** (Phase 4.2) ⭐
+10. **Filename Customization for Downloads** (Phase 4.2) ⭐
    - Professional download modal with filename customization
    - 3 quick filename options: Name Only, Name+Date, Date+Name
    - Custom filename input with real-time preview
@@ -802,7 +833,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Files: `src/components/DownloadModal.jsx`, `src/components/DownloadModal.css`
    - Updated: `src/services/pdfDownloadService.js`, `src/components/ControlPanel.jsx`
 
-4. **Supabase Cloud Integration** ⭐
+11. **Supabase Cloud Integration** ⭐
    - Complete authentication system (email/password + Google OAuth)
    - Cloud resume storage with Row Level Security (RLS)
    - Multi-resume support for authenticated users
@@ -811,32 +842,32 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Files: `src/config/supabase.js`, `src/context/AuthContext.jsx`, `src/services/supabaseResumeService.js`, `SUPABASE_SCHEMA.md`
    - **IMPORTANT**: Requires GitHub Secrets configuration for deployment
 
-3. **Automated Deployment**
+12. **Automated Deployment**
    - GitHub Actions workflow for FTP deployment to Hostinger
    - Triggers on push to `main` or `claude/*` branches
    - Required secrets: FTP credentials + OpenAI API key + Supabase credentials
    - Clean-slate deployment with verbose logging
    - Files: `.github/workflows/deploy-hostinger.yml`, `DEPLOYMENT.md`
 
-4. **Dual Upload System**
+13. **Dual Upload System**
    - Primary: `ResumeUpload.jsx` (PDF + DOCX support via `resumeParserService.js`)
    - Legacy: `PDFUpload.jsx` (PDF only via `pdfService.js`)
    - Both use OpenAI GPT-4o-mini for AI parsing
 
-5. **Environment Variables Migration**
+14. **Environment Variables Migration**
    - All API keys unified to `import.meta.env.*` pattern
    - OpenAI: `VITE_OPENAI_API_KEY`
    - Supabase: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
    - Deprecated localStorage approach for API keys
    - Build-time injection via GitHub Actions
 
-6. **Template System Enhancements**
+15. **Template System Enhancements**
    - 50 templates across 3 tiers (FREE, FREEMIUM, PREMIUM)
    - Template preview modal with full-screen view
    - Increased preview scale (0.6 → 1.0 for better visibility)
    - 5 reusable layout components (map 50 templates to 5 layouts)
 
-7. **Score Calculation Fixes**
+16. **Score Calculation Fixes**
    - Fixed to use updated resume data after AI improvements
    - Proper state synchronization between iterations
    - Retry logic for JSON parsing errors
