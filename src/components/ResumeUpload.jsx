@@ -9,11 +9,15 @@ import { parseUploadedResume } from '../services/resumeParserService'
 import './ResumeUpload.css'
 
 const ResumeUpload = ({ onClose }) => {
-  const { loadResumeFromPDF } = useResume()
+  const { loadResumeFromPDF, createNewResumeFromData } = useResume()
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState(null)
   const [progress, setProgress] = useState('')
+  const [parsedResumeData, setParsedResumeData] = useState(null)
+  const [showActionModal, setShowActionModal] = useState(false)
+  const [showTitleInput, setShowTitleInput] = useState(false)
+  const [resumeTitle, setResumeTitle] = useState('')
 
   const handleDragOver = (e) => {
     e.preventDefault()
@@ -73,24 +77,69 @@ const ResumeUpload = ({ onClose }) => {
       // Parse the resume
       const parsedData = await parseUploadedResume(file)
 
-      setProgress('Populating fields...')
-
-      // Load the parsed data into the resume
-      loadResumeFromPDF(parsedData)
-
       setProgress('Complete!')
 
-      // Show success message
-      setTimeout(() => {
-        alert('✅ Resume imported successfully! All fields have been populated.')
-        onClose()
-      }, 500)
+      // Store parsed data and show action modal
+      setParsedResumeData(parsedData)
+      setIsProcessing(false)
+      setShowActionModal(true)
 
     } catch (err) {
       console.error('Resume upload error:', err)
       setError(err.message)
       setIsProcessing(false)
     }
+  }
+
+  const handleReplaceCurrentResume = () => {
+    // Load the parsed data into current resume
+    loadResumeFromPDF(parsedResumeData)
+    setShowActionModal(false)
+    setTimeout(() => {
+      alert('✅ Resume imported successfully! Current resume has been updated.')
+      onClose()
+    }, 300)
+  }
+
+  const handleCreateNewResume = () => {
+    // Show title input
+    setShowActionModal(false)
+    setShowTitleInput(true)
+    // Generate default title from parsed name
+    const defaultTitle = parsedResumeData?.personal?.name
+      ? `${parsedResumeData.personal.name}'s Resume`
+      : 'Imported Resume'
+    setResumeTitle(defaultTitle)
+  }
+
+  const handleConfirmCreateNew = async () => {
+    if (!resumeTitle.trim()) {
+      alert('Please enter a title for your resume')
+      return
+    }
+
+    setIsProcessing(true)
+    const result = await createNewResumeFromData(resumeTitle, parsedResumeData)
+
+    if (result.success) {
+      setShowTitleInput(false)
+      setIsProcessing(false)
+      setTimeout(() => {
+        alert('✅ New resume created successfully! You can now edit and customize it.')
+        onClose()
+      }, 300)
+    } else {
+      setIsProcessing(false)
+      setError(result.error || 'Failed to create resume. Please try again.')
+    }
+  }
+
+  const handleCancelAction = () => {
+    setShowActionModal(false)
+    setShowTitleInput(false)
+    setParsedResumeData(null)
+    setResumeTitle('')
+    setError(null)
   }
 
   return (
@@ -163,6 +212,79 @@ const ResumeUpload = ({ onClose }) => {
             </ol>
           </div>
         </div>
+
+        {/* Action Modal - Choose what to do with uploaded resume */}
+        {showActionModal && (
+          <div className="upload-action-modal">
+            <h3>What would you like to do?</h3>
+            <p className="upload-action-description">
+              Your resume has been successfully parsed. Choose an option below:
+            </p>
+            <div className="upload-action-buttons">
+              <button
+                className="upload-action-btn upload-action-btn-primary"
+                onClick={handleCreateNewResume}
+              >
+                <span className="upload-action-icon">➕</span>
+                <div>
+                  <strong>Create New Resume</strong>
+                  <small>Save as a separate resume in your account</small>
+                </div>
+              </button>
+              <button
+                className="upload-action-btn upload-action-btn-secondary"
+                onClick={handleReplaceCurrentResume}
+              >
+                <span className="upload-action-icon">🔄</span>
+                <div>
+                  <strong>Replace Current Resume</strong>
+                  <small>Update your current resume with this data</small>
+                </div>
+              </button>
+            </div>
+            <button className="upload-action-cancel" onClick={handleCancelAction}>
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {/* Title Input Modal - Enter title for new resume */}
+        {showTitleInput && (
+          <div className="upload-title-modal">
+            <h3>Create New Resume</h3>
+            <p className="upload-title-description">
+              Enter a title for your new resume:
+            </p>
+            <input
+              type="text"
+              className="upload-title-input"
+              value={resumeTitle}
+              onChange={(e) => setResumeTitle(e.target.value)}
+              placeholder="e.g., Software Engineer Resume"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isProcessing) handleConfirmCreateNew()
+                if (e.key === 'Escape') handleCancelAction()
+              }}
+            />
+            <div className="upload-title-buttons">
+              <button
+                className="upload-title-btn upload-title-btn-primary"
+                onClick={handleConfirmCreateNew}
+                disabled={isProcessing}
+              >
+                {isProcessing ? 'Creating...' : 'Create Resume'}
+              </button>
+              <button
+                className="upload-title-btn upload-title-btn-secondary"
+                onClick={handleCancelAction}
+                disabled={isProcessing}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

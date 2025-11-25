@@ -297,6 +297,41 @@ export const ResumeProvider = ({ children }) => {
     setLoading(false)
   }
 
+  const createNewResumeFromData = async (title, customResumeData, template = 'ats-simple-minimal', customization = {
+    colorScheme: 'corporate-blue',
+    font: 'inter',
+    spacing: 'comfortable'
+  }) => {
+    if (!user) {
+      alert('Please sign in to create multiple resumes')
+      return { success: false, error: 'Not authenticated' }
+    }
+
+    setLoading(true)
+    const { data, error } = await createResume(
+      user.id,
+      customResumeData,
+      template,
+      customization,
+      title
+    )
+
+    if (error) {
+      console.error('Error creating resume from data:', error)
+      setLoading(false)
+      return { success: false, error: error.message }
+    } else {
+      setUserResumes(prev => [data, ...prev])
+      setCurrentResumeId(data.id)
+      setCurrentResumeTitle(data.title)
+      setResumeData(customResumeData)
+      setCurrentTemplateState(template)
+      setTemplateCustomizationState(customization)
+      setLoading(false)
+      return { success: true, data }
+    }
+  }
+
   const switchResume = async (resumeId) => {
     const resume = userResumes.find(r => r.id === resumeId)
     if (!resume) return
@@ -603,6 +638,7 @@ export const ResumeProvider = ({ children }) => {
 
     // Resume management
     createNewResume,
+    createNewResumeFromData,
     switchResume,
     renameResume,
     deleteCurrentResume,
