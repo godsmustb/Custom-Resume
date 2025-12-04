@@ -4,17 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Custom Resume** is an AI-powered resume builder built with React and Vite. It helps users create ATS-optimized resumes tailored to specific job descriptions using OpenAI's API. The application features 50+ professional resume templates, PDF generation/parsing, and real-time resume customization.
+**Custom Resume** is an AI-powered resume builder built with React and Vite. It helps users create ATS-optimized resumes tailored to specific job descriptions using OpenAI's API. The application features 51 professional resume templates, PDF generation/parsing, and real-time resume customization.
 
 **Current Status:** Production-ready with automated FTP deployment to Hostinger
 **Version:** 2.1.0
-**Last Documentation Update:** 2025-11-25
+**Last Documentation Update:** 2025-12-04
 **Deployment Status:** ✅ Active (GitHub Actions → Hostinger FTP)
 
 ### Quick Stats
 - **Codebase Size:** ~12,000-15,000 lines of code
 - **Components:** 35+ React components
-- **Resume Templates:** 50 professional templates (3 tiers)
+- **Resume Templates:** 51 professional templates (3 tiers) ⭐ Includes custom user template
 - **Cover Letter Templates:** 30 professional templates
 - **AI Functions:** 11 OpenAI GPT-4o-mini functions
 - **Skills Library:** 690+ categorized skills
@@ -143,13 +143,13 @@ Key state structure:
 
 ### Template System
 
-**50+ Resume Templates** organized in 3 tiers:
-- **FREE** (8 templates): ATS-optimized, basic layouts
+**51 Resume Templates** organized in 3 tiers:
+- **FREE** (9 templates): ATS-optimized, basic layouts (includes custom user template)
 - **FREEMIUM** (22 templates): Industry-specific, mid-career
 - **PREMIUM** (20 templates): Executive, specialized roles
 
 Template architecture:
-1. **Template Catalog** (`src/data/templateCatalog.js`): Registry of all 50 templates with metadata
+1. **Template Catalog** (`src/data/templateCatalog.js`): Registry of all 51 templates with metadata
 2. **Template Renderer** (`src/components/templates/TemplateRenderer.jsx`): Dynamic layout selector
 3. **Layout Components** (5 reusable layouts):
    - `ClassicSingleColumn`: Traditional 1-column ATS-friendly layout
@@ -158,7 +158,7 @@ Template architecture:
    - `CreativeLayout`: Visual designs for creative industries
    - `MinimalistLayout`: Clean Scandinavian style
 
-**How templates map to layouts**: The `LAYOUT_MAP` in `TemplateRenderer.jsx` maps each template's `component` field to one of the 5 actual layout components. This allows reusing layouts across multiple templates with different styling/customization.
+**How templates map to layouts**: The `LAYOUT_MAP` in `TemplateRenderer.jsx` maps each template's `component` field to one of the 5 actual layout components (plus custom standalone layouts like ProfessionalProjectManager). This allows reusing layouts across multiple templates with different styling/customization.
 
 ### Supabase Cloud Integration
 
@@ -401,7 +401,7 @@ Each template includes:
 **Main App Flow**:
 1. `App.jsx`: Root component with `ControlPanel`, `JobDescriptionInput`, `TemplateRenderer`
 2. `ControlPanel.jsx`: Main toolbar (template browser, PDF upload, customization, download)
-3. `TemplateBrowser.jsx`: Modal for selecting from 50 templates with filters
+3. `TemplateBrowser.jsx`: Modal for selecting from 51 templates with filters
 4. `TemplateCustomization.jsx`: Color schemes, fonts, spacing controls
 5. `JobDescriptionInput.jsx`: Paste job description for AI tailoring
 6. `TemplateRenderer.jsx`: Dynamically renders selected template layout
@@ -625,16 +625,16 @@ Based on codebase analysis, consider:
 ### Recent Major Changes (Last 10 Commits)
 
 ```
+fcb67c8 - Fix: Enable edit mode for Professional Project Manager template
+e651f0c - Fix: Improve skills layout and date parsing
+97ee81e - Add Professional Project Manager template as default (Template #51)
+6dca55f - Update CLAUDE.md: Document Multi-Resume Upload Integration (Phase 5.5)
+2a37029 - Add multi-resume upload feature: Create new or replace current
+68cfbd5 - Document AI optimization improvements in CLAUDE.md (v2.1.0)
+3910d1c - Improve AI resume generation based on ChatGPT feedback
+ca39de3 - Update documentation to v2.0: Add Cover Letter & Multi-Resume features
 7ca3dc8 - Merge pull request #21 from godsmustb/claude/fix-supabase-env-vars-019mZDfybE7BgNt7nptM4QoZ
 08e3b05 - Trigger Hostinger deployment - all PDF fixes ready
-5f5c482 - Fix two-column PDF: proper sizing, bottom margins, and page count
-041bfc8 - Fix template-aware PDF: proper sizing, formatting, and professional appearance
-8c69e14 - Fix template-aware PDF rendering as tiny photo instead of full resume
-a341e73 - Fix two-column template overlapping and multi-page issues
-008a9ac - Add clickable links to template-aware PDF exports
-cf83664 - Fix print preview: Remove gray sidebar background
-c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
-2a11426 - Update CLAUDE.md: Document template-aware export feature (Phase 4.3)
 ```
 
 ### Recent Feature Additions
@@ -688,7 +688,55 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - **Use Case**: Upload resumes for different roles, keep all organized, switch between them
    - Commit: 2a37029
 
-3. **Cover Letter Builder** (Phase 5.0) ⭐⭐⭐⭐
+3. **Professional Project Manager Template** (Template #51) ⭐⭐⭐ **NEW**
+   - Custom template based on user's actual resume - now the default template for the entire website!
+   - **Design Features**:
+     * Clean, traditional single-column layout
+     * Centered header with uppercase name and blue accent color
+     * Gradient section dividers for visual separation
+     * Two-column strengths/skills grid (adaptive 3-column for 13+ skills)
+     * Professional color scheme: Corporate blue (#3182CE) with gray text
+     * Calibri/Arial font family for professional appearance
+   - **Technical Implementation**:
+     * Uses existing editable components (Header, About, Experience, Education, Skills, Certifications, Contact)
+     * Custom CSS overrides (381 lines) to style components to match original design
+     * Proper edit mode support - all sections fully editable inline
+     * Responsive design with mobile optimization
+     * Print-optimized styling
+   - **Adaptive Skills Layout**:
+     * 2-column grid by default for readability
+     * Automatically switches to 3-column when 13+ skills detected
+     * Blue bullet points (•) for visual consistency
+     * Proper spacing and alignment
+   - **Section Order**:
+     1. Header (centered with contact info)
+     2. Summary (professional overview)
+     3. Strengths (2-3 column skill grid)
+     4. Experience (chronological work history)
+     5. Education (academic credentials)
+     6. Certifications (professional certifications - conditional display)
+   - **Why This Template**:
+     * User's personal resume used as base design
+     * ATS-optimized single-column layout (96 ATS score)
+     * Perfect for Project Management, Operations, Engineering roles
+     * Set as default for all new users
+   - **Files**:
+     * `src/components/templates/layouts/ProfessionalProjectManager.jsx` (73 lines)
+     * `src/components/templates/layouts/ProfessionalProjectManager.css` (381 lines)
+     * `src/data/templateCatalog.js` - Added as first template with default: true
+     * `src/components/templates/TemplateRenderer.jsx` - Added import and mapping
+     * `src/context/ResumeContext.jsx` - Changed default template in 6 locations
+   - **Fixes Applied**:
+     * **Skills Layout**: Fixed to display in parallel 2-3 column grid (was vertical list)
+     * **Date Parsing**: Enhanced AI prompt to explicitly extract education/certification dates
+     * **Edit Mode**: Completely rewrote to use editable components instead of custom rendering
+   - **Commits**:
+     * 97ee81e - Add Professional Project Manager template as default
+     * e651f0c - Fix: Improve skills layout and date parsing
+     * fcb67c8 - Fix: Enable edit mode for Professional Project Manager template
+   - **Industries**: Project Management, Operations, Engineering, Manufacturing, Construction
+
+4. **Cover Letter Builder** (Phase 5.0) ⭐⭐⭐⭐
    - Complete cover letter creation system with 30 professional templates!
    - **Template Browser**: Grid view with filters (industry, experience level, job title)
    - **Live Editor**: Split-view interface with real-time preview
@@ -783,7 +831,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Two-column layouts export perfectly
    - Multi-page support with proper pagination
    - Loading indicator during export process
-   - Works with all 50 templates
+   - Works with all 51 templates
    - Example: Modern Two Column template exports with sidebar colors intact!
    - Files: `src/services/templateAwareExportService.js` (200+ lines, new)
    - Updated: `src/components/DownloadModal.jsx`, `DownloadModal.css`, `ControlPanel.jsx`
@@ -800,7 +848,7 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
      * Prevents breaking inside sections
      * Proper margins and spacing
    - Works across all browsers (Chrome, Firefox, Safari, Edge)
-   - Supports all 50 templates
+   - Supports all 51 templates
    - Two-column layouts print correctly
    - Skills displayed inline to save space
    - Files: `src/print.css` (430 lines, new)
@@ -862,10 +910,11 @@ c7c373a - Fix Bug #1 & #2: Clickable links and two-column layout preservation
    - Build-time injection via GitHub Actions
 
 15. **Template System Enhancements**
-   - 50 templates across 3 tiers (FREE, FREEMIUM, PREMIUM)
+   - 51 templates across 3 tiers (FREE: 9, FREEMIUM: 22, PREMIUM: 20)
    - Template preview modal with full-screen view
    - Increased preview scale (0.6 → 1.0 for better visibility)
-   - 5 reusable layout components (map 50 templates to 5 layouts)
+   - 5 reusable layout components (map most templates to 5 core layouts)
+   - Custom standalone templates (e.g., Professional Project Manager)
 
 16. **Score Calculation Fixes**
    - Fixed to use updated resume data after AI improvements
@@ -1530,7 +1579,7 @@ npm run build
 ### What Works Well
 
 ✅ **Iterative AI Optimization:** Multiple refinement rounds achieve 95%+ scores
-✅ **Template Reusability:** 5 layouts support 50 templates efficiently
+✅ **Template Reusability:** 5 core layouts + custom standalone templates support 51 templates efficiently
 ✅ **Context API:** Simple state management without Redux complexity
 ✅ **localStorage:** Zero backend needed for persistence
 ✅ **Vite:** Fast development experience with HMR
@@ -1560,10 +1609,11 @@ npm run build
 - Privacy (data stays in browser)
 - Simpler deployment
 
-**Why 5 Layouts for 50 Templates?**
+**Why 5 Core Layouts for 51 Templates?**
 - DRY principle (Don't Repeat Yourself)
-- Easy maintenance (fix once, applies to 10 templates)
+- Easy maintenance (fix once, applies to multiple templates)
 - Consistent behavior across similar templates
+- Custom standalone templates (like Professional Project Manager) for unique designs
 
 ## Contributing Guidelines (For Future Claude Sessions)
 
