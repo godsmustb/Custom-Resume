@@ -10,30 +10,38 @@
   line-height: 1.6;
 }
 
-/* Header */
-.pm-header {
+/* ========================================
+   HEADER STYLING (Override default Header component)
+   ======================================== */
+.professional-pm-template .pm-header-wrapper .header {
   text-align: center;
   margin-bottom: 2rem;
   padding-bottom: 0.5rem;
+  border-bottom: none;
 }
 
-.pm-name {
+.professional-pm-template .pm-header-wrapper .header h1,
+.professional-pm-template .pm-header-wrapper .header .name-input {
   font-size: 2.5rem;
   font-weight: 700;
   color: #4A5568;
   margin: 0 0 0.5rem 0;
   letter-spacing: 1px;
   text-transform: uppercase;
+  text-align: center;
 }
 
-.pm-title {
+.professional-pm-template .pm-header-wrapper .header h2,
+.professional-pm-template .pm-header-wrapper .header .title-input {
   font-size: 1.1rem;
   color: #3182CE;
   margin: 0 0 0.75rem 0;
   font-weight: 500;
+  text-align: center;
 }
 
-.pm-contact {
+.professional-pm-template .pm-header-wrapper .header .contact-info,
+.professional-pm-template .pm-header-wrapper .header .contact-info-edit {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -43,13 +51,14 @@
   flex-wrap: wrap;
 }
 
-.contact-icon {
-  font-size: 0.9rem;
+.professional-pm-template .pm-header-wrapper .header .contact-item::after {
+  content: ' |';
+  margin-left: 0.5rem;
+  color: #CBD5E0;
 }
 
-.contact-separator {
-  color: #CBD5E0;
-  margin: 0 0.25rem;
+.professional-pm-template .pm-header-wrapper .header .contact-item:last-child::after {
+  content: '';
 }
 
 /* Section Styles */
@@ -73,8 +82,11 @@
   margin-bottom: 1rem;
 }
 
-/* Summary Section */
-.pm-summary {
+/* ========================================
+   SUMMARY/ABOUT STYLING
+   ======================================== */
+.professional-pm-template .pm-summary-section .about p,
+.professional-pm-template .pm-summary-section .about textarea {
   font-size: 0.95rem;
   line-height: 1.7;
   text-align: justify;
@@ -82,84 +94,112 @@
   margin: 0;
 }
 
-/* Strengths Section (Two/Three-Column Grid) */
-.pm-strengths-grid {
+/* ========================================
+   SKILLS/STRENGTHS STYLING (2-3 Column Grid)
+   ======================================== */
+.professional-pm-template .pm-skills-section .skills {
+  margin: 0;
+}
+
+.professional-pm-template .pm-skills-section .skill-category {
+  margin-bottom: 0;
+}
+
+.professional-pm-template .pm-skills-section .skill-category h3 {
+  display: none; /* Hide category headers for flat display */
+}
+
+.professional-pm-template .pm-skills-section .skill-tags {
   display: grid;
-  gap: 0.75rem 2rem;
-  margin-top: 0.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 2rem;
+  margin: 0;
 }
 
-.pm-strengths-grid.two-column {
-  grid-template-columns: 1fr 1fr;
+/* Adaptive 3-column layout for many skills */
+.professional-pm-template .pm-skills-section .skills:has(.skill-tag:nth-child(13)) .skill-tags {
+  grid-template-columns: repeat(3, 1fr);
 }
 
-.pm-strengths-grid.three-column {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.pm-strength-item {
+.professional-pm-template .pm-skills-section .skill-tag {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #2D3748;
+  border-radius: 0;
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  line-height: 1.5;
 }
 
-.pm-bullet {
+.professional-pm-template .pm-skills-section .skill-tag::before {
+  content: '•';
   color: #3182CE;
   font-weight: bold;
   flex-shrink: 0;
 }
 
-/* Experience Section */
-.pm-experience-item {
-  margin-bottom: 1.75rem;
-  page-break-inside: avoid;
+.professional-pm-template .pm-skills-section .editable-input {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.9rem;
 }
 
-.pm-exp-header {
+/* ========================================
+   EXPERIENCE STYLING
+   ======================================== */
+.professional-pm-template .pm-experience-section .experience-item {
+  margin-bottom: 1.75rem;
+  page-break-inside: avoid;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.professional-pm-template .pm-experience-section .experience-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.75rem;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-.pm-exp-left {
-  flex: 1;
-}
-
-.pm-job-title {
+.professional-pm-template .pm-experience-section .experience-title,
+.professional-pm-template .pm-experience-section .experience-header input[type="text"]:first-child {
   font-size: 1.05rem;
   font-weight: 700;
   color: #2D3748;
   margin: 0 0 0.25rem 0;
 }
 
-.pm-company {
+.professional-pm-template .pm-experience-section .experience-company,
+.professional-pm-template .pm-experience-section .experience-header input[type="text"]:nth-child(2) {
   font-size: 0.95rem;
   color: #4A5568;
   margin: 0;
   font-style: italic;
 }
 
-.pm-exp-right {
-  text-align: right;
-}
-
-.pm-date {
+.professional-pm-template .pm-experience-section .experience-date,
+.professional-pm-template .pm-experience-section .experience-header input[type="text"]:last-child {
   font-size: 0.9rem;
   color: #718096;
   margin: 0;
   font-weight: 500;
+  text-align: right;
 }
 
-.pm-exp-bullets {
+.professional-pm-template .pm-experience-section .experience-description ul {
   list-style: none;
   padding: 0;
   margin: 0.75rem 0 0 0;
 }
 
-.pm-exp-bullets li {
+.professional-pm-template .pm-experience-section .experience-description li {
   position: relative;
   padding-left: 1.25rem;
   margin-bottom: 0.5rem;
@@ -168,7 +208,7 @@
   color: #2D3748;
 }
 
-.pm-exp-bullets li::before {
+.professional-pm-template .pm-experience-section .experience-description li::before {
   content: '●';
   position: absolute;
   left: 0;
@@ -177,12 +217,17 @@
   top: 0.35rem;
 }
 
-/* Education Section */
-.pm-education-item {
+/* ========================================
+   EDUCATION STYLING
+   ======================================== */
+.professional-pm-template .pm-education-section .education-item {
   margin-bottom: 0.75rem;
+  border: none;
+  padding: 0;
+  background: none;
 }
 
-.pm-edu-row {
+.professional-pm-template .pm-education-section .education-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -190,76 +235,94 @@
   flex-wrap: wrap;
 }
 
-.pm-degree {
+.professional-pm-template .pm-education-section .education-degree,
+.professional-pm-template .pm-education-section .education-header input:first-child {
   font-size: 0.95rem;
   font-weight: 600;
   color: #2D3748;
 }
 
-.pm-edu-location {
+.professional-pm-template .pm-education-section .education-school,
+.professional-pm-template .pm-education-section .education-header input:nth-child(2) {
   font-size: 0.9rem;
   color: #4A5568;
 }
 
-.pm-edu-date {
+.professional-pm-template .pm-education-section .education-date,
+.professional-pm-template .pm-education-section .education-header input:last-child {
   font-size: 0.9rem;
   color: #718096;
   margin-left: auto;
 }
 
-.pm-edu-details {
+.professional-pm-template .pm-education-section .education-details {
   font-size: 0.9rem;
   color: #4A5568;
   margin: 0.25rem 0 0 0;
 }
 
-/* Certifications Section */
-.pm-cert-item {
+/* ========================================
+   CERTIFICATIONS STYLING
+   ======================================== */
+.professional-pm-template .pm-certifications-section .certification-item {
   margin-bottom: 0.5rem;
+  border: none;
+  padding: 0;
+  background: none;
 }
 
-.pm-cert-row {
+.professional-pm-template .pm-certifications-section .certification-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
 }
 
-.pm-cert-name {
+.professional-pm-template .pm-certifications-section .certification-name,
+.professional-pm-template .pm-certifications-section .certification-header input:first-child {
   font-size: 0.95rem;
   font-weight: 600;
   color: #2D3748;
 }
 
-.pm-cert-date {
+.professional-pm-template .pm-certifications-section .certification-date,
+.professional-pm-template .pm-certifications-section .certification-header input:nth-child(3) {
   font-size: 0.9rem;
   color: #718096;
 }
 
-/* Footer */
-.pm-footer {
+/* ========================================
+   CONTACT/SOCIAL LINKS FOOTER
+   ======================================== */
+.professional-pm-template .pm-contact-wrapper .contact {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #E2E8F0;
+}
+
+.professional-pm-template .pm-contact-wrapper .social-links,
+.professional-pm-template .pm-contact-wrapper .social-links-edit {
   display: flex;
   justify-content: center;
   gap: 1.5rem;
   flex-wrap: wrap;
 }
 
-.pm-social-link {
+.professional-pm-template .pm-contact-wrapper .social-link {
   font-size: 0.9rem;
   color: #3182CE;
   text-decoration: none;
   font-weight: 500;
 }
 
-.pm-social-link:hover {
+.professional-pm-template .pm-contact-wrapper .social-link:hover {
   text-decoration: underline;
   color: #2C5282;
 }
 
-/* Print Optimization */
+/* ========================================
+   PRINT OPTIMIZATION
+   ======================================== */
 @media print {
   .professional-pm-template {
     padding: 1.5rem;
@@ -270,45 +333,48 @@
     page-break-inside: avoid;
   }
 
-  .pm-experience-item {
+  .professional-pm-template .pm-experience-section .experience-item {
     page-break-inside: avoid;
   }
 
-  .pm-social-link {
+  .professional-pm-template .pm-contact-wrapper .social-link {
     color: #3182CE;
   }
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
 @media (max-width: 768px) {
   .professional-pm-template {
     padding: 1.5rem;
   }
 
-  .pm-name {
+  .professional-pm-template .pm-header-wrapper .header h1,
+  .professional-pm-template .pm-header-wrapper .header .name-input {
     font-size: 2rem;
   }
 
-  .pm-strengths-grid.two-column,
-  .pm-strengths-grid.three-column {
+  .professional-pm-template .pm-skills-section .skill-tags,
+  .professional-pm-template .pm-skills-section .skills:has(.skill-tag:nth-child(13)) .skill-tags {
     grid-template-columns: 1fr;
   }
 
-  .pm-exp-header {
+  .professional-pm-template .pm-experience-section .experience-header {
     flex-direction: column;
   }
 
-  .pm-exp-right {
+  .professional-pm-template .pm-experience-section .experience-date {
     text-align: left;
     margin-top: 0.25rem;
   }
 
-  .pm-edu-row {
+  .professional-pm-template .pm-education-section .education-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .pm-edu-date {
+  .professional-pm-template .pm-education-section .education-date {
     margin-left: 0;
   }
 }

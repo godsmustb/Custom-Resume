@@ -2,162 +2,72 @@
  * Professional Project Manager Template
  * Based on user's custom resume design
  * Clean, traditional layout with clear section separations
+ * Uses existing editable components with custom styling
  */
 
+import { useResume } from '../../../context/ResumeContext'
+import Header from '../../Header'
+import About from '../../About'
+import Experience from '../../Experience'
+import Education from '../../Education'
+import Skills from '../../Skills'
+import Certifications from '../../Certifications'
+import Contact from '../../Contact'
 import './ProfessionalProjectManager.css'
 
 export default function ProfessionalProjectManager({ data, customization, isEditing }) {
-  const { personal, about, experience, education, skills, certifications } = data
+  const { resumeData } = useResume()
 
   return (
     <div className="professional-pm-template">
-      {/* Header */}
-      <header className="pm-header">
-        <h1 className="pm-name">{personal.name}</h1>
-        <p className="pm-title">{personal.title}</p>
-        <div className="pm-contact">
-          {personal.phone && (
-            <>
-              <span className="contact-icon">📞</span>
-              <span>{personal.phone}</span>
-              <span className="contact-separator">|</span>
-            </>
-          )}
-          {personal.email && (
-            <>
-              <span className="contact-icon">✉️</span>
-              <span>{personal.email}</span>
-              <span className="contact-separator">|</span>
-            </>
-          )}
-          {personal.location && (
-            <>
-              <span className="contact-icon">📍</span>
-              <span>{personal.location}</span>
-            </>
-          )}
-        </div>
-      </header>
+      {/* Header - Uses existing Header component with custom PM styling */}
+      <div className="pm-header-wrapper">
+        <Header />
+      </div>
 
       {/* Summary Section */}
-      {about && (
-        <section className="pm-section">
-          <h2 className="pm-section-title">SUMMARY</h2>
-          <div className="pm-section-divider"></div>
-          <p className="pm-summary">{about}</p>
-        </section>
-      )}
+      <section className="pm-section pm-summary-section">
+        <h2 className="pm-section-title">SUMMARY</h2>
+        <div className="pm-section-divider"></div>
+        <About />
+      </section>
 
-      {/* Strengths Section (Two/Three-Column) */}
-      {skills && skills.length > 0 && (
-        <section className="pm-section">
-          <h2 className="pm-section-title">STRENGTHS</h2>
-          <div className="pm-section-divider"></div>
-          <div className={`pm-strengths-grid ${skills.length > 0 && skills.reduce((total, cat) => total + (cat.skills?.length || 0), 0) > 12 ? 'three-column' : 'two-column'}`}>
-            {skills.map((skillCategory, catIndex) => (
-              skillCategory.skills && skillCategory.skills.map((skill, skillIndex) => (
-                <div key={`${catIndex}-${skillIndex}`} className="pm-strength-item">
-                  <span className="pm-bullet">•</span>
-                  <span>{skill}</span>
-                </div>
-              ))
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Strengths/Skills Section (Two/Three-Column) */}
+      <section className="pm-section pm-skills-section">
+        <h2 className="pm-section-title">STRENGTHS</h2>
+        <div className="pm-section-divider"></div>
+        <div className="pm-skills-wrapper">
+          <Skills />
+        </div>
+      </section>
 
       {/* Experience Section */}
-      {experience && experience.length > 0 && (
-        <section className="pm-section">
-          <h2 className="pm-section-title">EXPERIENCE</h2>
-          <div className="pm-section-divider"></div>
-
-          {experience.map((exp, index) => (
-            <div key={exp.id || index} className="pm-experience-item">
-              <div className="pm-exp-header">
-                <div className="pm-exp-left">
-                  <h3 className="pm-job-title">{exp.title}</h3>
-                  <p className="pm-company">{exp.company}</p>
-                </div>
-                <div className="pm-exp-right">
-                  <p className="pm-date">{exp.date}</p>
-                </div>
-              </div>
-
-              {exp.description && (
-                <ul className="pm-exp-bullets">
-                  {Array.isArray(exp.description) ? (
-                    exp.description.map((bullet, idx) => (
-                      <li key={idx}>{bullet}</li>
-                    ))
-                  ) : (
-                    <li>{exp.description}</li>
-                  )}
-                </ul>
-              )}
-            </div>
-          ))}
-        </section>
-      )}
+      <section className="pm-section pm-experience-section">
+        <h2 className="pm-section-title">EXPERIENCE</h2>
+        <div className="pm-section-divider"></div>
+        <Experience />
+      </section>
 
       {/* Education Section */}
-      {education && education.length > 0 && (
-        <section className="pm-section">
-          <h2 className="pm-section-title">EDUCATION</h2>
-          <div className="pm-section-divider"></div>
-
-          {education.map((edu, index) => (
-            <div key={edu.id || index} className="pm-education-item">
-              <div className="pm-edu-row">
-                <span className="pm-degree">{edu.degree}</span>
-                <span className="pm-edu-location">{edu.school}</span>
-                <span className="pm-edu-date">{edu.date}</span>
-              </div>
-              {edu.details && (
-                <p className="pm-edu-details">{edu.details}</p>
-              )}
-            </div>
-          ))}
-        </section>
-      )}
+      <section className="pm-section pm-education-section">
+        <h2 className="pm-section-title">EDUCATION</h2>
+        <div className="pm-section-divider"></div>
+        <Education />
+      </section>
 
       {/* Certifications Section */}
-      {certifications && certifications.length > 0 && (
-        <section className="pm-section">
+      {resumeData.certifications && resumeData.certifications.length > 0 && (
+        <section className="pm-section pm-certifications-section">
           <h2 className="pm-section-title">CERTIFICATIONS</h2>
           <div className="pm-section-divider"></div>
-
-          {certifications.map((cert, index) => (
-            <div key={cert.id || index} className="pm-cert-item">
-              <div className="pm-cert-row">
-                <span className="pm-cert-name">{cert.name}</span>
-                <span className="pm-cert-date">{cert.date}</span>
-              </div>
-            </div>
-          ))}
+          <Certifications />
         </section>
       )}
 
       {/* Social Links Footer */}
-      {(personal.linkedin || personal.github || personal.portfolio) && (
-        <footer className="pm-footer">
-          {personal.linkedin && (
-            <a href={personal.linkedin} className="pm-social-link" target="_blank" rel="noopener noreferrer">
-              LinkedIn
-            </a>
-          )}
-          {personal.github && (
-            <a href={personal.github} className="pm-social-link" target="_blank" rel="noopener noreferrer">
-              GitHub
-            </a>
-          )}
-          {personal.portfolio && (
-            <a href={personal.portfolio} className="pm-social-link" target="_blank" rel="noopener noreferrer">
-              Portfolio
-            </a>
-          )}
-        </footer>
-      )}
+      <div className="pm-contact-wrapper">
+        <Contact />
+      </div>
     </div>
   )
 }
