@@ -110,7 +110,7 @@ export const ResumeProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const [currentTemplate, setCurrentTemplateState] = useState(() => {
     const savedTemplate = localStorage.getItem('currentTemplate')
-    return savedTemplate || 'ats-simple-minimal'
+    return savedTemplate || 'professional-project-manager'
   })
 
   const [templateCustomization, setTemplateCustomizationState] = useState(() => {
@@ -243,7 +243,7 @@ export const ResumeProvider = ({ children }) => {
           setCurrentResumeId(latestResume.id)
           setCurrentResumeTitle(latestResume.title)
           setResumeData(latestResume.resume_data)
-          setCurrentTemplateState(latestResume.current_template || 'ats-simple-minimal')
+          setCurrentTemplateState(latestResume.current_template || 'professional-project-manager')
           setTemplateCustomizationState(latestResume.template_customization || {
             colorScheme: 'corporate-blue',
             font: 'inter',
@@ -269,7 +269,7 @@ export const ResumeProvider = ({ children }) => {
     const { data, error } = await createResume(
       user.id,
       initialResumeData,
-      'ats-simple-minimal',
+      'professional-project-manager',
       {
         colorScheme: 'corporate-blue',
         font: 'inter',
@@ -286,7 +286,7 @@ export const ResumeProvider = ({ children }) => {
       setCurrentResumeId(data.id)
       setCurrentResumeTitle(data.title)
       setResumeData(initialResumeData)
-      setCurrentTemplateState('ats-simple-minimal')
+      setCurrentTemplateState('professional-project-manager')
       setTemplateCustomizationState({
         colorScheme: 'corporate-blue',
         font: 'inter',
@@ -297,6 +297,41 @@ export const ResumeProvider = ({ children }) => {
     setLoading(false)
   }
 
+  const createNewResumeFromData = async (title, customResumeData, template = 'professional-project-manager', customization = {
+    colorScheme: 'corporate-blue',
+    font: 'inter',
+    spacing: 'comfortable'
+  }) => {
+    if (!user) {
+      alert('Please sign in to create multiple resumes')
+      return { success: false, error: 'Not authenticated' }
+    }
+
+    setLoading(true)
+    const { data, error } = await createResume(
+      user.id,
+      customResumeData,
+      template,
+      customization,
+      title
+    )
+
+    if (error) {
+      console.error('Error creating resume from data:', error)
+      setLoading(false)
+      return { success: false, error: error.message }
+    } else {
+      setUserResumes(prev => [data, ...prev])
+      setCurrentResumeId(data.id)
+      setCurrentResumeTitle(data.title)
+      setResumeData(customResumeData)
+      setCurrentTemplateState(template)
+      setTemplateCustomizationState(customization)
+      setLoading(false)
+      return { success: true, data }
+    }
+  }
+
   const switchResume = async (resumeId) => {
     const resume = userResumes.find(r => r.id === resumeId)
     if (!resume) return
@@ -304,7 +339,7 @@ export const ResumeProvider = ({ children }) => {
     setCurrentResumeId(resume.id)
     setCurrentResumeTitle(resume.title)
     setResumeData(resume.resume_data)
-    setCurrentTemplateState(resume.current_template || 'ats-simple-minimal')
+    setCurrentTemplateState(resume.current_template || 'professional-project-manager')
     setTemplateCustomizationState(resume.template_customization || {
       colorScheme: 'corporate-blue',
       font: 'inter',
@@ -603,6 +638,7 @@ export const ResumeProvider = ({ children }) => {
 
     // Resume management
     createNewResume,
+    createNewResumeFromData,
     switchResume,
     renameResume,
     deleteCurrentResume,

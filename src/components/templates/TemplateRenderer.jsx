@@ -12,12 +12,16 @@ import ModernTwoColumn from './layouts/ModernTwoColumn'
 import ExecutiveLayout from './layouts/ExecutiveLayout'
 import CreativeLayout from './layouts/CreativeLayout'
 import MinimalistLayout from './layouts/MinimalistLayout'
+import ProfessionalProjectManager from './layouts/ProfessionalProjectManager'
 
 /**
  * Map template components to actual layout components
  * This allows us to reuse layouts across multiple templates
  */
 const LAYOUT_MAP = {
+  // Custom User Template (Professional Project Manager)
+  'ProfessionalProjectManager': ProfessionalProjectManager,
+
   // Classic Single Column Layouts
   'ATSSimpleTemplate': ClassicSingleColumn,
   'TraditionalTemplate': ClassicSingleColumn,

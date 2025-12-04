@@ -7,6 +7,7 @@ const openai = new OpenAI({
 
 /**
  * Generate professional summary based on user's background
+ * NEW: Creates scannable bullet-point format (6-9 lines, 80-120 words)
  */
 export async function generateSummary(currentSummary, jobDescription = '') {
   try {
@@ -15,20 +16,44 @@ export async function generateSummary(currentSummary, jobDescription = '') {
 
          And this current professional summary: "${currentSummary}"
 
-         Generate an improved, tailored professional summary that highlights relevant skills and experience for this specific job.
-         Keep it concise (3-4 sentences), professional, and use action-oriented language.
-         Focus on how the candidate's experience aligns with the job requirements.`
+         Generate an improved, tailored professional summary in BULLET-POINT FORMAT.
+
+         CRITICAL REQUIREMENTS:
+         - Create 6-9 concise bullet points (total 80-120 words)
+         - Each bullet should be ONE line (12-15 words max)
+         - Start each bullet with a different power word (avoid repetition)
+         - First 2-3 bullets should include scale/scope (team size, budget, users, projects)
+         - Include specific technical skills and keywords from job description
+         - Make it scannable - recruiters should grasp value in 10 seconds
+         - Use varied sentence structures - NO repetition
+
+         POWER WORDS TO VARY:
+         • Results-driven, Strategic, Certified, Award-winning, Accomplished
+         • Expert, Proficient, Skilled, Specialized, Proven
+         • Innovative, Analytical, Detail-oriented, Collaborative
+
+         EXAMPLE FORMAT:
+         • Results-driven [Role] with 10+ years managing teams of 15+ and budgets exceeding $5M
+         • Expert in [Skill 1], [Skill 2], and [Skill 3] with proven track record in [Industry]
+         • Successfully delivered 50+ projects serving 2M+ users across global markets
+         • Certified in [Certification] with deep expertise in [Technical Area]
+         • Strong background in [Domain] achieving 40% efficiency gains and $2M cost savings
+         • Proven ability to lead cross-functional initiatives and drive organizational change
+
+         Return ONLY the bullet points (no intro text, no explanations), one per line, starting with bullet symbol (•).`
       : `Improve this professional summary: "${currentSummary}"
 
-         Make it more compelling, professional, and action-oriented. Keep it 3-4 sentences.
-         Highlight key strengths and unique value proposition.`
+         Create it as 6-9 scannable bullet points (80-120 words total).
+         Each bullet should be one concise line highlighting a key strength.
+         Include numbers, scale, and specific achievements where possible.
+         Return only the bullets, one per line, starting with (•).`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are a professional resume writer with expertise in crafting compelling professional summaries. Provide only the improved summary text, no explanations.'
+          content: 'You are a professional resume writer specializing in ATS-optimized, scannable summaries. Create bullet-point summaries that are concise, impactful, and easy to skim. Each bullet should be a complete thought in 12-15 words. Vary your language - never repeat the same power words. Focus on scale, scope, and measurable achievements. Return ONLY the bullets with • symbols.'
         },
         {
           role: 'user',
@@ -36,7 +61,7 @@ export async function generateSummary(currentSummary, jobDescription = '') {
         }
       ],
       temperature: 0.7,
-      max_tokens: 300
+      max_tokens: 400
     })
 
     return response.choices[0].message.content.trim()
@@ -388,7 +413,7 @@ export async function autoImproveResume(resumeData, jobDescription, gaps) {
     // Extract key requirements from job description first
     const analysis = await analyzeJobDescription(jobDescription)
 
-    // Improve summary - VERY AGGRESSIVE
+    // Improve summary - SCANNABLE BULLET FORMAT
     const summaryPrompt = `Current Summary: "${resumeData.about}"
 
     Job Description: ${jobDescription}
@@ -399,29 +424,31 @@ export async function autoImproveResume(resumeData, jobDescription, gaps) {
     REQUIRED TECHNICAL SKILLS: ${analysis.technicalSkills.join(', ')}
     REQUIRED SOFT SKILLS: ${analysis.softSkills.join(', ')}
 
-    TASK: Completely rewrite this professional summary to MAXIMIZE match with the job description and achieve 95%+ score.
+    TASK: Create a SCANNABLE, BULLET-POINT professional summary that achieves 95%+ ATS match.
 
-    CRITICAL REQUIREMENTS - ALL MUST BE MET:
-    - MUST include at least 8-10 exact keywords from the job description
-    - MUST directly address EVERY SINGLE critical gap listed above
-    - MUST mention 3-5 technical skills from the required list by name
-    - MUST include specific quantifiable achievements (numbers like "500K users", "40% improvement", "$2M savings")
-    - MUST be 5-6 sentences to pack maximum keywords
-    - MUST mirror the language/terminology used in the job description
-    - Use power verbs: Led, Architected, Drove, Spearheaded, Optimized, Delivered
-    - Make it sound like this person is THE PERFECT match for this exact role
-    - Include industry-specific terminology from the job posting
+    CRITICAL FORMAT REQUIREMENTS:
+    - Create 6-9 concise bullet points (80-120 words total)
+    - Each bullet ONE line only (12-15 words max)
+    - Start each bullet with DIFFERENT power words (Results-driven, Expert, Accomplished, Certified, Strategic, Proven, Innovative, Skilled)
+    - First 2-3 bullets MUST include scale/scope (team size, budget, # projects, users, environments)
+    - Include 8-10 exact keywords from job description across all bullets
+    - Directly address critical gaps
+    - NO repetition of sentence structures or power words
 
-    GOAL: Write a summary so targeted that ATS systems give it 90%+ keyword match.
+    EXAMPLE SCALE CONTEXT (use in first 2-3 bullets):
+    • Results-driven [Role] with 10+ years leading teams of 15+ and managing $5M+ budgets
+    • Successfully delivered 50+ enterprise projects serving 2M+ users across 10 global regions
 
-    Return ONLY the rewritten summary, nothing else.`
+    GOAL: Recruiter can skim in 10 seconds and see perfect match. ATS scores 95%+.
+
+    Return ONLY the bullet points (one per line, starting with •), nothing else.`
 
     const summaryResponse = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are an elite ATS optimization specialist and professional resume writer. Your ONLY goal is to pack as many relevant keywords from the job description into the summary as possible while keeping it professional and realistic. Be EXTREMELY aggressive with keyword density. Think like an ATS system - more matching keywords = higher score. DO NOT hold back on keywords.'
+          content: 'You are an elite ATS optimization specialist. Create SCANNABLE bullet-point summaries (not paragraphs). Each bullet should be 12-15 words max. Vary your power words - never repeat. Include scale/scope early (team size, budget, projects, users). Pack keywords while staying professional. Return ONLY bullets with • symbols.'
         },
         {
           role: 'user',
@@ -434,7 +461,7 @@ export async function autoImproveResume(resumeData, jobDescription, gaps) {
 
     improvements.summary = summaryResponse.choices[0].message.content.trim()
 
-    // Improve ALL experience items - HYPER-AGGRESSIVE
+    // Improve ALL experience items - OPTIMIZED FOR READABILITY + ATS
     for (const exp of resumeData.experience) {
       const expPrompt = `Job Title: ${exp.title}
       Company: ${exp.company}
@@ -448,28 +475,37 @@ export async function autoImproveResume(resumeData, jobDescription, gaps) {
       REQUIRED TECHNICAL SKILLS: ${analysis.technicalSkills.join(', ')}
       KEY RESPONSIBILITIES FROM JOB: ${analysis.responsibilities.slice(0, 3).join(' | ')}
 
-      TASK: Generate 6-8 HYPER-TARGETED bullet points that MAXIMIZE match with the job description to achieve 95%+ score.
+      TASK: Generate EXACTLY 6-7 TARGETED, SCANNABLE bullet points (NOT 8+) that achieve 95%+ ATS match while remaining readable.
 
-      MANDATORY REQUIREMENTS FOR EACH BULLET (ALL MUST BE MET):
-      - Start with power action verbs (Led, Architected, Spearheaded, Engineered, Drove, Optimized, Delivered, Designed)
-      - Include SPECIFIC quantifiable metrics (%, $, exact numbers, scale, time saved, team size)
-      - Incorporate 3-4 EXACT KEYWORDS from the required list in EACH bullet
-      - Directly address at least one of the critical gaps mentioned
-      - Mirror EXACT language and terminology from the target job description
-      - Show measurable impact and business results, not just responsibilities
-      - Include 2-3 relevant technical skills/tools from the requirements IN EACH BULLET
-      - Make each bullet 15-25 words for maximum keyword density
+      CRITICAL REQUIREMENTS FOR EACH BULLET:
+      ✅ EXACTLY 6-7 bullets (not more, not less)
+      ✅ Each bullet 15-20 words MAX (NOT 25+) for scannability
+      ✅ VARY action verbs - use DIFFERENT verb for each bullet from this list:
+         - Architected, Spearheaded, Drove, Implemented, Optimized, Delivered, Established, Streamlined, Engineered, Designed, Pioneered, Orchestrated, Scaled, Transformed
+      ✅ NO repetition - each bullet should start differently and use varied structure
+      ✅ First 2-3 bullets should include SCALE CONTEXT (team size, budget, # projects, users, systems supported)
+      ✅ Include specific metrics in EVERY bullet (%, $, numbers, time, scale)
+      ✅ Pack 3-4 exact keywords from job description in each bullet
+      ✅ Show: Scope → Action → Measurable Outcome
 
-      QUALITY EXAMPLES (COPY THIS STYLE):
-      - "Architected and deployed scalable microservices infrastructure using Docker, Kubernetes, and AWS, reducing deployment time by 60% and supporting 2M+ daily active users across 15 regions"
-      - "Led cross-functional agile team of 8 engineers to deliver React-based SaaS platform with CI/CD pipeline, increasing customer retention by 35% and revenue by $1.2M annually"
-      - "Spearheaded cloud migration initiative from on-premise to AWS, implementing auto-scaling and monitoring, cutting infrastructure costs by 45% while improving uptime to 99.99%"
+      STRUCTURE VARIETY (use different patterns):
+      1. "Architected [system] supporting X users, achieving Y% improvement in Z metric"
+      2. "Led team of X to deliver [project], reducing costs by $Y and increasing Z by 40%"
+      3. "Implemented [technology] across X environments, driving Y% efficiency gains"
+      4. "Drove [initiative] managing $X budget, resulting in Y% revenue growth"
+      5. "Optimized [process] serving X customers, cutting deployment time by Y%"
+      6. "Delivered [project] with team of X, improving performance by Y% and saving $Z"
 
-      GOAL: Each bullet should contain so many job-specific keywords that ATS systems score it 95%+.
+      GOOD EXAMPLES (15-20 words each):
+      - "Architected scalable microservices infrastructure supporting 2M+ users, reducing deployment time by 60% using Docker and Kubernetes"
+      - "Led agile team of 8 engineers delivering SaaS platform, increasing retention by 35% and generating $1.2M annual revenue"
+      - "Implemented cloud migration across 15 production environments, cutting infrastructure costs by 45% while achieving 99.99% uptime"
 
-      Return 6-8 bullets in JSON format:
+      GOAL: Scannable bullets that score 95%+ on ATS while being easy to read.
+
+      Return EXACTLY 6-7 bullets in JSON format:
       {
-        "bullets": ["bullet 1", "bullet 2", "bullet 3", "bullet 4", "bullet 5", ...]
+        "bullets": ["bullet 1", "bullet 2", "bullet 3", "bullet 4", "bullet 5", "bullet 6", "bullet 7"]
       }`
 
       const expResponse = await openai.chat.completions.create({
@@ -477,7 +513,7 @@ export async function autoImproveResume(resumeData, jobDescription, gaps) {
         messages: [
           {
             role: 'system',
-            content: 'You are an elite resume writer and ATS optimization expert. Your ONLY job is to generate bullet points with MAXIMUM keyword density from the job description. Pack 3-4 exact keywords from the job posting into EVERY SINGLE bullet. Include specific technical skills, tools, and methodologies mentioned in the job description. Be EXTREMELY aggressive - think like an ATS parser that counts keyword matches. More keywords = higher score. DO NOT be conservative.'
+            content: 'You are an elite resume writer balancing ATS optimization with human readability. Generate EXACTLY 6-7 bullets (not 8+). Each bullet 15-20 words MAX. VARY your action verbs - never use the same verb twice. Include scale/scope early (team size, budget, users). Structure: Scope → Action → Outcome. Pack keywords but keep scannable. Return valid JSON with bullets array.'
           },
           {
             role: 'user',
@@ -485,7 +521,7 @@ export async function autoImproveResume(resumeData, jobDescription, gaps) {
           }
         ],
         temperature: 1.0,
-        max_tokens: 800,
+        max_tokens: 900,
         response_format: { type: 'json_object' }
       })
 
@@ -709,6 +745,77 @@ Return as JSON array matching the number of gaps:
   } catch (error) {
     console.error('Error generating gap bullets:', error)
     throw new Error('Failed to generate gap-specific bullets. Please try again.')
+  }
+}
+
+/**
+ * Categorize skills into structured groups for better ATS parsing and readability
+ * Returns skills organized into: Business Analysis, Technical & Modeling, Agile/Project Management, Tools/Software
+ */
+export async function categorizeSkills(skillsList, jobDescription = '') {
+  try {
+    const prompt = `Skills List: ${skillsList.join(', ')}
+
+    ${jobDescription ? `Job Description Context: ${jobDescription}` : ''}
+
+    TASK: Organize these skills into 4 SPECIFIC categories for optimal ATS parsing and recruiter readability.
+
+    REQUIRED CATEGORIES (use exactly these names):
+    1. "Business Analysis" - Business requirements, stakeholder management, process improvement, domain knowledge
+    2. "Technical & Modeling" - Programming languages, databases, data modeling, architecture, technical design
+    3. "Agile/Project Management" - Scrum, Kanban, sprint planning, project coordination, delivery methodologies
+    4. "Tools/Software" - Specific software, platforms, and tools (JIRA, Confluence, Figma, etc.)
+
+    CATEGORIZATION RULES:
+    - Every skill must go into ONE category only (no duplicates)
+    - If a skill fits multiple categories, choose the MOST relevant one
+    - Keep skill names exactly as provided (don't modify)
+    - If job description is provided, prioritize skills mentioned in it
+    - Empty categories are OK if no skills fit
+
+    EXAMPLES:
+    Business Analysis: Requirements Gathering, Stakeholder Management, Business Process Modeling, Gap Analysis, User Stories
+    Technical & Modeling: Python, SQL, Data Modeling, System Architecture, API Design, PostgreSQL, React
+    Agile/Project Management: Scrum, Agile Methodologies, Sprint Planning, Kanban, Release Management, Roadmap Planning
+    Tools/Software: JIRA, Confluence, Figma, Git, Docker, Tableau, AWS, Azure DevOps
+
+    Return in JSON format:
+    {
+      "Business Analysis": ["skill1", "skill2", ...],
+      "Technical & Modeling": ["skill1", "skill2", ...],
+      "Agile/Project Management": ["skill1", "skill2", ...],
+      "Tools/Software": ["skill1", "skill2", ...]
+    }`
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert at organizing resume skills for ATS optimization. Categorize skills into exactly 4 groups: Business Analysis, Technical & Modeling, Agile/Project Management, and Tools/Software. Every skill goes in one category only. Keep skill names unchanged. Return valid JSON.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 800,
+      response_format: { type: 'json_object' }
+    })
+
+    const categorized = JSON.parse(response.choices[0].message.content)
+
+    // Ensure all categories exist (even if empty)
+    return {
+      'Business Analysis': categorized['Business Analysis'] || [],
+      'Technical & Modeling': categorized['Technical & Modeling'] || [],
+      'Agile/Project Management': categorized['Agile/Project Management'] || [],
+      'Tools/Software': categorized['Tools/Software'] || []
+    }
+  } catch (error) {
+    console.error('Error categorizing skills:', error)
+    throw new Error('Failed to categorize skills. Please try again.')
   }
 }
 
