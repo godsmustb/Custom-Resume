@@ -77,36 +77,42 @@ export async function parseResumeWithAI(resumeText, retryCount = 0) {
       "id": "string",
       "title": "string",
       "company": "string",
-      "date": "string",
-      "description": ["array", "of", "strings"]
+      "date": "string - MUST include dates (e.g., 'Jan 2020 - Present', '2018-2022')",
+      "description": ["array", "of", "strings - each bullet point"]
     }
   ],
   "education": [
     {
       "id": "string",
-      "degree": "string",
-      "school": "string",
-      "date": "string",
-      "details": "string"
+      "degree": "string - full degree name (e.g., 'Bachelor of Technology, Computer Sciences Engineering')",
+      "school": "string - institution name with location if available",
+      "date": "string - MUST extract graduation year or date range (e.g., '2006-2010', '2014-2016', '2018')",
+      "details": "string - additional details like GPA, honors, etc."
     }
   ],
   "skills": [
     {
-      "category": "string",
-      "skills": ["array", "of", "strings"]
+      "category": "string - skill category name",
+      "skills": ["array", "of", "individual", "skills"]
     }
   ],
   "certifications": [
     {
       "id": "string",
-      "name": "string",
-      "issuer": "string",
-      "date": "string",
-      "credentialId": "string",
-      "credentialUrl": "string"
+      "name": "string - certification name (e.g., 'PMI PMP - Project Management Professional')",
+      "issuer": "string - certifying organization",
+      "date": "string - MUST extract year obtained (e.g., '2018', '2016')",
+      "credentialId": "string - if available",
+      "credentialUrl": "string - if available"
     }
   ]
 }
+
+IMPORTANT EXTRACTION RULES:
+1. For EDUCATION: Always extract the date/year (graduation year or date range). Look for patterns like "2006-2010", "2014", "Graduated 2016", etc.
+2. For CERTIFICATIONS: Always extract the year obtained. Look for patterns like "2018", "Obtained 2016", etc.
+3. For EXPERIENCE: Always include the date range (e.g., "Jul 2024 - Present", "Dec 2020 - Jul 2024").
+4. Extract ALL information available, do not skip dates even if they seem partial.
 
 Return ONLY the JSON object, no explanations or markdown formatting. Ensure all strings are properly escaped and terminated.`
         },

@@ -48,21 +48,19 @@ export default function ProfessionalProjectManager({ data, customization, isEdit
         </section>
       )}
 
-      {/* Strengths Section (Two-Column) */}
+      {/* Strengths Section (Two/Three-Column) */}
       {skills && skills.length > 0 && (
         <section className="pm-section">
           <h2 className="pm-section-title">STRENGTHS</h2>
           <div className="pm-section-divider"></div>
-          <div className="pm-strengths-grid">
-            {skills.map((skillCategory, index) => (
-              <div key={index} className="pm-strength-category">
-                {skillCategory.skills && skillCategory.skills.map((skill, skillIndex) => (
-                  <div key={skillIndex} className="pm-strength-item">
-                    <span className="pm-bullet">•</span>
-                    <span>{skill}</span>
-                  </div>
-                ))}
-              </div>
+          <div className={`pm-strengths-grid ${skills.length > 0 && skills.reduce((total, cat) => total + (cat.skills?.length || 0), 0) > 12 ? 'three-column' : 'two-column'}`}>
+            {skills.map((skillCategory, catIndex) => (
+              skillCategory.skills && skillCategory.skills.map((skill, skillIndex) => (
+                <div key={`${catIndex}-${skillIndex}`} className="pm-strength-item">
+                  <span className="pm-bullet">•</span>
+                  <span>{skill}</span>
+                </div>
+              ))
             ))}
           </div>
         </section>

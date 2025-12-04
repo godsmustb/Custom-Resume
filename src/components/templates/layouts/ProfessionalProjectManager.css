@@ -82,18 +82,19 @@
   margin: 0;
 }
 
-/* Strengths Section (Two-Column Grid) */
+/* Strengths Section (Two/Three-Column Grid) */
 .pm-strengths-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 0.75rem 2rem;
   margin-top: 0.5rem;
 }
 
-.pm-strength-category {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.pm-strengths-grid.two-column {
+  grid-template-columns: 1fr 1fr;
+}
+
+.pm-strengths-grid.three-column {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .pm-strength-item {
@@ -288,7 +289,8 @@
     font-size: 2rem;
   }
 
-  .pm-strengths-grid {
+  .pm-strengths-grid.two-column,
+  .pm-strengths-grid.three-column {
     grid-template-columns: 1fr;
   }
 
