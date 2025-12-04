@@ -1,0 +1,312 @@
+/* Professional Project Manager Template Styles */
+
+.professional-pm-template {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 3rem 3.5rem;
+  background: white;
+  font-family: 'Calibri', 'Arial', sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Header */
+.pm-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 0.5rem;
+}
+
+.pm-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #4A5568;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pm-title {
+  font-size: 1.1rem;
+  color: #3182CE;
+  margin: 0 0 0.75rem 0;
+  font-weight: 500;
+}
+
+.pm-contact {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #4A5568;
+  flex-wrap: wrap;
+}
+
+.contact-icon {
+  font-size: 0.9rem;
+}
+
+.contact-separator {
+  color: #CBD5E0;
+  margin: 0 0.25rem;
+}
+
+/* Section Styles */
+.pm-section {
+  margin-bottom: 2rem;
+}
+
+.pm-section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #3182CE;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pm-section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, #3182CE, #90CDF4, transparent);
+  margin-bottom: 1rem;
+}
+
+/* Summary Section */
+.pm-summary {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  text-align: justify;
+  color: #2D3748;
+  margin: 0;
+}
+
+/* Strengths Section (Two-Column Grid) */
+.pm-strengths-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 2rem;
+  margin-top: 0.5rem;
+}
+
+.pm-strength-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pm-strength-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.pm-bullet {
+  color: #3182CE;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* Experience Section */
+.pm-experience-item {
+  margin-bottom: 1.75rem;
+  page-break-inside: avoid;
+}
+
+.pm-exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.pm-exp-left {
+  flex: 1;
+}
+
+.pm-job-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2D3748;
+  margin: 0 0 0.25rem 0;
+}
+
+.pm-company {
+  font-size: 0.95rem;
+  color: #4A5568;
+  margin: 0;
+  font-style: italic;
+}
+
+.pm-exp-right {
+  text-align: right;
+}
+
+.pm-date {
+  font-size: 0.9rem;
+  color: #718096;
+  margin: 0;
+  font-weight: 500;
+}
+
+.pm-exp-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0 0;
+}
+
+.pm-exp-bullets li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #2D3748;
+}
+
+.pm-exp-bullets li::before {
+  content: '●';
+  position: absolute;
+  left: 0;
+  color: #3182CE;
+  font-size: 0.7rem;
+  top: 0.35rem;
+}
+
+/* Education Section */
+.pm-education-item {
+  margin-bottom: 0.75rem;
+}
+
+.pm-edu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pm-degree {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2D3748;
+}
+
+.pm-edu-location {
+  font-size: 0.9rem;
+  color: #4A5568;
+}
+
+.pm-edu-date {
+  font-size: 0.9rem;
+  color: #718096;
+  margin-left: auto;
+}
+
+.pm-edu-details {
+  font-size: 0.9rem;
+  color: #4A5568;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Certifications Section */
+.pm-cert-item {
+  margin-bottom: 0.5rem;
+}
+
+.pm-cert-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.pm-cert-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2D3748;
+}
+
+.pm-cert-date {
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+/* Footer */
+.pm-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pm-social-link {
+  font-size: 0.9rem;
+  color: #3182CE;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pm-social-link:hover {
+  text-decoration: underline;
+  color: #2C5282;
+}
+
+/* Print Optimization */
+@media print {
+  .professional-pm-template {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .pm-section {
+    page-break-inside: avoid;
+  }
+
+  .pm-experience-item {
+    page-break-inside: avoid;
+  }
+
+  .pm-social-link {
+    color: #3182CE;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .professional-pm-template {
+    padding: 1.5rem;
+  }
+
+  .pm-name {
+    font-size: 2rem;
+  }
+
+  .pm-strengths-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pm-exp-header {
+    flex-direction: column;
+  }
+
+  .pm-exp-right {
+    text-align: left;
+    margin-top: 0.25rem;
+  }
+
+  .pm-edu-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pm-edu-date {
+    margin-left: 0;
+  }
+}

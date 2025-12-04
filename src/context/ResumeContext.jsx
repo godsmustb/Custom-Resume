@@ -110,7 +110,7 @@ export const ResumeProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const [currentTemplate, setCurrentTemplateState] = useState(() => {
     const savedTemplate = localStorage.getItem('currentTemplate')
-    return savedTemplate || 'ats-simple-minimal'
+    return savedTemplate || 'professional-project-manager'
   })
 
   const [templateCustomization, setTemplateCustomizationState] = useState(() => {
@@ -243,7 +243,7 @@ export const ResumeProvider = ({ children }) => {
           setCurrentResumeId(latestResume.id)
           setCurrentResumeTitle(latestResume.title)
           setResumeData(latestResume.resume_data)
-          setCurrentTemplateState(latestResume.current_template || 'ats-simple-minimal')
+          setCurrentTemplateState(latestResume.current_template || 'professional-project-manager')
           setTemplateCustomizationState(latestResume.template_customization || {
             colorScheme: 'corporate-blue',
             font: 'inter',
@@ -269,7 +269,7 @@ export const ResumeProvider = ({ children }) => {
     const { data, error } = await createResume(
       user.id,
       initialResumeData,
-      'ats-simple-minimal',
+      'professional-project-manager',
       {
         colorScheme: 'corporate-blue',
         font: 'inter',
@@ -286,7 +286,7 @@ export const ResumeProvider = ({ children }) => {
       setCurrentResumeId(data.id)
       setCurrentResumeTitle(data.title)
       setResumeData(initialResumeData)
-      setCurrentTemplateState('ats-simple-minimal')
+      setCurrentTemplateState('professional-project-manager')
       setTemplateCustomizationState({
         colorScheme: 'corporate-blue',
         font: 'inter',
@@ -297,7 +297,7 @@ export const ResumeProvider = ({ children }) => {
     setLoading(false)
   }
 
-  const createNewResumeFromData = async (title, customResumeData, template = 'ats-simple-minimal', customization = {
+  const createNewResumeFromData = async (title, customResumeData, template = 'professional-project-manager', customization = {
     colorScheme: 'corporate-blue',
     font: 'inter',
     spacing: 'comfortable'
@@ -339,7 +339,7 @@ export const ResumeProvider = ({ children }) => {
     setCurrentResumeId(resume.id)
     setCurrentResumeTitle(resume.title)
     setResumeData(resume.resume_data)
-    setCurrentTemplateState(resume.current_template || 'ats-simple-minimal')
+    setCurrentTemplateState(resume.current_template || 'professional-project-manager')
     setTemplateCustomizationState(resume.template_customization || {
       colorScheme: 'corporate-blue',
       font: 'inter',

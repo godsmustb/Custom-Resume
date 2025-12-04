@@ -6,7 +6,28 @@
 import { TEMPLATE_TIERS, TEMPLATE_CATEGORIES } from '../types/templateTypes'
 
 export const TEMPLATE_CATALOG = [
-  // FREE TEMPLATES (3 templates)
+  // FREE TEMPLATES (4 templates - including custom user template)
+  {
+    id: 'professional-project-manager',
+    name: 'Professional Project Manager',
+    description: 'Clean, traditional layout with two-column strengths section. Perfect for project managers, operations, and engineering roles.',
+    category: TEMPLATE_CATEGORIES.ATS_CORE,
+    tier: TEMPLATE_TIERS.FREE,
+    atsScore: 96,
+    columns: 1,
+    colorSchemes: ['corporate-blue', 'professional-green', 'executive-navy'],
+    fonts: ['arial', 'calibri', 'roboto'],
+    industries: ['Project Management', 'Operations', 'Engineering', 'Manufacturing', 'Construction'],
+    thumbnailUrl: '/templates/thumbnails/professional-project-manager.png',
+    component: 'ProfessionalProjectManager',
+    featured: true,
+    default: true,
+    layout: {
+      sections: ['contact', 'summary', 'strengths', 'experience', 'education', 'certifications'],
+      spacing: 'comfortable',
+      headerStyle: 'centered'
+    }
+  },
   {
     id: 'ats-simple-minimal',
     name: 'ATS Simple & Minimal',
