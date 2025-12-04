@@ -109,16 +109,53 @@
   display: none; /* Hide category headers for flat display */
 }
 
+/* Target the actual skill-list UL element */
+.professional-pm-template .pm-skills-section .skill-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Count total skills across all categories for adaptive layout */
+.professional-pm-template .pm-skills-section .skills:has(.skill-list li:nth-child(7)) .skill-list {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Adaptive 3-column layout when 13+ skills total */
+.professional-pm-template .pm-skills-section:has(.skill-list li:nth-last-child(n+13)) .skill-list {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem 1.5rem;
+}
+
+.professional-pm-template .pm-skills-section .skill-list li {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #2D3748;
+  border-radius: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.professional-pm-template .pm-skills-section .skill-list li::before {
+  content: '•';
+  color: #3182CE;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* Also support skill-tags if used in edit mode */
 .professional-pm-template .pm-skills-section .skill-tags {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem 2rem;
   margin: 0;
-}
-
-/* Adaptive 3-column layout for many skills */
-.professional-pm-template .pm-skills-section .skills:has(.skill-tag:nth-child(13)) .skill-tags {
-  grid-template-columns: repeat(3, 1fr);
 }
 
 .professional-pm-template .pm-skills-section .skill-tag {

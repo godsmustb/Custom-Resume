@@ -108,11 +108,25 @@ export async function parseResumeWithAI(resumeText, retryCount = 0) {
   ]
 }
 
-IMPORTANT EXTRACTION RULES:
-1. For EDUCATION: Always extract the date/year (graduation year or date range). Look for patterns like "2006-2010", "2014", "Graduated 2016", etc.
-2. For CERTIFICATIONS: Always extract the year obtained. Look for patterns like "2018", "Obtained 2016", etc.
-3. For EXPERIENCE: Always include the date range (e.g., "Jul 2024 - Present", "Dec 2020 - Jul 2024").
-4. Extract ALL information available, do not skip dates even if they seem partial.
+CRITICAL DATE EXTRACTION RULES (DO NOT SKIP):
+1. EDUCATION DATES - MANDATORY: Search the entire education section for ANY year/date patterns:
+   - Look for: "2006-2010", "2010-2014", "2014-2016", "2016-2018", "2018-2022"
+   - Look for: "2010", "2014", "2016", "2018" (single years)
+   - Look for: "Graduated 2016", "Graduation: 2014", "Class of 2018"
+   - Look for: dates near degree/school names
+   - If you find ANY 4-digit number between 1990-2030 near education, that's likely the date
+
+2. CERTIFICATION DATES - MANDATORY: Search certification section for ANY year:
+   - Look for: "2018", "2016", "2020", "2022" (any 4-digit year)
+   - Look for: "Obtained 2018", "Issued 2016", "Valid 2020"
+   - Look for: dates at the end of certification lines
+   - If you find ANY 4-digit number near a certification, extract it
+
+3. EXPERIENCE DATES - MANDATORY: Must always have date ranges
+   - Format: "Jul 2024 - Present", "Dec 2020 - Jul 2024", "2018-2022"
+
+4. NEVER leave date fields empty - extract ANY date pattern you find
+5. If dates appear anywhere in the text near education/certification, EXTRACT THEM
 
 Return ONLY the JSON object, no explanations or markdown formatting. Ensure all strings are properly escaped and terminated.`
         },
