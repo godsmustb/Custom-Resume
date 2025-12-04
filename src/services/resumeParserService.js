@@ -149,6 +149,68 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
 
     const parsedData = JSON.parse(content)
 
+    // Fallback: Extract dates using regex if AI missed them
+    const extractDatesWithRegex = (text) => {
+      // Match 4-digit years (1990-2030) and date ranges
+      const yearPattern = /\b(19[9]\d|20[0-3]\d)\b/g
+      const dateRangePattern = /\b(19[9]\d|20[0-3]\d)\s*[-–—]\s*(19[9]\d|20[0-3]\d|Present|Current)\b/gi
+
+      const years = text.match(yearPattern) || []
+      const ranges = text.match(dateRangePattern) || []
+
+      return { years, ranges }
+    }
+
+    // Try to extract missing education dates from both parsed data and original text
+    if (parsedData.education && parsedData.education.length > 0) {
+      parsedData.education.forEach((edu, idx) => {
+        if (!edu.date || edu.date.trim() === '') {
+          // First try: Look for dates in the degree or school text
+          const eduText = `${edu.degree || ''} ${edu.school || ''} ${edu.details || ''}`
+          const { years, ranges } = extractDatesWithRegex(eduText)
+
+          if (ranges.length > 0) {
+            edu.date = ranges[0]
+          } else if (years.length > 0) {
+            edu.date = years.sort().reverse()[0]
+          } else {
+            // Second try: Search original text near education keywords
+            const educationSection = truncatedText.match(/education[\s\S]{0,500}/i)?.[0] || ''
+            const { years: sectionYears, ranges: sectionRanges } = extractDatesWithRegex(educationSection)
+
+            if (sectionRanges.length > idx) {
+              edu.date = sectionRanges[idx]
+            } else if (sectionYears.length > idx) {
+              edu.date = sectionYears[idx]
+            }
+          }
+        }
+      })
+    }
+
+    // Try to extract missing certification dates from both parsed data and original text
+    if (parsedData.certifications && parsedData.certifications.length > 0) {
+      parsedData.certifications.forEach((cert, idx) => {
+        if (!cert.date || cert.date.trim() === '') {
+          // First try: Look for dates in the certification name or issuer
+          const certText = `${cert.name || ''} ${cert.issuer || ''}`
+          const { years } = extractDatesWithRegex(certText)
+
+          if (years.length > 0) {
+            cert.date = years.sort().reverse()[0]
+          } else {
+            // Second try: Search original text near certification keywords
+            const certSection = truncatedText.match(/certifications?[\s\S]{0,800}/i)?.[0] || ''
+            const { years: sectionYears } = extractDatesWithRegex(certSection)
+
+            if (sectionYears.length > idx) {
+              cert.date = sectionYears[idx]
+            }
+          }
+        }
+      })
+    }
+
     // Ensure all required fields exist with defaults
     return {
       personal: {
