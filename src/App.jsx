@@ -10,6 +10,7 @@ import AuthModal from './components/auth/AuthModal'
 import CoverLetterTemplateBrowser from './components/CoverLetterTemplateBrowser'
 import CoverLetterEditor from './components/CoverLetterEditor'
 import SavedCoverLetters from './components/SavedCoverLetters'
+import JobSearchBoard from './components/JobSearchBoard'
 
 function App() {
   const { isEditing } = useResume()
@@ -17,7 +18,7 @@ function App() {
   const { openTemplateBrowser, openSavedLetters } = useCoverLetter()
   const [showJobDescription, setShowJobDescription] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [currentView, setCurrentView] = useState('resume') // 'resume' or 'coverletter'
+  const [currentView, setCurrentView] = useState('resume') // 'resume', 'coverletter', or 'jobsearch'
 
   // Debug: Check if API keys are loaded
   console.log('=== Environment Variables Debug ===')
@@ -90,6 +91,23 @@ function App() {
           }}
         >
           Cover Letter Builder
+        </button>
+        <button
+          onClick={() => setCurrentView('jobsearch')}
+          style={{
+            padding: '0.75rem 1.5rem',
+            fontSize: '1rem',
+            fontWeight: '600',
+            borderRadius: '0.5rem',
+            border: 'none',
+            cursor: 'pointer',
+            backgroundColor: currentView === 'jobsearch' ? '#2563eb' : '#fff',
+            color: currentView === 'jobsearch' ? '#fff' : '#374151',
+            transition: 'all 0.2s',
+            boxShadow: currentView === 'jobsearch' ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
+          }}
+        >
+          Job Search
         </button>
       </div>
 
@@ -271,6 +289,11 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Job Search View */}
+      {currentView === 'jobsearch' && (
+        <JobSearchBoard />
       )}
 
       {/* Modals - Always render (they control their own visibility) */}

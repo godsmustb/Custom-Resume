@@ -7,20 +7,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Custom Resume** is an AI-powered resume builder built with React and Vite. It helps users create ATS-optimized resumes tailored to specific job descriptions using OpenAI's API. The application features 51 professional resume templates, PDF generation/parsing, and real-time resume customization.
 
 **Current Status:** Production-ready with automated FTP deployment to Hostinger
-**Version:** 2.1.0
-**Last Documentation Update:** 2025-12-04
+**Version:** 2.2.0
+**Last Documentation Update:** 2025-12-10
 **Deployment Status:** ✅ Active (GitHub Actions → Hostinger FTP)
 
 ### Quick Stats
-- **Codebase Size:** ~12,000-15,000 lines of code
-- **Components:** 35+ React components
+- **Codebase Size:** ~18,000-20,000 lines of code
+- **Components:** 42+ React components
 - **Resume Templates:** 51 professional templates (3 tiers) ⭐ Includes custom user template
 - **Cover Letter Templates:** 30 professional templates
 - **AI Functions:** 11 OpenAI GPT-4o-mini functions
 - **Skills Library:** 690+ categorized skills
 - **Job Titles:** 597 autocomplete suggestions
 - **Supported Formats:** PDF, DOCX (import), PDF & DOCX (export)
-- **Features:** Resume Builder, Cover Letter Builder, Multi-Resume Management, Cloud Sync
+- **Features:** Resume Builder, Cover Letter Builder, Job Search & Tracking, Multi-Resume Management, Cloud Sync
 
 ## Development Commands
 
@@ -396,6 +396,87 @@ Each template includes:
 - Export as PDF for submission
 - Access saved letters from any device (cloud sync)
 
+### Job Search & Application Tracking System ⭐ NEW
+
+**Architecture:** Job search + filtering + application tracking with cloud sync
+
+**Key Components:**
+- **JobSearchBoard** (`src/components/JobSearchBoard.jsx`):
+  - Search bar for job title input
+  - Collapsible filters sidebar
+  - Job cards grid display
+  - "My Applications" dashboard access
+
+- **JobCard** (`src/components/JobCard.jsx`):
+  - Job title, company, location, work type
+  - Badges: Easy Apply, employment type, experience level
+  - Applicant count with competition indicator
+  - Bookmark button (save for later)
+  - Date posted (relative time)
+
+- **JobFilters** (`src/components/JobFilters.jsx`):
+  - Easy Apply toggle
+  - Date posted (24h/7d/30d/all)
+  - Work type (Remote/Hybrid/On-site)
+  - Employment type (Full-time/Part-time/Contract)
+  - Experience level
+  - Location search
+
+- **JobDetailsModal** (`src/components/JobDetailsModal.jsx`):
+  - Full job information display
+  - Complete job description
+  - Save/update job actions
+  - Application notes
+  - Status tracking
+  - "View on LinkedIn" link
+
+- **ApplicationDashboard** (`src/components/ApplicationDashboard.jsx`):
+  - Stats cards (Saved, Applied, Interviewing, Offers)
+  - Filter by status
+  - Update application status
+  - Add notes and track interviews
+  - Delete saved jobs
+
+**Job Search Services:**
+- **jobSearchService.js** (`src/services/jobSearchService.js`):
+  - `fetchJobListings(filters)` - Get jobs from database
+  - `saveJobForUser(applicationData)` - Save job for tracking
+  - `updateUserJobApplication(id, updates)` - Update status/notes
+  - `getUserJobStats(userId)` - Get application statistics
+  - All operations use Supabase RLS for security
+
+- **linkedInScraperService.js** (`src/services/linkedInScraperService.js`):
+  - `scrapeLinkedInJobsWithFallback(jobTitle, options)` - Search jobs
+  - **Mock Mode (Current)**: Generates realistic fake jobs for testing
+  - **Future**: Supabase Edge Function with Crawl4AI for real scraping
+  - Auto-saves scraped jobs to database
+
+**Database Schema** (see `JOB_SEARCH_SCHEMA.md`):
+- `job_listings` table:
+  - Stores all scraped job data (public, shared across users)
+  - Fields: job_url, job_title, company_name, location, work_type, easy_apply, applicant_count, date_posted
+  - Indexed for fast filtering and searching
+
+- `user_job_applications` table:
+  - User-specific job tracking with RLS
+  - Fields: user_id, job_listing_id, status, applied_date, notes, resume_snapshot
+  - Statuses: saved, applied, interviewing, offer, rejected, withdrawn
+
+- `user_search_queries` table:
+  - Search history for quick access
+  - Fields: user_id, job_title, location, results_count, searched_at
+
+**Current Status:** ✅ MVP Complete (Mock Data Mode)
+- Mock job generation (10-20 realistic jobs per search)
+- Advanced filtering (all filters functional)
+- Save & track jobs (requires authentication)
+- Application dashboard with stats
+- Cloud sync via Supabase
+
+**Future:** Real LinkedIn scraping via Supabase Edge Function (optional)
+
+**For detailed documentation**, see **[JOB_SEARCH_FEATURE.md](JOB_SEARCH_FEATURE.md)** and **[JOB_SEARCH_SETUP_GUIDE.md](JOB_SEARCH_SETUP_GUIDE.md)**.
+
 ### Component Structure
 
 **Main App Flow**:
@@ -639,7 +720,62 @@ ca39de3 - Update documentation to v2.0: Add Cover Letter & Multi-Resume features
 
 ### Recent Feature Additions
 
-1. **AI Resume Optimization Improvements** (Latest - Phase 5.4) ⭐⭐⭐
+1. **Job Search & Application Tracking** (Latest - Phase 6.0) ⭐⭐⭐⭐ **NEW**
+   - Complete job search system with LinkedIn-style filtering and application tracking!
+   - **Search Interface**:
+     * Minimalistic modern UI with 3-section layout
+     * Search bar for job title input (e.g., "Product Manager", "Software Engineer")
+     * Mock LinkedIn job generation (10-20 realistic jobs per search)
+     * Collapsible filters sidebar
+     * Job cards grid with responsive design
+   - **Advanced Filtering**:
+     * Easy Apply toggle (show only quick-apply jobs)
+     * Date posted filter (Last 24h, Last week, Last month, All time)
+     * Work type (Remote, Hybrid, On-site)
+     * Employment type (Full-time, Part-time, Contract, Internship)
+     * Experience level (Entry, Mid-Senior, Director, Executive)
+     * Location text search
+     * Client-side filtering (instant updates)
+   - **Job Cards**:
+     * Job title with "NEW" badge for recent posts
+     * Company name, location, work type
+     * Badges: Easy Apply, employment type, experience level
+     * Applicant count with competition indicator (low/medium/high)
+     * Date posted (relative time: "2 days ago")
+     * Bookmark icon (save for later - requires auth)
+   - **Job Details Modal**:
+     * Full job information grid
+     * Complete job description (HTML rendered)
+     * Save/update job actions
+     * Application notes textarea
+     * Status tracking dropdown
+     * "View on LinkedIn" link
+   - **Application Dashboard**:
+     * Stats cards: Saved (📌), Applied (✅), Interviewing (👥), Offers (🎉)
+     * Filter by status (All, Saved, Applied, Interviewing, Offers)
+     * Update application status per job
+     * Add personal notes
+     * Delete saved jobs
+     * Track interview dates (JSONB storage)
+   - **Database Schema** (3 new tables):
+     * `job_listings` - All scraped jobs (public, shared)
+     * `user_job_applications` - User's saved jobs (RLS protected)
+     * `user_search_queries` - Search history
+   - **Services**:
+     * `jobSearchService.js` - 15+ CRUD functions for Supabase operations
+     * `linkedInScraperService.js` - Mock scraper (realistic fake data)
+     * Future: Supabase Edge Function with Crawl4AI for real scraping
+   - **Files Created** (~5,000+ lines):
+     * Components: `JobSearchBoard.jsx`, `JobCard.jsx`, `JobFilters.jsx`, `JobDetailsModal.jsx`, `ApplicationDashboard.jsx` + CSS
+     * Context: `JobSearchContext.jsx` (400+ lines)
+     * Services: `jobSearchService.js`, `linkedInScraperService.js`
+     * Types: `jobSearchTypes.js` (utility functions)
+     * Docs: `JOB_SEARCH_SCHEMA.md`, `JOB_SEARCH_FEATURE.md`, `JOB_SEARCH_SETUP_GUIDE.md`
+   - **Current Status**: ✅ MVP Complete (Mock Data Mode)
+   - **Future**: Optional real LinkedIn scraping via Supabase Edge Function
+   - Commit: (Current session - 2025-12-10)
+
+2. **AI Resume Optimization Improvements** (Phase 5.4) ⭐⭐⭐
    - Enhanced resume generation based on ChatGPT feedback for better ATS + human readability
    - **Scannable Summary Format**:
      * Bullet-point format (not paragraphs)
