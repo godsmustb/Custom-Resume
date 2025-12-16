@@ -6,6 +6,7 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
 import OpenAI from 'openai'
+import { skillsLibrary } from './skillsSuggestions'
 
 // Set up PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
@@ -15,6 +16,98 @@ const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true
 })
+
+/**
+ * Normalize skill name: trim whitespace, standardize capitalization
+ */
+function normalizeSkillName(skill) {
+  if (!skill || typeof skill !== 'string') return skill
+
+  // Trim whitespace
+  let normalized = skill.trim()
+
+  // List of known acronyms to keep uppercase
+  const acronyms = [
+    'AI', 'ML', 'API', 'UI', 'UX', 'SQL', 'AWS', 'GCP', 'CI', 'CD', 'REST', 'JSON',
+    'XML', 'HTML', 'CSS', 'JS', 'TS', 'PHP', 'SAP', 'ERP', 'CRM', 'PMP', 'PMI',
+    'JIRA', 'SCRUM', 'KPI', 'ROI', 'B2B', 'B2C', 'SaaS', 'PaaS', 'IaaS', 'IoT',
+    'SDLC', 'AGILE', 'DevOps', 'QA', 'BI', 'ETL', 'OLAP', 'OLTP', 'HR', 'IT', 'R&D',
+    'ADO', 'BAU', 'FCM', 'MiFID', 'ISO', 'RAID'
+  ]
+
+  // Check if the entire skill is an acronym
+  if (acronyms.includes(normalized.toUpperCase())) {
+    return normalized.toUpperCase()
+  }
+
+  // Check if skill contains acronyms and preserve them
+  const words = normalized.split(/\s+/)
+  const titleCased = words.map(word => {
+    // Preserve known acronyms
+    if (acronyms.includes(word.toUpperCase())) {
+      return word.toUpperCase()
+    }
+
+    // Special handling for hyphenated words (Power-BI → Power-BI)
+    if (word.includes('-')) {
+      return word.split('-').map(part =>
+        acronyms.includes(part.toUpperCase())
+          ? part.toUpperCase()
+          : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+      ).join('-')
+    }
+
+    // Special handling for slashes (Agile/Scrum)
+    if (word.includes('/')) {
+      return word.split('/').map(part =>
+        acronyms.includes(part.toUpperCase())
+          ? part.toUpperCase()
+          : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+      ).join('/')
+    }
+
+    // Handle parentheses (e.g., "Excel (Advanced)")
+    if (word.includes('(') || word.includes(')')) {
+      return word.split(/([()])/g).map(part => {
+        if (part === '(' || part === ')') return part
+        if (acronyms.includes(part.toUpperCase())) return part.toUpperCase()
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+      }).join('')
+    }
+
+    // Title case for regular words
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  }).join(' ')
+
+  return titleCased
+}
+
+/**
+ * Deduplicate skills: detect similar skills and merge them
+ */
+function deduplicateSkills(skills) {
+  if (!skills || skills.length === 0) return skills
+
+  const normalized = new Map()
+
+  skills.forEach(skill => {
+    // Create a key by removing spaces, hyphens, and converting to lowercase
+    const key = skill.toLowerCase().replace(/[\s\-_()]/g, '')
+
+    // If we haven't seen this skill before, add it
+    if (!normalized.has(key)) {
+      normalized.set(key, skill)
+    } else {
+      // If we have seen it, keep the longer/more descriptive version
+      const existing = normalized.get(key)
+      if (skill.length > existing.length) {
+        normalized.set(key, skill)
+      }
+    }
+  })
+
+  return Array.from(normalized.values())
+}
 
 /**
  * Extract text from PDF file
@@ -238,10 +331,20 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
         date: edu.date || '',
         details: edu.details || ''
       })),
-      skills: (parsedData.skills || []).map(skillGroup => ({
-        category: skillGroup.category || 'Skills',
-        skills: Array.isArray(skillGroup.skills) ? skillGroup.skills : []
-      })),
+      skills: (parsedData.skills || []).map(skillGroup => {
+        // Normalize each skill: trim whitespace, Title Case, preserve acronyms
+        let normalizedSkills = Array.isArray(skillGroup.skills)
+          ? skillGroup.skills.map(skill => normalizeSkillName(skill))
+          : []
+
+        // Deduplicate: merge similar skills (PowerBI = Power BI)
+        normalizedSkills = deduplicateSkills(normalizedSkills)
+
+        return {
+          category: skillGroup.category || 'Skills',
+          skills: normalizedSkills
+        }
+      }),
       certifications: (parsedData.certifications || []).map((cert, idx) => ({
         id: cert.id || Date.now().toString() + idx,
         name: cert.name || '',

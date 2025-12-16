@@ -102,32 +102,33 @@
 }
 
 .professional-pm-template .pm-skills-section .skill-category {
-  margin-bottom: 0;
+  margin-bottom: 1.5rem;
 }
 
+/* Category headers - shown only if resume has meaningful categories */
 .professional-pm-template .pm-skills-section .skill-category h3 {
-  display: none; /* Hide category headers for flat display */
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4A5568;
+  margin: 0 0 0.5rem 0;
+  text-transform: none; /* Keep original case from resume */
+  letter-spacing: 0.3px;
+}
+
+/* Hide generic "Skills" category header if it's the only one */
+.professional-pm-template .pm-skills-section .skills:has(.skill-category:only-child) .skill-category h3 {
+  display: none;
 }
 
 /* Target the actual skill-list UL element */
 .professional-pm-template .pm-skills-section .skill-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem 2rem;
+  grid-template-columns: repeat(3, 1fr); /* Always 3 columns */
+  gap: 0.75rem 2.5rem; /* Better spacing: vertical and horizontal */
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-/* Count total skills across all categories for adaptive layout */
-.professional-pm-template .pm-skills-section .skills:has(.skill-list li:nth-child(7)) .skill-list {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-/* Adaptive 3-column layout when 13+ skills total */
-.professional-pm-template .pm-skills-section:has(.skill-list li:nth-last-child(n+13)) .skill-list {
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem 1.5rem;
 }
 
 .professional-pm-template .pm-skills-section .skill-list li {
@@ -138,23 +139,17 @@
   font-size: 0.9rem;
   color: #2D3748;
   border-radius: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
+  display: block; /* Changed from flex to block - no bullet icon */
+  text-align: left;
 }
 
-.professional-pm-template .pm-skills-section .skill-list li::before {
-  content: '•';
-  color: #3182CE;
-  font-weight: bold;
-  flex-shrink: 0;
-}
+/* Remove the blue bullet - no ::before needed */
 
 /* Also support skill-tags if used in edit mode */
 .professional-pm-template .pm-skills-section .skill-tags {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem 2rem;
+  grid-template-columns: repeat(3, 1fr); /* Always 3 columns */
+  gap: 0.75rem 2.5rem; /* Better spacing */
   margin: 0;
 }
 
@@ -166,17 +161,10 @@
   font-size: 0.9rem;
   color: #2D3748;
   border-radius: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
+  display: block; /* No bullet icon */
+  text-align: left;
 }
 
-.professional-pm-template .pm-skills-section .skill-tag::before {
-  content: '•';
-  color: #3182CE;
-  font-weight: bold;
-  flex-shrink: 0;
-}
 
 .professional-pm-template .pm-skills-section .editable-input {
   background: none;
