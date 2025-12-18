@@ -236,15 +236,31 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
 
     const parsedData = JSON.parse(content)
 
-    // Log what was extracted
-    console.log('✅ EXTRACTED:')
-    console.log('   - Experience items:', parsedData.experience?.length || 0)
-    console.log('   - Education items:', parsedData.education?.length || 0)
-    console.log('   - Skill categories:', parsedData.skills?.length || 0)
-    console.log('   - Certifications:', parsedData.certifications?.length || 0)
+    // Log what was extracted with details
+    console.log('✅ EXTRACTED DATA:')
+    console.log('   📝 Summary/About:', parsedData.about ? `${parsedData.about.substring(0, 50)}...` : '❌ MISSING')
+    console.log('   💼 Experience items:', parsedData.experience?.length || 0)
+    if (parsedData.experience && parsedData.experience.length > 0) {
+      parsedData.experience.forEach((exp, idx) => {
+        console.log(`      ${idx + 1}. ${exp.title || 'No title'} at ${exp.company || 'No company'} (${exp.date || 'No date'})`)
+      })
+    }
+    console.log('   🎓 Education items:', parsedData.education?.length || 0)
+    if (parsedData.education && parsedData.education.length > 0) {
+      parsedData.education.forEach((edu, idx) => {
+        console.log(`      ${idx + 1}. ${edu.degree || 'No degree'} (${edu.date || 'No date'})`)
+      })
+    }
+    console.log('   💪 Skill categories:', parsedData.skills?.length || 0)
     if (parsedData.skills && parsedData.skills.length > 0) {
       parsedData.skills.forEach((cat, idx) => {
-        console.log(`   - Skill category ${idx + 1}: "${cat.category}" (${cat.skills?.length || 0} skills)`)
+        console.log(`      ${idx + 1}. "${cat.category}" (${cat.skills?.length || 0} skills)`)
+      })
+    }
+    console.log('   🏆 Certifications:', parsedData.certifications?.length || 0)
+    if (parsedData.certifications && parsedData.certifications.length > 0) {
+      parsedData.certifications.forEach((cert, idx) => {
+        console.log(`      ${idx + 1}. ${cert.name || 'No name'} (${cert.date || 'No date'})`)
       })
     }
 
@@ -392,6 +408,15 @@ export async function parseUploadedResume(file) {
   if (!resumeText.trim()) {
     throw new Error('Could not extract text from the resume. Please try a different file.')
   }
+
+  // Log extracted text preview
+  console.log('📄 EXTRACTED TEXT PREVIEW:')
+  console.log('   First 300 chars:', resumeText.substring(0, 300))
+  console.log('   Last 300 chars:', resumeText.substring(Math.max(0, resumeText.length - 300)))
+  console.log('   Contains "SUMMARY" or "PROFESSIONAL SUMMARY"?',
+    /summary|professional\s+summary/i.test(resumeText) ? 'YES ✅' : 'NO ❌')
+  console.log('   Contains "EDUCATION"?', /education/i.test(resumeText) ? 'YES ✅' : 'NO ❌')
+  console.log('   Contains "CERTIFICATION"?', /certification/i.test(resumeText) ? 'YES ✅' : 'NO ❌')
 
   // Parse the extracted text with AI
   const parsedData = await parseResumeWithAI(resumeText)
