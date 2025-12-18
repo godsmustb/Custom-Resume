@@ -141,14 +141,17 @@ export async function extractTextFromDOCX(file) {
  */
 export async function parseResumeWithAI(resumeText, retryCount = 0) {
   try {
-    // Increase limit to handle longer resumes (was 8000)
-    const maxResumeLength = 15000
+    // Handle very long resumes (4+ pages) - increased from 15000
+    const maxResumeLength = 25000  // ~10 pages worth
     const truncatedText = resumeText.length > maxResumeLength
       ? resumeText.substring(0, maxResumeLength) + '...'
       : resumeText
 
     console.log('📄 Resume text length:', resumeText.length, 'chars')
-    console.log('📄 Truncated:', resumeText.length > maxResumeLength ? 'YES' : 'NO')
+    console.log('📄 Truncated:', resumeText.length > maxResumeLength ? 'YES ⚠️' : 'NO ✅')
+    if (resumeText.length > maxResumeLength) {
+      console.warn('⚠️ Resume is very long and was truncated. Some content may be missing.')
+    }
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -220,7 +223,7 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
         }
       ],
       temperature: 0.2,
-      max_tokens: 4500,  // Increased from 3000 to allow longer responses
+      max_tokens: 6000,  // Increased from 4500 for very long resumes (4+ pages)
       response_format: { type: 'json_object' }
     })
 
