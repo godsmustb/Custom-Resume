@@ -141,18 +141,21 @@ export async function extractTextFromDOCX(file) {
  */
 export async function parseResumeWithAI(resumeText, retryCount = 0) {
   try {
-    // Truncate resume text if too long to avoid token limits
-    const maxResumeLength = 8000
+    // Increase limit to handle longer resumes (was 8000)
+    const maxResumeLength = 15000
     const truncatedText = resumeText.length > maxResumeLength
       ? resumeText.substring(0, maxResumeLength) + '...'
       : resumeText
+
+    console.log('📄 Resume text length:', resumeText.length, 'chars')
+    console.log('📄 Truncated:', resumeText.length > maxResumeLength ? 'YES' : 'NO')
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: `You are a resume parser. Extract structured data from the resume text and return ONLY a valid JSON object with this exact structure:
+          content: `You are a resume parser. Extract ALL data from the resume text and return ONLY a valid JSON object with this exact structure:
 {
   "personal": {
     "name": "string",
@@ -185,7 +188,7 @@ export async function parseResumeWithAI(resumeText, retryCount = 0) {
   ],
   "skills": [
     {
-      "category": "string - skill category name",
+      "category": "string - USE EXACT category name from resume (e.g., 'Core Competencies', 'Technical Skills', 'AI Tools & Machine Learning')",
       "skills": ["array", "of", "individual", "skills"]
     }
   ],
@@ -201,25 +204,13 @@ export async function parseResumeWithAI(resumeText, retryCount = 0) {
   ]
 }
 
-CRITICAL DATE EXTRACTION RULES (DO NOT SKIP):
-1. EDUCATION DATES - MANDATORY: Search the entire education section for ANY year/date patterns:
-   - Look for: "2006-2010", "2010-2014", "2014-2016", "2016-2018", "2018-2022"
-   - Look for: "2010", "2014", "2016", "2018" (single years)
-   - Look for: "Graduated 2016", "Graduation: 2014", "Class of 2018"
-   - Look for: dates near degree/school names
-   - If you find ANY 4-digit number between 1990-2030 near education, that's likely the date
-
-2. CERTIFICATION DATES - MANDATORY: Search certification section for ANY year:
-   - Look for: "2018", "2016", "2020", "2022" (any 4-digit year)
-   - Look for: "Obtained 2018", "Issued 2016", "Valid 2020"
-   - Look for: dates at the end of certification lines
-   - If you find ANY 4-digit number near a certification, extract it
-
-3. EXPERIENCE DATES - MANDATORY: Must always have date ranges
-   - Format: "Jul 2024 - Present", "Dec 2020 - Jul 2024", "2018-2022"
-
-4. NEVER leave date fields empty - extract ANY date pattern you find
-5. If dates appear anywhere in the text near education/certification, EXTRACT THEM
+CRITICAL EXTRACTION RULES:
+1. EXTRACT ALL EXPERIENCE ITEMS - If resume has 5-6 jobs/projects, extract ALL 5-6, not just 2-3
+2. EXTRACT ALL EDUCATION ITEMS - Never leave education empty if it exists in resume
+3. PRESERVE SKILL CATEGORIES - Use exact category names from resume (don't rename "Core Competencies" to "Skills")
+4. EXTRACT ALL DATES - Follow date patterns for education/certifications
+5. IF SKILLS HAVE NO CATEGORIES in resume, create single category called "Skills"
+6. COUNT items: If you see 6 job entries, extract all 6. If you see 2 education entries, extract both.
 
 Return ONLY the JSON object, no explanations or markdown formatting. Ensure all strings are properly escaped and terminated.`
         },
@@ -229,7 +220,7 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
         }
       ],
       temperature: 0.2,
-      max_tokens: 3000,
+      max_tokens: 4500,  // Increased from 3000 to allow longer responses
       response_format: { type: 'json_object' }
     })
 
@@ -241,6 +232,18 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
     console.log('AI Resume Parse Response (first 200 chars):', content.substring(0, 200))
 
     const parsedData = JSON.parse(content)
+
+    // Log what was extracted
+    console.log('✅ EXTRACTED:')
+    console.log('   - Experience items:', parsedData.experience?.length || 0)
+    console.log('   - Education items:', parsedData.education?.length || 0)
+    console.log('   - Skill categories:', parsedData.skills?.length || 0)
+    console.log('   - Certifications:', parsedData.certifications?.length || 0)
+    if (parsedData.skills && parsedData.skills.length > 0) {
+      parsedData.skills.forEach((cat, idx) => {
+        console.log(`   - Skill category ${idx + 1}: "${cat.category}" (${cat.skills?.length || 0} skills)`)
+      })
+    }
 
     // Fallback: Extract dates using regex if AI missed them
     const extractDatesWithRegex = (text) => {
