@@ -134,16 +134,21 @@
 .professional-pm-template .pm-skills-section .skill-list li {
   background: none;
   border: none;
-  padding: 0;
+  padding: 0 !important; /* Override global padding-left */
   margin: 0;
   font-size: 0.9rem;
   color: #2D3748;
   border-radius: 0;
-  display: block; /* Changed from flex to block - no bullet icon */
+  display: block;
   text-align: left;
+  position: static; /* Override global position: relative */
 }
 
-/* Remove the blue bullet - no ::before needed */
+/* Remove the blue arrow/bullet from global App.css */
+.professional-pm-template .pm-skills-section .skill-list li::before {
+  content: none !important;
+  display: none !important;
+}
 
 /* Also support skill-tags if used in edit mode */
 .professional-pm-template .pm-skills-section .skill-tags {
