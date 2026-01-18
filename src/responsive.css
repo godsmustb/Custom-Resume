@@ -1,0 +1,711 @@
+/* ============================================
+   RESPONSIVE CSS - Custom Resume Builder
+   Comprehensive responsive styles for all devices
+   ============================================ */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (Variables)
+   ============================================ */
+:root {
+  /* Breakpoints (for reference) */
+  --breakpoint-phone: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-laptop: 1024px;
+  --breakpoint-desktop: 1280px;
+
+  /* Spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Font sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+}
+
+/* ============================================
+   BASE RESPONSIVE IMPROVEMENTS
+   ============================================ */
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  button,
+  .btn,
+  input[type="button"],
+  input[type="submit"],
+  a.button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Improve text readability */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+/* ============================================
+   PHONE (max-width: 480px)
+   ============================================ */
+@media (max-width: 480px) {
+  /* App Wrapper */
+  .app-wrapper {
+    padding-top: 0;
+  }
+
+  /* Resume Container */
+  .resume-container {
+    margin: 0;
+    padding: 1rem;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Section spacing */
+  .section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Job/Education items */
+  .job-title,
+  .degree {
+    font-size: 1.1rem;
+  }
+
+  .company,
+  .school {
+    font-size: 1rem;
+  }
+
+  .date {
+    font-size: 0.875rem;
+  }
+
+  /* Skills */
+  .skills-container {
+    gap: 0.75rem;
+  }
+
+  .skill-category {
+    min-width: 100%;
+  }
+
+  .skill-category h3 {
+    font-size: 1rem;
+  }
+
+  /* Edit mode */
+  .editable-experience,
+  .editable-education,
+  .editable-skills,
+  .editable-certification {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .editable-input,
+  .editable-textarea {
+    padding: 0.625rem;
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+
+  /* Buttons */
+  .add-btn,
+  .remove-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    width: 100%;
+  }
+
+  /* Certifications */
+  .cert-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cert-field-half {
+    flex: auto;
+    width: 100%;
+  }
+
+  /* Suggestions */
+  .suggestions-panel {
+    padding: 0.875rem;
+  }
+
+  .suggestion-item {
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .suggestion-text {
+    font-size: 0.875rem;
+  }
+
+  /* Bullet points */
+  .bullet-edit {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .bullet-textarea {
+    min-height: 100px;
+  }
+
+  .bullet-actions {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ============================================
+   TABLET (481px - 768px)
+   ============================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+  /* Resume Container */
+  .resume-container {
+    margin: 0 auto;
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  /* Skills - 2 columns on tablet */
+  .skills-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .skill-category {
+    min-width: auto;
+  }
+
+  /* Certifications */
+  .cert-row {
+    flex-wrap: wrap;
+  }
+
+  .cert-field-half {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 200px;
+  }
+
+  /* Experience controls */
+  .experience-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+/* ============================================
+   LAPTOP (769px - 1024px)
+   ============================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Resume Container */
+  .resume-container {
+    max-width: 850px;
+    padding: 2rem;
+  }
+
+  /* Skills - 2-3 columns */
+  .skills-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .skill-category {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 250px;
+    max-width: calc(50% - 0.5rem);
+  }
+}
+
+/* ============================================
+   CONTROL PANEL RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .control-panel {
+    padding: 0.75rem;
+    gap: 0.5rem;
+    flex-direction: column;
+  }
+
+  .control-panel-section {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .control-panel button {
+    flex: 1;
+    min-height: 44px;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .control-panel button span {
+    display: none;
+  }
+
+  /* Show only emoji on phone */
+  .control-panel button::before {
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .control-panel {
+    padding: 0.875rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .control-panel-section {
+    flex: 1 1 auto;
+  }
+
+  .control-panel button {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* ============================================
+   JOB DESCRIPTION PANEL RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .job-description-panel {
+    margin: 0.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .job-description-panel h3 {
+    font-size: 1rem;
+  }
+
+  .job-description-textarea {
+    min-height: 120px;
+    font-size: 16px;
+  }
+
+  .jd-action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .jd-action-buttons button {
+    width: 100%;
+  }
+
+  .match-score-display {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .score-number {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .job-description-panel {
+    margin: 0.75rem;
+    padding: 1.25rem;
+  }
+
+  .jd-action-buttons {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .jd-action-buttons button {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 140px;
+  }
+}
+
+/* ============================================
+   MODAL RESPONSIVE (General)
+   ============================================ */
+@media (max-width: 480px) {
+  /* Full screen modals on phone */
+  .modal-overlay,
+  .template-browser-overlay,
+  .download-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal,
+  .template-browser-modal,
+  .download-modal {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 20px 20px 0 0;
+    margin: 0;
+  }
+
+  .modal-header,
+  .template-browser-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: inherit;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .modal,
+  .template-browser-modal,
+  .download-modal {
+    max-width: 90%;
+    max-height: 85vh;
+  }
+}
+
+/* ============================================
+   TEMPLATE BROWSER RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .template-browser-modal {
+    padding: 1rem;
+  }
+
+  .template-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .template-card {
+    padding: 0.5rem;
+  }
+
+  .template-preview {
+    height: 150px;
+  }
+
+  .template-name {
+    font-size: 0.8rem;
+  }
+
+  .template-filters {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .template-filters select,
+  .template-filters input {
+    width: 100%;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .template-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .template-preview {
+    height: 180px;
+  }
+
+  .template-filters {
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .template-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================
+   DOWNLOAD MODAL RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .download-modal {
+    padding: 1.25rem;
+  }
+
+  .download-modal h2 {
+    font-size: 1.25rem;
+  }
+
+  .filename-options {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filename-option {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .format-toggle {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .format-btn {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   HEADER COMPONENT RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .header-section {
+    text-align: center;
+  }
+
+  .header-name {
+    font-size: 1.5rem;
+  }
+
+  .header-title {
+    font-size: 1rem;
+  }
+
+  .header-contact {
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .header-contact-item {
+    font-size: 0.8rem;
+  }
+
+  .header-social-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .header-name {
+    font-size: 1.75rem;
+  }
+
+  .header-contact {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   AUTH COMPONENTS RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .auth-btn {
+    position: fixed;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    z-index: 1001;
+  }
+
+  .auth-modal {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  .auth-form input {
+    font-size: 16px;
+    padding: 0.875rem;
+  }
+
+  .auth-form button {
+    padding: 0.875rem;
+    font-size: 1rem;
+  }
+}
+
+/* ============================================
+   PRINT RESPONSIVE
+   ============================================ */
+@media print {
+  /* Hide all UI elements */
+  .control-panel,
+  .job-description-panel,
+  .auth-btn,
+  .sync-status,
+  .modal-overlay,
+  .resume-manager-container,
+  button,
+  .add-btn,
+  .remove-btn,
+  .suggestion-btn {
+    display: none !important;
+  }
+
+  /* Full width for print */
+  .resume-container {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  /* Remove backgrounds */
+  .editable-experience,
+  .editable-education,
+  .editable-skills,
+  .editable-certification {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  /* Page breaks */
+  .section {
+    page-break-inside: avoid;
+  }
+
+  .experience-item,
+  .education-item,
+  .certification-item {
+    page-break-inside: avoid;
+  }
+}
+
+/* ============================================
+   TOUCH-SPECIFIC IMPROVEMENTS
+   ============================================ */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  button,
+  .btn,
+  a.button {
+    min-height: 44px;
+    padding: 0.625rem 1rem;
+  }
+
+  /* Remove hover effects on touch devices */
+  .suggestion-item:hover,
+  .template-card:hover,
+  .resume-manager-item:hover {
+    transform: none;
+    box-shadow: inherit;
+  }
+
+  /* Better tap highlighting */
+  button:active,
+  .btn:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+/* ============================================
+   LANDSCAPE MODE ADJUSTMENTS
+   ============================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Reduce vertical spacing */
+  .resume-container {
+    padding: 0.75rem;
+  }
+
+  .section {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  /* Modals in landscape */
+  .modal,
+  .resume-manager-modal {
+    max-height: 95vh;
+  }
+}
+
+/* ============================================
+   HIGH DPI / RETINA SCREENS
+   ============================================ */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper borders */
+  .resume-container,
+  .section,
+  button,
+  input,
+  textarea {
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ============================================
+   DARK MODE SUPPORT (Optional)
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  /* Note: Implement only if needed */
+  /* This is a placeholder for future dark mode support */
+}
+
+/* ============================================
+   REDUCED MOTION (Accessibility)
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   SAFE AREA INSETS (Notched Devices)
+   ============================================ */
+@supports (padding: max(0px)) {
+  .app-wrapper {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .control-panel {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  /* Modal bottom safe area */
+  .resume-manager-footer,
+  .modal-footer {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
