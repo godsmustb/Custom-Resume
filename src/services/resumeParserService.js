@@ -131,8 +131,6 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
     // Clean up potential markdown code blocks
     content = content.replace(/^```json\s*/i, '').replace(/\s*```$/, '')
 
-    console.log('AI Resume Parse Response (first 200 chars):', content.substring(0, 200))
-
     const parsedData = JSON.parse(content)
 
     // Ensure all required fields exist with defaults
@@ -181,7 +179,6 @@ Return ONLY the JSON object, no explanations or markdown formatting. Ensure all 
 
     // Retry once if it's a JSON parsing error
     if (error instanceof SyntaxError && retryCount < 1) {
-      console.log('JSON parse failed, retrying with stricter prompt...')
       await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
       return parseResumeWithAI(resumeText, retryCount + 1)
     }

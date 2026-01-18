@@ -389,9 +389,6 @@ Return in JSON format:
 
     const result = JSON.parse(response.choices[0].message.content)
 
-    // Log for debugging
-    console.log('Score calculation result:', result)
-
     return result
   } catch (error) {
     console.error('Error calculating match score:', error)

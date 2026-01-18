@@ -414,7 +414,6 @@ export async function downloadResumeDOCX(resumeData, customFilename = null) {
   // Footer
   sections.push(
     new Paragraph({
-      text: 'Generated with AI Resume Builder',
       alignment: AlignmentType.CENTER,
       spacing: { before: 400 },
       children: [

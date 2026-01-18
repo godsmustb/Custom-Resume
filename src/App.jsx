@@ -19,12 +19,6 @@ function App() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [currentView, setCurrentView] = useState('resume') // 'resume' or 'coverletter'
 
-  // Debug: Check if API keys are loaded
-  console.log('=== Environment Variables Debug ===')
-  console.log('OpenAI API Key exists?:', import.meta.env.VITE_OPENAI_API_KEY ? 'YES ✅' : 'NO ❌')
-  console.log('Supabase URL exists?:', import.meta.env.VITE_SUPABASE_URL ? 'YES ✅' : 'NO ❌')
-  console.log('Supabase Anon Key exists?:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'YES ✅' : 'NO ❌')
-
   const handleSignOut = async () => {
     await signOut()
   }

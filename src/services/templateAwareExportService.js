@@ -7,6 +7,8 @@ import jsPDF from 'jspdf'
  * @param {string} customFilename - Optional custom filename (without .pdf extension)
  */
 export async function downloadTemplateAwarePDF(customFilename = null) {
+  let loadingEl = null
+
   try {
     // Find the resume container element
     const resumeElement = document.querySelector('.template-renderer') ||
@@ -18,7 +20,7 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     }
 
     // Show a loading indicator
-    const loadingEl = showLoadingIndicator('Generating PDF...')
+    loadingEl = showLoadingIndicator('Generating PDF...')
 
     // Temporarily hide any edit buttons or interactive elements
     const interactiveElements = resumeElement.querySelectorAll('button, .edit-button, .add-button, .remove-button, .ai-button')
@@ -173,13 +175,15 @@ export async function downloadTemplateAwarePDF(customFilename = null) {
     // Save PDF
     pdf.save(fileName)
 
-    // Hide loading indicator
-    hideLoadingIndicator(loadingEl)
-
     return { success: true }
   } catch (error) {
     console.error('Error generating template-aware PDF:', error)
     throw new Error('Failed to generate PDF. Please try again.')
+  } finally {
+    // Always hide loading indicator, even if an error occurred
+    if (loadingEl) {
+      hideLoadingIndicator(loadingEl)
+    }
   }
 }
 

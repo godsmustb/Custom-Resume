@@ -169,7 +169,6 @@ export const ResumeProvider = ({ children }) => {
       setSyncStatus('error')
     } else {
       setSyncStatus('synced')
-      console.log('✅ Saved to Supabase')
     }
   }, [user, currentResumeId, resumeData, currentTemplate, templateCustomization, currentResumeTitle])
 
@@ -218,7 +217,6 @@ export const ResumeProvider = ({ children }) => {
         )
 
         if (!migrateError && !skipped) {
-          console.log('✅ Migrated localStorage data to Supabase')
           localStorage.setItem('supabaseMigrated', 'true')
           setHasMigrated(true)
 

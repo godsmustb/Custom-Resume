@@ -118,8 +118,6 @@ export async function parseResumeWithAI(resumeText, retryCount = 0) {
     // Clean up potential markdown code blocks
     jsonContent = jsonContent.replace(/^```json\s*/i, '').replace(/\s*```$/, '')
 
-    console.log('AI Response (first 200 chars):', jsonContent.substring(0, 200))
-
     const parsedData = JSON.parse(jsonContent)
 
     // Add IDs to experience and education items
@@ -146,7 +144,6 @@ export async function parseResumeWithAI(resumeText, retryCount = 0) {
 
     // Retry once if it's a JSON parsing error
     if (error instanceof SyntaxError && retryCount < 1) {
-      console.log('JSON parse failed, retrying with stricter prompt...')
       await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
       return parseResumeWithAI(resumeText, retryCount + 1)
     }
@@ -169,8 +166,6 @@ export async function uploadAndParseResumePDF(file) {
       throw new Error('File size must be less than 5MB')
     }
 
-    console.log('Extracting text from PDF...')
-
     // Extract text
     const resumeText = await extractTextFromPDF(file)
 
@@ -178,13 +173,8 @@ export async function uploadAndParseResumePDF(file) {
       throw new Error('Could not extract text from PDF. Please ensure it is not a scanned image.')
     }
 
-    console.log('Text extracted successfully. Length:', resumeText.length)
-    console.log('Parsing with AI...')
-
     // Parse with AI
     const structuredData = await parseResumeWithAI(resumeText)
-
-    console.log('Parsing complete!', structuredData)
 
     return structuredData
   } catch (error) {
