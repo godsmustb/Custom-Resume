@@ -47,16 +47,17 @@ jobs:
           echo "=== Checking for assets folder ==="
           ls -la dist/assets/ || echo "No assets folder found!"
 
-      - name: Deploy to Hostinger via FTP
+      - name: Deploy to Hostinger via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.HOSTINGER_FTP_SERVER }}
           username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
           port: 21
-          protocol: ftp
+          protocol: ftps
+          security: loose
           local-dir: ./dist/
           server-dir: /public_html/
           dangerous-clean-slate: true
           log-level: verbose
-          timeout: 60000
+          timeout: 120000
