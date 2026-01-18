@@ -344,5 +344,77 @@ const { data } = await supabase
 
 ---
 
-**Last Updated**: 2025-11-18
-**Version**: 1.0.0
+## Resume Folders & Version History (v2.0)
+
+### Additional Tables for Folder Organization and Version History
+
+See `FOLDER_VERSION_SCHEMA.sql` for the complete SQL migration script.
+
+#### `resume_folders` Table
+
+Organizes resumes into folders for better management.
+
+```sql
+CREATE TABLE IF NOT EXISTS resume_folders (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  name VARCHAR(255) NOT NULL DEFAULT 'New Folder',
+  description TEXT,
+  color VARCHAR(20) DEFAULT '#6366f1',
+  icon VARCHAR(50) DEFAULT 'folder',
+  parent_folder_id UUID REFERENCES resume_folders(id) ON DELETE SET NULL,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### `resume_versions` Table
+
+Stores version history for each resume, enabling rollback and comparison.
+
+```sql
+CREATE TABLE IF NOT EXISTS resume_versions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  resume_id UUID REFERENCES resumes(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  version_number INTEGER NOT NULL,
+  version_label VARCHAR(255),
+  resume_data JSONB NOT NULL,
+  current_template VARCHAR(100),
+  template_customization JSONB,
+  change_type VARCHAR(50) DEFAULT 'manual_edit',
+  change_summary TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT unique_resume_version UNIQUE (resume_id, version_number)
+);
+```
+
+#### Additional Columns on `resumes` Table
+
+```sql
+ALTER TABLE resumes
+ADD COLUMN IF NOT EXISTS folder_id UUID REFERENCES resume_folders(id) ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ;
+```
+
+#### Version History Features
+
+- **Automatic versioning**: Versions are created automatically when resume data changes
+- **Manual snapshots**: Users can create labeled snapshots before major changes
+- **Version restore**: Roll back to any previous version with one click
+- **Version export**: Export any version as PDF or DOCX
+- **Version comparison**: Compare two versions side-by-side (client-side diff)
+
+#### Folder Features
+
+- **Nested folders**: Support for parent-child folder relationships
+- **Color coding**: Custom colors for folder organization
+- **Archive support**: Move unused resumes to archive
+- **Drag and drop**: Move resumes between folders easily
+
+---
+
+**Last Updated**: 2026-01-18
+**Version**: 2.0.0

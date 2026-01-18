@@ -1,0 +1,332 @@
+.folder-browser {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1rem;
+  min-width: 260px;
+}
+
+.folder-browser-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.folder-browser-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.folder-browser-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.folder-browser-close:hover {
+  color: #374151;
+}
+
+.folder-browser-signin {
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.folder-browser-loading {
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.folder-browser-section {
+  margin-bottom: 1rem;
+}
+
+.folder-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.folder-item-wrapper {
+  margin-bottom: 2px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.folder-item:hover {
+  background: #f3f4f6;
+}
+
+.folder-item-active {
+  background: #eef2ff;
+}
+
+.folder-item-active:hover {
+  background: #e0e7ff;
+}
+
+.folder-item-system {
+  border-left: 3px solid transparent;
+}
+
+.folder-item-system.folder-item-active {
+  border-left-color: #6366f1;
+}
+
+.folder-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-count {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background: #f3f4f6;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.folder-item-active .folder-count {
+  background: #c7d2fe;
+  color: #4338ca;
+}
+
+.folder-actions {
+  display: none;
+  gap: 0.25rem;
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: inherit;
+}
+
+.folder-item:hover .folder-actions {
+  display: flex;
+}
+
+.folder-item:hover .folder-count {
+  display: none;
+}
+
+.folder-action-btn {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  opacity: 0.7;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.folder-action-btn:hover {
+  opacity: 1;
+  background: #e5e7eb;
+}
+
+.folder-action-delete:hover {
+  background: #fee2e2;
+}
+
+/* Create/Edit Folder Forms */
+.folder-create,
+.folder-edit {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.folder-create-input,
+.folder-edit-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.folder-create-input:focus,
+.folder-edit-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.folder-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.folder-color-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.folder-color-btn:hover {
+  transform: scale(1.1);
+}
+
+.folder-color-active {
+  border-color: #1f2937;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.folder-create-actions,
+.folder-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.folder-btn-create,
+.folder-btn-save {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.folder-btn-create:hover,
+.folder-btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.folder-btn-cancel {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.folder-btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.folder-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: transparent;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.folder-add-btn:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+  background: #f5f3ff;
+}
+
+.folder-add-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .folder-browser {
+    min-width: auto;
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .folder-item {
+    padding: 0.875rem;
+  }
+
+  .folder-color-picker {
+    justify-content: space-between;
+  }
+
+  .folder-color-btn {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .folder-browser {
+    padding: 0.75rem;
+  }
+
+  .folder-browser-header h3 {
+    font-size: 1rem;
+  }
+
+  .folder-name {
+    font-size: 0.85rem;
+  }
+
+  .folder-create-input,
+  .folder-edit-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}

@@ -1,11 +1,13 @@
 /**
  * Resume Upload Component
  * Allows users to upload PDF/DOCX resumes with drag-and-drop
+ * or import from LinkedIn
  */
 
 import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
 import { parseUploadedResume } from '../services/resumeParserService'
+import LinkedInImport from './LinkedInImport'
 import './ResumeUpload.css'
 
 const ResumeUpload = ({ onClose }) => {
@@ -18,6 +20,8 @@ const ResumeUpload = ({ onClose }) => {
   const [showActionModal, setShowActionModal] = useState(false)
   const [showTitleInput, setShowTitleInput] = useState(false)
   const [resumeTitle, setResumeTitle] = useState('')
+  const [showLinkedInImport, setShowLinkedInImport] = useState(false)
+  const [importMethod, setImportMethod] = useState(null) // 'file' or 'linkedin'
 
   const handleDragOver = (e) => {
     e.preventDefault()
@@ -142,6 +146,17 @@ const ResumeUpload = ({ onClose }) => {
     setError(null)
   }
 
+  // Handle LinkedIn import close
+  const handleLinkedInClose = () => {
+    setShowLinkedInImport(false)
+    onClose()
+  }
+
+  // If showing LinkedIn import wizard, render it instead
+  if (showLinkedInImport) {
+    return <LinkedInImport onClose={handleLinkedInClose} />
+  }
+
   return (
     <div className="resume-upload-overlay" onClick={onClose}>
       <div className="resume-upload-modal" onClick={(e) => e.stopPropagation()}>
@@ -153,64 +168,114 @@ const ResumeUpload = ({ onClose }) => {
 
         {/* Content */}
         <div className="upload-modal-content">
-          <p className="upload-description">
-            Upload your existing resume (PDF or DOCX) and we'll automatically extract
-            and populate all your information using AI.
-          </p>
+          {/* Import Method Selection */}
+          {!importMethod && (
+            <div className="import-method-selection">
+              <p className="upload-description">
+                Choose how you want to import your resume information
+              </p>
 
-          {/* Drag and Drop Zone */}
-          <div
-            className={`upload-drop-zone ${isDragging ? 'dragging' : ''} ${isProcessing ? 'processing' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            {isProcessing ? (
-              <div className="upload-processing">
-                <div className="upload-spinner"></div>
-                <p className="upload-progress">{progress}</p>
+              <div className="import-method-options">
+                <button
+                  className="import-method-card"
+                  onClick={() => setImportMethod('file')}
+                >
+                  <div className="method-icon">📄</div>
+                  <div className="method-info">
+                    <h3>Upload Resume File</h3>
+                    <p>Import from PDF or DOCX file</p>
+                  </div>
+                </button>
+
+                <button
+                  className="import-method-card linkedin"
+                  onClick={() => setShowLinkedInImport(true)}
+                >
+                  <div className="method-icon">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="#0077b5">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                  </div>
+                  <div className="method-info">
+                    <h3>Import from LinkedIn</h3>
+                    <p>Create resume from your LinkedIn profile</p>
+                  </div>
+                </button>
               </div>
-            ) : (
-              <>
-                <div className="upload-icon">📤</div>
-                <p className="upload-text-primary">
-                  Drag & drop your resume here
-                </p>
-                <p className="upload-text-secondary">or</p>
-                <label className="upload-file-input-label">
-                  <input
-                    type="file"
-                    accept=".pdf,.docx"
-                    onChange={handleFileInput}
-                    className="upload-file-input"
-                    disabled={isProcessing}
-                  />
-                  <span className="upload-browse-btn">Browse Files</span>
-                </label>
-                <p className="upload-file-types">Supported: PDF, DOCX (Max 10MB)</p>
-              </>
-            )}
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="upload-error">
-              <span className="upload-error-icon">⚠️</span>
-              <span className="upload-error-text">{error}</span>
             </div>
           )}
 
-          {/* Info */}
-          <div className="upload-info">
-            <h4>How it works:</h4>
-            <ol>
-              <li>Upload your existing resume (PDF or DOCX)</li>
-              <li>Our AI extracts your information automatically</li>
-              <li>All fields are populated with your data</li>
-              <li>Review and edit as needed</li>
-              <li>Choose from 50 professional templates</li>
-            </ol>
-          </div>
+          {/* File Upload Section */}
+          {importMethod === 'file' && (
+            <>
+              <div className="import-method-header">
+                <button
+                  className="back-to-methods"
+                  onClick={() => setImportMethod(null)}
+                >
+                  ← Back to options
+                </button>
+                <p className="upload-description">
+                  Upload your existing resume (PDF or DOCX) and we'll automatically extract
+                  and populate all your information using AI.
+                </p>
+              </div>
+
+              {/* Drag and Drop Zone */}
+              <div
+                className={`upload-drop-zone ${isDragging ? 'dragging' : ''} ${isProcessing ? 'processing' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                {isProcessing ? (
+                  <div className="upload-processing">
+                    <div className="upload-spinner"></div>
+                    <p className="upload-progress">{progress}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="upload-icon">📤</div>
+                    <p className="upload-text-primary">
+                      Drag & drop your resume here
+                    </p>
+                    <p className="upload-text-secondary">or</p>
+                    <label className="upload-file-input-label">
+                      <input
+                        type="file"
+                        accept=".pdf,.docx"
+                        onChange={handleFileInput}
+                        className="upload-file-input"
+                        disabled={isProcessing}
+                      />
+                      <span className="upload-browse-btn">Browse Files</span>
+                    </label>
+                    <p className="upload-file-types">Supported: PDF, DOCX (Max 10MB)</p>
+                  </>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="upload-error">
+                  <span className="upload-error-icon">⚠️</span>
+                  <span className="upload-error-text">{error}</span>
+                </div>
+              )}
+
+              {/* Info */}
+              <div className="upload-info">
+                <h4>How it works:</h4>
+                <ol>
+                  <li>Upload your existing resume (PDF or DOCX)</li>
+                  <li>Our AI extracts your information automatically</li>
+                  <li>All fields are populated with your data</li>
+                  <li>Review and edit as needed</li>
+                  <li>Choose from 50 professional templates</li>
+                </ol>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Action Modal - Choose what to do with uploaded resume */}

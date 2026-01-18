@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import './Auth.css'
 
@@ -9,7 +9,15 @@ export default function Login({ onToggleMode, onClose }) {
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
 
-  const { signIn, signInWithGoogle } = useAuth()
+  const { signIn, signInWithGoogle, authError, clearAuthError } = useAuth()
+
+  // Show OAuth errors if any
+  useEffect(() => {
+    if (authError) {
+      setError(authError)
+      clearAuthError()
+    }
+  }, [authError, clearAuthError])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -33,13 +41,25 @@ export default function Login({ onToggleMode, onClose }) {
     setError(null)
     setLoading(true)
 
-    const { error } = await signInWithGoogle()
+    try {
+      const { error } = await signInWithGoogle()
 
-    if (error) {
-      setError(error.message)
+      if (error) {
+        // Check for specific error types
+        if (error.message?.includes('provider is not enabled')) {
+          setError('Google Sign-In is not configured. Please contact support or use email/password login.')
+        } else if (error.message?.includes('popup_closed_by_user')) {
+          setError('Sign-in was cancelled. Please try again.')
+        } else {
+          setError(error.message || 'Failed to sign in with Google')
+        }
+        setLoading(false)
+      }
+      // Google OAuth will redirect, so we don't need to handle success here
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
       setLoading(false)
     }
-    // Google OAuth will redirect, so we don't need to handle success here
   }
 
   const handleForgotPassword = () => {

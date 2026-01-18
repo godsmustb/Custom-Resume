@@ -2,10 +2,24 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { useAuth } from './AuthContext'
 import {
   fetchUserResumes,
+  fetchResumeById,
   createResume,
   updateResume,
   deleteResume,
-  migrateLocalStorageToSupabase
+  migrateLocalStorageToSupabase,
+  moveResumeToFolder,
+  archiveResume as archiveResumeService,
+  unarchiveResume as unarchiveResumeService,
+  fetchUserFolders,
+  createFolder as createFolderService,
+  updateFolder as updateFolderService,
+  deleteFolder as deleteFolderService,
+  fetchResumeVersions,
+  fetchVersionById,
+  createVersionSnapshot,
+  restoreVersion as restoreVersionService,
+  updateVersionLabel,
+  getVersionCount
 } from '../services/supabaseResumeService'
 
 const ResumeContext = createContext()
@@ -134,6 +148,17 @@ export const ResumeProvider = ({ children }) => {
     return localStorage.getItem('supabaseMigrated') === 'true'
   })
 
+  // Folder state
+  const [folders, setFolders] = useState([])
+  const [currentFolderId, setCurrentFolderId] = useState(null) // null = "All Resumes", 'archived' = Archived
+  const [folderLoading, setFolderLoading] = useState(false)
+
+  // Version history state
+  const [versions, setVersions] = useState([])
+  const [versionCount, setVersionCount] = useState(0)
+  const [selectedVersion, setSelectedVersion] = useState(null)
+  const [versionLoading, setVersionLoading] = useState(false)
+
   // Debounce timer ref
   const saveTimerRef = useRef(null)
 
@@ -169,6 +194,12 @@ export const ResumeProvider = ({ children }) => {
       setSyncStatus('error')
     } else {
       setSyncStatus('synced')
+      // Update local state with the returned data
+      if (data) {
+        setUserResumes(prev =>
+          prev.map(r => r.id === currentResumeId ? { ...r, ...data } : r)
+        )
+      }
     }
   }, [user, currentResumeId, resumeData, currentTemplate, templateCustomization, currentResumeTitle])
 
@@ -193,19 +224,38 @@ export const ResumeProvider = ({ children }) => {
     }
   }, [resumeData, currentTemplate, templateCustomization, user, currentResumeId, saveToSupabase])
 
+  // Load folders when user authenticates
+  const loadFolders = useCallback(async () => {
+    if (!user) return
+    setFolderLoading(true)
+    const { data, error } = await fetchUserFolders(user.id)
+    if (error) {
+      console.error('Error fetching folders:', error)
+    } else {
+      setFolders(data || [])
+    }
+    setFolderLoading(false)
+  }, [user])
+
   // Load resumes when user authenticates
   useEffect(() => {
     if (!user) {
       // User logged out - clear Supabase state
       setCurrentResumeId(null)
       setUserResumes([])
+      setFolders([])
+      setVersions([])
       setSyncStatus('idle')
+      setCurrentFolderId(null)
       return
     }
 
     // User logged in - load resumes from Supabase
     const loadResumes = async () => {
       setLoading(true)
+
+      // Load folders first
+      await loadFolders()
 
       // Migrate localStorage data if first login
       if (!hasMigrated) {
@@ -227,8 +277,8 @@ export const ResumeProvider = ({ children }) => {
         }
       }
 
-      // Fetch all resumes
-      const { data: resumes, error } = await fetchUserResumes(user.id)
+      // Fetch all resumes (unfiled by default)
+      const { data: resumes, error } = await fetchUserResumes(user.id, { folderId: 'all' })
 
       if (error) {
         console.error('Error fetching resumes:', error)
@@ -254,10 +304,45 @@ export const ResumeProvider = ({ children }) => {
     }
 
     loadResumes()
-  }, [user, hasMigrated])
+  }, [user, hasMigrated, loadFolders])
 
-  // Resume management functions
-  const createNewResume = async (title = 'New Resume') => {
+  // Load version history when current resume changes
+  const loadVersionHistory = useCallback(async () => {
+    if (!user || !currentResumeId) {
+      setVersions([])
+      setVersionCount(0)
+      return
+    }
+
+    setVersionLoading(true)
+    const [versionsResult, countResult] = await Promise.all([
+      fetchResumeVersions(currentResumeId, user.id, 50),
+      getVersionCount(currentResumeId, user.id)
+    ])
+
+    if (versionsResult.error) {
+      console.error('Error fetching versions:', versionsResult.error)
+    } else {
+      setVersions(versionsResult.data || [])
+    }
+
+    if (!countResult.error) {
+      setVersionCount(countResult.count || 0)
+    }
+
+    setVersionLoading(false)
+  }, [user, currentResumeId])
+
+  // Load versions when resume changes
+  useEffect(() => {
+    loadVersionHistory()
+  }, [currentResumeId, loadVersionHistory])
+
+  // ============================================
+  // RESUME MANAGEMENT FUNCTIONS
+  // ============================================
+
+  const createNewResume = async (title = 'New Resume', folderId = null) => {
     if (!user) {
       alert('Please sign in to create multiple resumes')
       return
@@ -273,7 +358,8 @@ export const ResumeProvider = ({ children }) => {
         font: 'inter',
         spacing: 'comfortable'
       },
-      title
+      title,
+      folderId
     )
 
     if (error) {
@@ -290,6 +376,8 @@ export const ResumeProvider = ({ children }) => {
         font: 'inter',
         spacing: 'comfortable'
       })
+      // Reload folders to update counts
+      await loadFolders()
     }
 
     setLoading(false)
@@ -299,7 +387,7 @@ export const ResumeProvider = ({ children }) => {
     colorScheme: 'corporate-blue',
     font: 'inter',
     spacing: 'comfortable'
-  }) => {
+  }, folderId = null) => {
     if (!user) {
       alert('Please sign in to create multiple resumes')
       return { success: false, error: 'Not authenticated' }
@@ -311,7 +399,8 @@ export const ResumeProvider = ({ children }) => {
       customResumeData,
       template,
       customization,
-      title
+      title,
+      folderId
     )
 
     if (error) {
@@ -325,6 +414,7 @@ export const ResumeProvider = ({ children }) => {
       setResumeData(customResumeData)
       setCurrentTemplateState(template)
       setTemplateCustomizationState(customization)
+      await loadFolders()
       setLoading(false)
       return { success: true, data }
     }
@@ -332,7 +422,25 @@ export const ResumeProvider = ({ children }) => {
 
   const switchResume = async (resumeId) => {
     const resume = userResumes.find(r => r.id === resumeId)
-    if (!resume) return
+    if (!resume) {
+      // Try to fetch it from database
+      if (user) {
+        const { data, error } = await fetchResumeById(resumeId, user.id)
+        if (error || !data) return
+
+        setCurrentResumeId(data.id)
+        setCurrentResumeTitle(data.title)
+        setResumeData(data.resume_data)
+        setCurrentTemplateState(data.current_template || 'professional-project-manager')
+        setTemplateCustomizationState(data.template_customization || {
+          colorScheme: 'corporate-blue',
+          font: 'inter',
+          spacing: 'comfortable'
+        })
+        return
+      }
+      return
+    }
 
     setCurrentResumeId(resume.id)
     setCurrentResumeTitle(resume.title)
@@ -394,6 +502,7 @@ export const ResumeProvider = ({ children }) => {
       if (remaining.length > 0) {
         await switchResume(remaining[0].id)
       }
+      await loadFolders()
     }
   }
 
@@ -418,10 +527,224 @@ export const ResumeProvider = ({ children }) => {
       setUserResumes(prev => [data, ...prev])
       // Optionally switch to the new copy
       await switchResume(data.id)
+      await loadFolders()
     }
   }
 
-  // Original CRUD functions (unchanged)
+  // ============================================
+  // FOLDER MANAGEMENT FUNCTIONS
+  // ============================================
+
+  const createFolder = async (name, options = {}) => {
+    if (!user) {
+      alert('Please sign in to create folders')
+      return { success: false }
+    }
+
+    const { data, error } = await createFolderService(user.id, name, options)
+    if (error) {
+      console.error('Error creating folder:', error)
+      return { success: false, error }
+    }
+
+    setFolders(prev => [...prev, { ...data, resume_count: 0 }])
+    return { success: true, data }
+  }
+
+  const updateFolder = async (folderId, updates) => {
+    if (!user) return { success: false }
+
+    const { data, error } = await updateFolderService(folderId, user.id, updates)
+    if (error) {
+      console.error('Error updating folder:', error)
+      return { success: false, error }
+    }
+
+    setFolders(prev =>
+      prev.map(f => f.id === folderId ? { ...f, ...updates } : f)
+    )
+    return { success: true, data }
+  }
+
+  const deleteFolder = async (folderId) => {
+    if (!user) return { success: false }
+
+    if (!confirm('Are you sure? Resumes in this folder will be moved to "All Resumes".')) {
+      return { success: false, cancelled: true }
+    }
+
+    const { error } = await deleteFolderService(folderId, user.id)
+    if (error) {
+      console.error('Error deleting folder:', error)
+      return { success: false, error }
+    }
+
+    setFolders(prev => prev.filter(f => f.id !== folderId))
+
+    // Move resumes in this folder to unfiled
+    setUserResumes(prev =>
+      prev.map(r => r.folder_id === folderId ? { ...r, folder_id: null } : r)
+    )
+
+    // If we were viewing this folder, go back to all
+    if (currentFolderId === folderId) {
+      setCurrentFolderId(null)
+    }
+
+    return { success: true }
+  }
+
+  const moveToFolder = async (resumeId, folderId) => {
+    if (!user) return { success: false }
+
+    const { data, error } = await moveResumeToFolder(resumeId, user.id, folderId)
+    if (error) {
+      console.error('Error moving resume:', error)
+      return { success: false, error }
+    }
+
+    setUserResumes(prev =>
+      prev.map(r => r.id === resumeId ? { ...r, folder_id: folderId } : r)
+    )
+
+    // Reload folders to update counts
+    await loadFolders()
+    return { success: true, data }
+  }
+
+  const archiveResume = async (resumeId) => {
+    if (!user) return { success: false }
+
+    const { data, error } = await archiveResumeService(resumeId, user.id)
+    if (error) {
+      console.error('Error archiving resume:', error)
+      return { success: false, error }
+    }
+
+    setUserResumes(prev =>
+      prev.map(r => r.id === resumeId ? { ...r, is_archived: true } : r)
+    )
+
+    // If this was the current resume, switch to another
+    if (currentResumeId === resumeId) {
+      const activeResumes = userResumes.filter(r => r.id !== resumeId && !r.is_archived)
+      if (activeResumes.length > 0) {
+        await switchResume(activeResumes[0].id)
+      }
+    }
+
+    return { success: true, data }
+  }
+
+  const unarchiveResume = async (resumeId) => {
+    if (!user) return { success: false }
+
+    const { data, error } = await unarchiveResumeService(resumeId, user.id)
+    if (error) {
+      console.error('Error unarchiving resume:', error)
+      return { success: false, error }
+    }
+
+    setUserResumes(prev =>
+      prev.map(r => r.id === resumeId ? { ...r, is_archived: false, archived_at: null } : r)
+    )
+
+    return { success: true, data }
+  }
+
+  const filterResumesByFolder = (folderId) => {
+    setCurrentFolderId(folderId)
+  }
+
+  const getFilteredResumes = () => {
+    if (currentFolderId === 'archived') {
+      return userResumes.filter(r => r.is_archived)
+    } else if (currentFolderId === 'all' || currentFolderId === null) {
+      return userResumes.filter(r => !r.is_archived)
+    } else {
+      return userResumes.filter(r => r.folder_id === currentFolderId && !r.is_archived)
+    }
+  }
+
+  // ============================================
+  // VERSION HISTORY FUNCTIONS
+  // ============================================
+
+  const createSnapshot = async (label = '', changeType = 'manual_edit') => {
+    if (!user || !currentResumeId) return { success: false }
+
+    const { data, error } = await createVersionSnapshot(currentResumeId, user.id, label, changeType)
+    if (error) {
+      console.error('Error creating snapshot:', error)
+      return { success: false, error }
+    }
+
+    // Reload versions
+    await loadVersionHistory()
+    return { success: true, data }
+  }
+
+  const restoreVersion = async (versionId) => {
+    if (!user) return { success: false }
+
+    if (!confirm('Are you sure you want to restore this version? Current changes will be saved as a new version.')) {
+      return { success: false, cancelled: true }
+    }
+
+    setVersionLoading(true)
+    const { data, error } = await restoreVersionService(versionId, user.id)
+    if (error) {
+      console.error('Error restoring version:', error)
+      setVersionLoading(false)
+      return { success: false, error }
+    }
+
+    // Update current state with restored data
+    if (data) {
+      setResumeData(data.resume_data)
+      setCurrentTemplateState(data.current_template || 'professional-project-manager')
+      setTemplateCustomizationState(data.template_customization || {
+        colorScheme: 'corporate-blue',
+        font: 'inter',
+        spacing: 'comfortable'
+      })
+
+      // Update in userResumes
+      setUserResumes(prev =>
+        prev.map(r => r.id === data.id ? data : r)
+      )
+    }
+
+    // Reload version history
+    await loadVersionHistory()
+    setVersionLoading(false)
+    return { success: true, data }
+  }
+
+  const getVersionDetails = async (versionId) => {
+    if (!user) return { data: null, error: new Error('Not authenticated') }
+    return await fetchVersionById(versionId, user.id)
+  }
+
+  const labelVersion = async (versionId, label) => {
+    if (!user) return { success: false }
+
+    const { data, error } = await updateVersionLabel(versionId, user.id, label)
+    if (error) {
+      console.error('Error labeling version:', error)
+      return { success: false, error }
+    }
+
+    setVersions(prev =>
+      prev.map(v => v.id === versionId ? { ...v, version_label: label } : v)
+    )
+    return { success: true, data }
+  }
+
+  // ============================================
+  // ORIGINAL CRUD FUNCTIONS
+  // ============================================
+
   const setCurrentTemplate = (templateId) => {
     setCurrentTemplateState(templateId)
   }
@@ -634,6 +957,19 @@ export const ResumeProvider = ({ children }) => {
     userResumes,
     syncStatus,
 
+    // Folder state
+    folders,
+    currentFolderId,
+    folderLoading,
+    setCurrentFolderId,
+
+    // Version state
+    versions,
+    versionCount,
+    selectedVersion,
+    setSelectedVersion,
+    versionLoading,
+
     // Resume management
     createNewResume,
     createNewResumeFromData,
@@ -642,6 +978,24 @@ export const ResumeProvider = ({ children }) => {
     deleteCurrentResume,
     duplicateResume,
     saveToSupabase,
+
+    // Folder management
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    moveToFolder,
+    archiveResume,
+    unarchiveResume,
+    filterResumesByFolder,
+    getFilteredResumes,
+    loadFolders,
+
+    // Version management
+    createSnapshot,
+    restoreVersion,
+    getVersionDetails,
+    labelVersion,
+    loadVersionHistory,
 
     // Original CRUD operations
     updatePersonal,
