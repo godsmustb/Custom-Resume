@@ -7,20 +7,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Custom Resume** is an AI-powered resume builder built with React and Vite. It helps users create ATS-optimized resumes tailored to specific job descriptions using OpenAI's API. The application features 51 professional resume templates, PDF generation/parsing, and real-time resume customization.
 
 **Current Status:** Production-ready with automated FTP deployment to Hostinger
-**Version:** 2.1.0
-**Last Documentation Update:** 2025-12-04
+**Version:** 2.3.0
+**Last Documentation Update:** 2026-01-18
 **Deployment Status:** ✅ Active (GitHub Actions → Hostinger FTP)
+**Live Site:** https://darkseagreen-toad-310992.hostingersite.com/
 
 ### Quick Stats
-- **Codebase Size:** ~12,000-15,000 lines of code
-- **Components:** 35+ React components
+- **Codebase Size:** ~15,000-18,000 lines of code
+- **Components:** 40+ React components
 - **Resume Templates:** 51 professional templates (3 tiers) ⭐ Includes custom user template
 - **Cover Letter Templates:** 30 professional templates
-- **AI Functions:** 11 OpenAI GPT-4o-mini functions
+- **AI Functions:** 12 OpenAI GPT-4o-mini functions (includes LinkedIn parser)
 - **Skills Library:** 690+ categorized skills
 - **Job Titles:** 597 autocomplete suggestions
 - **Supported Formats:** PDF, DOCX (import), PDF & DOCX (export)
-- **Features:** Resume Builder, Cover Letter Builder, Multi-Resume Management, Cloud Sync
+- **Features:** Resume Builder, Cover Letter Builder, Multi-Resume Management, Folder Organization, Version History, LinkedIn Import, Cloud Sync
 
 ---
 
@@ -41,15 +42,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | DOCX Export | ✅ Complete | 99%* | YES |
 | Resume Upload (PDF/DOCX) | ✅ Complete | 100% | YES |
 | Multi-Resume Management | ✅ Complete | 100% | YES |
+| Folder Organization | ✅ Complete | 100% | YES |
+| Resume Version History | ✅ Complete | 100% | YES |
+| LinkedIn Profile Import | ✅ Complete | 100% | YES |
 | Cloud Sync (Supabase) | ✅ Complete | 100% | YES |
 | Authentication (Email + Google) | ✅ Complete | 100% | YES |
 | Cover Letter Builder (30 templates) | ✅ Complete | 100% | YES |
 | Print Support | ✅ Complete | 100% | YES |
 | ATS Scoring | ✅ Complete | 100% | YES |
+| Mobile Responsive Design | ✅ Complete | 100% | YES |
 
 *Minor issue: DOCX footer has duplicate text definition (non-breaking)
 
-**Total Features: 12 | Fully Working: 12 | Need Fixes: 0 major, 3 minor**
+**Total Features: 16 | Fully Working: 16 | Need Fixes: 0 major, 2 minor**
 
 ### Quick Fixes Required Before Launch (< 2 hours total)
 
@@ -75,22 +80,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Based on analysis of Zety, Resume.io, Novoresume, Kickresume, Rezi, Teal, Huntr, and Careerflow:
 
 #### Tier S: Must-Have (Transform to Career Platform)
-| Rank | Feature | Effort | Impact | Competitors |
-|------|---------|--------|--------|-------------|
-| 1 | **Job Application Tracker (Kanban)** | Medium | Very High | Huntr, Teal, Careerflow |
-| 2 | **Chrome Extension (Job Saver + Autofill)** | High | Very High | Simplify, Teal, Huntr |
-| 3 | **LinkedIn Profile Import** | Medium | High | Enhancv, Kickresume |
-| 4 | **Enhanced ATS Scoring (20+ criteria)** | Medium | High | Rezi (23 criteria) |
-| 5 | **AI Mock Interview Practice** | High | High | Final Round AI |
+| Rank | Feature | Effort | Impact | Competitors | Status |
+|------|---------|--------|--------|-------------|--------|
+| 1 | **Job Application Tracker (Kanban)** | Medium | Very High | Huntr, Teal, Careerflow | 🔜 Next |
+| 2 | **Chrome Extension (Job Saver + Autofill)** | High | Very High | Simplify, Teal, Huntr | Planned |
+| 3 | **LinkedIn Profile Import** | Medium | High | Enhancv, Kickresume | ✅ Done |
+| 4 | **Enhanced ATS Scoring (20+ criteria)** | Medium | High | Rezi (23 criteria) | Planned |
+| 5 | **AI Mock Interview Practice** | High | High | Final Round AI | Planned |
 
 #### Tier A: High-Value Differentiators
-| Rank | Feature | Effort | Impact |
-|------|---------|--------|--------|
-| 6 | LinkedIn Profile Optimizer | Medium | Medium |
-| 7 | Personal Resume Website Builder | Medium | Medium |
-| 8 | Keyword Match Analysis (side-by-side) | Low | Medium |
-| 9 | Resume Version History | Low | Medium |
-| 10 | Salary Insights Dashboard | Low | Medium |
+| Rank | Feature | Effort | Impact | Status |
+|------|---------|--------|--------|--------|
+| 6 | LinkedIn Profile Optimizer | Medium | Medium | Planned |
+| 7 | Personal Resume Website Builder | Medium | Medium | Planned |
+| 8 | Keyword Match Analysis (side-by-side) | Low | Medium | Planned |
+| 9 | Resume Version History | Low | Medium | ✅ Done |
+| 10 | Salary Insights Dashboard | Low | Medium | Planned |
 
 #### Tier B: Nice-to-Have Features
 | Rank | Feature | Effort | Impact |
@@ -758,7 +763,99 @@ ca39de3 - Update documentation to v2.0: Add Cover Letter & Multi-Resume features
 
 ### Recent Feature Additions
 
-1. **AI Resume Optimization Improvements** (Latest - Phase 5.4) ⭐⭐⭐
+1. **LinkedIn Profile Import with Information Wizard** (Phase 6.0) ⭐⭐⭐⭐ **NEW**
+   - Create resumes directly from LinkedIn profile data!
+   - **Import Methods**:
+     * Paste LinkedIn Profile text - Copy/paste your profile content
+     * Manual Entry - Step-by-step guided wizard
+   - **Information Collection Wizard**:
+     * 7-step guided process: Source → Personal → Experience → Education → Skills → Certifications → Review
+     * Progress indicators and step navigation
+     * Real-time form validation
+     * Add/remove multiple entries for experience, education, skills, certifications
+   - **AI-Powered Extraction** (`linkedInService.js`):
+     * Uses GPT-4o-mini to parse LinkedIn profile text
+     * Extracts structured data: personal info, experience, education, skills, certifications
+     * Converts paragraphs to bullet points automatically
+     * Groups skills into logical categories
+   - **Save Options**:
+     * Create New Resume - saves as separate cloud entry (requires auth)
+     * Replace Current Resume - updates current resume
+   - **Files**:
+     * `src/components/LinkedInImport.jsx` - Main wizard component (750+ lines)
+     * `src/components/LinkedInImport.css` - Wizard styles (500+ lines)
+     * `src/services/linkedInService.js` - AI extraction service (200+ lines)
+     * `src/components/ResumeUpload.jsx` - Updated with LinkedIn option
+   - **Use Case**: Quick resume creation from existing LinkedIn profile
+
+2. **Resume Folder Organization** (Phase 5.6) ⭐⭐⭐ **NEW**
+   - Organize resumes into color-coded folders!
+   - **Folder Features**:
+     * Create, rename, delete folders
+     * 8 color options for folder customization
+     * Move resumes between folders via modal
+     * System folders: All Resumes, Archived
+   - **Archive System**:
+     * Archive old resumes to keep workspace clean
+     * Restore archived resumes anytime
+   - **Navigation**:
+     * Breadcrumb navigation in ResumeManager
+     * Filter resumes by folder
+     * Tab interface: Resumes | Folders | History
+   - **Files**:
+     * `src/components/FolderBrowser.jsx` - Folder management UI
+     * `src/components/FolderBrowser.css` - Folder styles
+     * `FOLDER_VERSION_SCHEMA.sql` - Database migrations
+
+3. **Resume Version History** (Phase 5.7) ⭐⭐⭐ **NEW**
+   - Track and restore previous versions of your resumes!
+   - **Version Features**:
+     * Automatic version creation on changes (via database trigger)
+     * Manual snapshot creation with custom labels
+     * View version timeline with change types
+     * Restore any previous version instantly
+   - **Export Options**:
+     * Download any version as PDF
+     * Download any version as DOCX
+   - **Change Type Tracking**:
+     * Manual Edit, AI Improvement, Restore, Duplicate, Import, Template Change
+   - **Version Preview**:
+     * Preview version data before restoring
+     * Compare versions side-by-side
+   - **Files**:
+     * `src/components/VersionHistory.jsx` - Version history UI
+     * `src/components/VersionHistory.css` - Timeline styles
+     * `src/services/supabaseResumeService.js` - Version CRUD operations
+
+4. **Google OAuth Fix** (Phase 5.8) ⭐⭐ **NEW**
+   - Fixed Google Sign-In authentication flow
+   - **Improvements**:
+     * PKCE flow for better security with SPAs
+     * Proper OAuth callback handling without React Router dependency
+     * Better error messages for OAuth failures
+     * Session detection from URL hash/query params
+   - **Files**:
+     * `src/config/supabase.js` - Updated with PKCE flow
+     * `src/context/AuthContext.jsx` - OAuth callback handling
+     * `src/components/auth/Login.jsx` - Error display
+
+5. **Mobile Responsive Design** (Phase 5.9) ⭐⭐⭐ **NEW**
+   - Comprehensive responsive CSS for all device sizes!
+   - **Breakpoints**:
+     * Phone: ≤480px
+     * Tablet: 481-768px
+     * Laptop: 769-1024px
+   - **Features**:
+     * CSS custom properties for maintainable breakpoints
+     * Touch-specific improvements (larger tap targets)
+     * Safe area insets for notched devices
+     * Print-optimized styles
+     * Reduced motion support for accessibility
+   - **Files**:
+     * `src/responsive.css` - Comprehensive responsive styles (400+ lines)
+     * `src/main.jsx` - Added responsive CSS import
+
+6. **AI Resume Optimization Improvements** (Phase 5.4) ⭐⭐⭐
    - Enhanced resume generation based on ChatGPT feedback for better ATS + human readability
    - **Scannable Summary Format**:
      * Bullet-point format (not paragraphs)
