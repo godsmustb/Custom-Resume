@@ -48,12 +48,8 @@ const JobDescriptionInput = () => {
     try {
       if (autoApply) {
         // AUTO-IMPROVE MODE: Apply improvements FIRST, then calculate score
-        console.log('🚀 Starting auto-improvement iteration...')
-
         // Get current score to identify gaps
         const currentScore = await calculateMatchScore(resumeData, resumeData.jobDescription)
-        console.log('Current score:', currentScore.matchScore, '%')
-        console.log('Gaps:', currentScore.gaps)
 
         if (currentScore.matchScore >= 95) {
           setMatchScore(currentScore)
@@ -76,22 +72,14 @@ const JobDescriptionInput = () => {
 
         if (isFirstIteration) {
           // FIRST ITERATION: Major rewrite with keyword optimization
-          console.log('FIRST ITERATION: Comprehensive rewrite...')
           improvements = await autoImproveResume(
             resumeData,
             resumeData.jobDescription,
             currentScore.gaps
           )
 
-          console.log('Improvements generated:', improvements)
-          console.log('Summary improvement length:', improvements.summary?.length || 0)
-          console.log('Experience improvements:', improvements.experience.length, 'roles')
-          console.log('Total bullets generated:', improvements.experience.reduce((sum, exp) => sum + exp.improvedBullets.length, 0))
-          console.log('Skills to add:', improvements.skills.length)
-
           // Apply improvements to resume
           if (improvements.summary) {
-            console.log('Applying new summary:', improvements.summary)
             updateAbout(improvements.summary)
           }
 
@@ -118,16 +106,12 @@ const JobDescriptionInput = () => {
 
         } else {
           // SECOND+ ITERATION: SURGICAL - Only add missing gap items to existing bullets
-          console.log('ITERATION 2+: Adding gap-specific bullets to existing content...')
-
           // Use AI to generate professional bullets that address each gap
           const gapBullets = await generateGapBullets(
             currentScore.gaps,
             resumeData.jobDescription,
             resumeData.experience
           )
-
-          console.log('Gap-specific bullets generated:', gapBullets)
 
           // Add these gap bullets to the FIRST experience entry
           if (resumeData.experience.length > 0 && gapBullets.length > 0) {
@@ -213,13 +197,7 @@ const JobDescriptionInput = () => {
           })
         }
 
-        console.log('Recalculating score with improved content...')
-        console.log('Updated summary:', updatedResumeData.about.substring(0, 100) + '...')
-        console.log('Updated experience bullets count:', updatedResumeData.experience[0]?.description.length)
-        console.log('Updated skills count:', updatedResumeData.skills.flatMap(s => s.skills).length)
-
         const newScore = await calculateMatchScore(updatedResumeData, resumeData.jobDescription)
-        console.log('New score:', newScore.matchScore, '%')
 
         setMatchScore(newScore)
         setScoreHistory(prev => [...prev, {
@@ -504,15 +482,8 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
         )
       }
 
-      console.log('📊 Recalculating score with new bullets...')
-      console.log('Previous bullet count:', currentBullets.length)
-      console.log('New bullet count:', updatedBullets.length)
-      console.log('Bullets added:', option.bullets.length)
-
       // Calculate score with the UPDATED data (before state update)
       const newScore = await calculateMatchScore(updatedResumeData, resumeData.jobDescription)
-      console.log('Previous score:', matchScore.matchScore, '%')
-      console.log('New score:', newScore.matchScore, '%')
 
       // NOW update the actual state
       replaceExperienceDescription(0, updatedBullets)
