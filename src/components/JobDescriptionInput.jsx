@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useResume } from '../context/ResumeContext'
+import { useCredits } from '../context/CreditsContext'
 import {
   customizeResume,
   generateSummary,
@@ -24,6 +25,8 @@ const JobDescriptionInput = () => {
     setLoading
   } = useResume()
 
+  const { credits, useCredit, hasCredits } = useCredits()
+
   const [analyzing, setAnalyzing] = useState(false)
   const [suggestions, setSuggestions] = useState(null)
   const [matchScore, setMatchScore] = useState(null)
@@ -41,12 +44,26 @@ const JobDescriptionInput = () => {
       return
     }
 
+    // Check credits for AI operations that modify the resume
+    if (autoApply && !hasCredits(1)) {
+      alert('⚠️ You need at least 1 credit to use AI Resume Optimization.\n\nVisit the Pricing page to purchase more credits.')
+      return
+    }
+
     setAnalyzing(true)
     setLoading(true)
     setError(null)
 
     try {
       if (autoApply) {
+        // Deduct credit for AI resume optimization
+        const creditResult = await useCredit('AI Resume Optimization')
+        if (!creditResult.success) {
+          alert(`⚠️ Unable to use credit: ${creditResult.error}`)
+          setAnalyzing(false)
+          setLoading(false)
+          return
+        }
         // AUTO-IMPROVE MODE: Apply improvements FIRST, then calculate score
         // Get current score to identify gaps
         const currentScore = await calculateMatchScore(resumeData, resumeData.jobDescription)
@@ -289,9 +306,23 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
   }
 
   const handleGenerateSummary = async () => {
+    // Check credits
+    if (!hasCredits(1)) {
+      alert('⚠️ You need at least 1 credit to generate AI summary.\n\nVisit the Pricing page to purchase more credits.')
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
+      // Deduct credit
+      const creditResult = await useCredit('AI Summary Generation')
+      if (!creditResult.success) {
+        alert(`⚠️ Unable to use credit: ${creditResult.error}`)
+        setLoading(false)
+        return
+      }
+
       const newSummary = await generateSummary(
         resumeData.about,
         resumeData.jobDescription
@@ -310,9 +341,23 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
   }
 
   const handleImproveExperience = async () => {
+    // Check credits
+    if (!hasCredits(1)) {
+      alert('⚠️ You need at least 1 credit to improve experience with AI.\n\nVisit the Pricing page to purchase more credits.')
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
+      // Deduct credit
+      const creditResult = await useCredit('AI Experience Improvement')
+      if (!creditResult.success) {
+        alert(`⚠️ Unable to use credit: ${creditResult.error}`)
+        setLoading(false)
+        return
+      }
+
       const improvements = await improveExperience(
         resumeData.experience,
         resumeData.jobDescription
@@ -351,9 +396,23 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
       return
     }
 
+    // Check credits
+    if (!hasCredits(1)) {
+      alert('⚠️ You need at least 1 credit to get AI skill suggestions.\n\nVisit the Pricing page to purchase more credits.')
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
+      // Deduct credit
+      const creditResult = await useCredit('AI Skill Suggestions')
+      if (!creditResult.success) {
+        alert(`⚠️ Unable to use credit: ${creditResult.error}`)
+        setLoading(false)
+        return
+      }
+
       const newSkills = await suggestSkills(
         resumeData.skills,
         resumeData.jobDescription
@@ -405,9 +464,23 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
   }
 
   const handleGenerateVariations = async () => {
+    // Check credits
+    if (!hasCredits(1)) {
+      alert('⚠️ You need at least 1 credit to generate summary variations.\n\nVisit the Pricing page to purchase more credits.')
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
+      // Deduct credit
+      const creditResult = await useCredit('AI Summary Variations')
+      if (!creditResult.success) {
+        alert(`⚠️ Unable to use credit: ${creditResult.error}`)
+        setLoading(false)
+        return
+      }
+
       const variantTexts = await generateContentVariations(
         resumeData.about,
         `Job description context: ${resumeData.jobDescription}`,
@@ -440,9 +513,23 @@ ${newScore.matchScore < 95 ? `Gap remaining: ${(95 - newScore.matchScore).toFixe
       return
     }
 
+    // Check credits
+    if (!hasCredits(1)) {
+      alert('⚠️ You need at least 1 credit to generate bullet options.\n\nVisit the Pricing page to purchase more credits.')
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
+      // Deduct credit
+      const creditResult = await useCredit('AI Bullet Point Options')
+      if (!creditResult.success) {
+        alert(`⚠️ Unable to use credit: ${creditResult.error}`)
+        setLoading(false)
+        return
+      }
+
       const options = await generateMultipleBulletOptions(
         resumeData,
         resumeData.jobDescription,
