@@ -13,6 +13,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -23,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -41,37 +42,22 @@ jobs:
         run: |
           echo "=== Checking dist/ folder contents ==="
           ls -la dist/
-          echo "=== Checking dist/index.html content (first 30 lines) ==="
-          head -30 dist/index.html
+          echo "=== Checking dist/index.html exists ==="
+          test -f dist/index.html && echo "index.html found!" || exit 1
           echo "=== Checking for assets folder ==="
           ls -la dist/assets/ || echo "No assets folder found!"
 
-      - name: Deploy to Hostinger via FTP (using lftp for reliability)
-        run: |
-          # Install lftp
-          sudo apt-get update
-          sudo apt-get install -y lftp
-
-          # Configure lftp for better reliability with large files
-          cat > lftp_script.txt <<'EOF'
-          set ftp:ssl-allow yes
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
-          set net:timeout 120
-          set net:max-retries 10
-          set net:reconnect-interval-base 10
-          set net:reconnect-interval-multiplier 2
-          set net:connection-limit 1
-          set ftp:sync-mode off
-          debug 9
-          open -u ${{ secrets.HOSTINGER_FTP_USERNAME }},${{ secrets.HOSTINGER_FTP_PASSWORD }} ${{ secrets.HOSTINGER_FTP_SERVER }}
-          mirror --reverse --delete --verbose --parallel=1 ./dist/ /public_html/
-          bye
-          EOF
-
-          # Execute lftp script
-          lftp -f lftp_script.txt
-
-          # Clean up
-          rm lftp_script.txt
+      - name: Deploy to Hostinger via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_FTP_SERVER }}
+          username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          port: 21
+          protocol: ftps
+          security: loose
+          local-dir: ./dist/
+          server-dir: /public_html/
+          dangerous-clean-slate: true
+          log-level: verbose
+          timeout: 120000

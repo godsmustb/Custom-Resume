@@ -8,16 +8,19 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { ResumeProvider } from './context/ResumeContext'
 import { AuthProvider } from './context/AuthContext'
 import { CoverLetterProvider } from './context/CoverLetterContext'
+import { CreditsProvider } from './context/CreditsContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
       <AuthProvider>
-        <ResumeProvider>
-          <CoverLetterProvider>
-            <App />
-          </CoverLetterProvider>
-        </ResumeProvider>
+        <CreditsProvider>
+          <ResumeProvider>
+            <CoverLetterProvider>
+              <App />
+            </CoverLetterProvider>
+          </ResumeProvider>
+        </CreditsProvider>
       </AuthProvider>
     </ErrorBoundary>
   </StrictMode>,

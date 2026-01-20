@@ -3,6 +3,7 @@ import './App.css'
 import { useResume } from './context/ResumeContext'
 import { useAuth } from './context/AuthContext'
 import { useCoverLetter } from './context/CoverLetterContext'
+import { useCredits } from './context/CreditsContext'
 import ControlPanel from './components/ControlPanel'
 import JobDescriptionInput from './components/JobDescriptionInput'
 import TemplateRenderer from './components/templates/TemplateRenderer'
@@ -10,81 +11,110 @@ import AuthModal from './components/auth/AuthModal'
 import CoverLetterTemplateBrowser from './components/CoverLetterTemplateBrowser'
 import CoverLetterEditor from './components/CoverLetterEditor'
 import SavedCoverLetters from './components/SavedCoverLetters'
+import LandingPage from './components/LandingPage'
+import PricingPage from './components/PricingPage'
 
 function App() {
   const { isEditing } = useResume()
   const { user, signOut } = useAuth()
   const { openTemplateBrowser, openSavedLetters } = useCoverLetter()
+  const { credits, loading: creditsLoading } = useCredits()
   const [showJobDescription, setShowJobDescription] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [currentView, setCurrentView] = useState('resume') // 'resume' or 'coverletter'
+  const [showPricing, setShowPricing] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
   }
 
+  const handleGetStarted = () => {
+    setShowAuthModal(true)
+  }
+
+  const handleViewPricing = () => {
+    setShowPricing(true)
+  }
+
+  // Show Landing Page for non-authenticated users
+  if (!user) {
+    if (showPricing) {
+      return (
+        <>
+          <PricingPage
+            onBack={() => setShowPricing(false)}
+            onGetStarted={handleGetStarted}
+          />
+          {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+        </>
+      )
+    }
+
+    return (
+      <>
+        <LandingPage
+          onGetStarted={handleGetStarted}
+          onViewPricing={handleViewPricing}
+        />
+        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      </>
+    )
+  }
+
+  // Show main app for authenticated users
   return (
     <div className="app-wrapper">
-      {/* Auth Button */}
-      <div className="auth-button-container">
-        {user ? (
+      {/* Top Navigation Bar */}
+      <div className="app-top-nav">
+        <div className="nav-brand">
+          <span className="brand-icon">📄</span>
+          <span className="brand-name">ResumeAI Pro</span>
+        </div>
+
+        <div className="nav-center">
+          <button
+            className={`nav-tab ${currentView === 'resume' ? 'active' : ''}`}
+            onClick={() => setCurrentView('resume')}
+          >
+            Resume Builder
+          </button>
+          <button
+            className={`nav-tab ${currentView === 'coverletter' ? 'active' : ''}`}
+            onClick={() => setCurrentView('coverletter')}
+          >
+            Cover Letter
+          </button>
+        </div>
+
+        <div className="nav-right">
+          {/* Credits Display */}
+          <div className="credits-display">
+            <span className="credits-icon">⚡</span>
+            <span className="credits-count">
+              {creditsLoading ? '...' : credits}
+            </span>
+            <span className="credits-label">Credits</span>
+            <button
+              className="buy-credits-btn"
+              onClick={handleViewPricing}
+            >
+              +
+            </button>
+          </div>
+
+          {/* User Menu */}
           <div className="user-menu">
-            <span className="user-email">{user.email}</span>
+            <div className="user-info">
+              <span className="user-email">{user.email}</span>
+              <span className="user-credits-inline">
+                {creditsLoading ? '...' : `${credits} credits`}
+              </span>
+            </div>
             <button onClick={handleSignOut} className="auth-sign-out-btn">
               Sign Out
             </button>
           </div>
-        ) : (
-          <button onClick={() => setShowAuthModal(true)} className="auth-sign-in-btn">
-            Sign In / Sign Up
-          </button>
-        )}
-      </div>
-
-      {/* Navigation Menu */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '1rem',
-        padding: '1rem',
-        backgroundColor: '#f9fafb',
-        borderBottom: '1px solid #e5e7eb',
-        marginBottom: '1rem'
-      }}>
-        <button
-          onClick={() => setCurrentView('resume')}
-          style={{
-            padding: '0.75rem 1.5rem',
-            fontSize: '1rem',
-            fontWeight: '600',
-            borderRadius: '0.5rem',
-            border: 'none',
-            cursor: 'pointer',
-            backgroundColor: currentView === 'resume' ? '#2563eb' : '#fff',
-            color: currentView === 'resume' ? '#fff' : '#374151',
-            transition: 'all 0.2s',
-            boxShadow: currentView === 'resume' ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
-          }}
-        >
-          Resume Builder
-        </button>
-        <button
-          onClick={() => setCurrentView('coverletter')}
-          style={{
-            padding: '0.75rem 1.5rem',
-            fontSize: '1rem',
-            fontWeight: '600',
-            borderRadius: '0.5rem',
-            border: 'none',
-            cursor: 'pointer',
-            backgroundColor: currentView === 'coverletter' ? '#2563eb' : '#fff',
-            color: currentView === 'coverletter' ? '#fff' : '#374151',
-            transition: 'all 0.2s',
-            boxShadow: currentView === 'coverletter' ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
-          }}
-        >
-          Cover Letter Builder
-        </button>
+        </div>
       </div>
 
       {/* Resume Builder View */}
@@ -141,36 +171,34 @@ function App() {
                 Browse Templates
               </button>
 
-              {user && (
-                <button
-                  onClick={openSavedLetters}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    borderRadius: '0.5rem',
-                    border: '2px solid #2563eb',
-                    cursor: 'pointer',
-                    backgroundColor: '#fff',
-                    color: '#2563eb',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = '#eff6ff'
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fff'
-                  }}
-                >
-                  <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-                  </svg>
-                  My Saved Letters
-                </button>
-              )}
+              <button
+                onClick={openSavedLetters}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  borderRadius: '0.5rem',
+                  border: '2px solid #2563eb',
+                  cursor: 'pointer',
+                  backgroundColor: '#fff',
+                  color: '#2563eb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#eff6ff'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fff'
+                }}
+              >
+                <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+                </svg>
+                My Saved Letters
+              </button>
             </div>
           </div>
 
@@ -271,7 +299,19 @@ function App() {
       <CoverLetterTemplateBrowser />
       <CoverLetterEditor />
       <SavedCoverLetters />
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+
+      {/* Pricing Modal */}
+      {showPricing && (
+        <div className="pricing-modal-overlay" onClick={() => setShowPricing(false)}>
+          <div className="pricing-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="pricing-modal-close" onClick={() => setShowPricing(false)}>×</button>
+            <PricingPage
+              onBack={() => setShowPricing(false)}
+              onGetStarted={() => setShowPricing(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
